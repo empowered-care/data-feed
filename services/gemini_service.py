@@ -2,6 +2,8 @@ import os
 import PIL.Image
 import google.generativeai as genai
 import json
+import io
+from pathlib import Path
 from dotenv import load_dotenv
 from models.schemas import StructuredMedicalRecord, Medication
 
@@ -142,6 +144,36 @@ class GeminiService:
                 continue
         
         raise ValueError(f"❌ Gemini text generation failed: {last_error}")
+
+    def generate_vision_text(self, image_path_or_bytes, prompt: str) -> str:
+        """Extract text from an image using Gemini Vision."""
+        if isinstance(image_path_or_bytes, (str, Path)):
+            img = PIL.Image.open(image_path_or_bytes)
+        else:
+            img = PIL.Image.open(io.BytesIO(image_path_or_bytes))
+            
+        last_error = None
+        for model_name in self.models:
+            try:
+                print(f"🧠 Vision Scan: Using {model_name}...")
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content([prompt, img])
+                
+                if not response or not hasattr(response, 'text'):
+                     if response.candidates:
+                         raw_text = response.candidates[0].content.parts[0].text
+                     else:
+                         raise ValueError("Empty response")
+                else:
+                    raw_text = response.text
+                
+                return raw_text.strip()
+            except Exception as e:
+                print(f"⚠️ {model_name} Vision Error: {e}")
+                last_error = e
+                continue
+        
+        raise ValueError(f"❌ Gemini Vision failed: {last_error}")
 
 
 

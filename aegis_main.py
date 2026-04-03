@@ -4,14 +4,20 @@ Aegis Lite - Multi-Agent Disease Outbreak Detection System
 """
 
 import logging
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 import uuid
+import pandas as pd
+import io
 from datetime import datetime
 
 from models.schemas import OutbreakProcessResponse, QueryResponse
 from services.gemini_service import GeminiService
-from services.agents import ExtractionAgent, ValidationAgent, RiskAnalysisAgent, AlertGenerationAgent, DataAssistantAgent
+from services.agents import (
+    SuperAgent, DataAssistantAgent
+)
+from services.ocr_engine import OCREngine
+from utils.pdf_utils import pdf_to_images
 from config import API_TITLE, API_VERSION, LOG_LEVEL, LOG_FORMAT, ALLOWED_ORIGINS, MAX_TEXT_LENGTH, MAX_QUERY_LENGTH
 
 # Configure logging
@@ -40,23 +46,29 @@ app.add_middleware(
 logger.info("🔧 Initializing Gemini service...")
 try:
     gemini_service = GeminiService()
-    logger.info("✅ Gemini service initialized")
+    ocr_engine = None  # Lazy load OCR
+    logger.info("✅ Gemini and OCR services initialized (OCR lazy)")
 except Exception as e:
     logger.error(f"❌ Failed to initialize Gemini service: {e}")
     raise
 
 # Initialize agents
-logger.info("🤖 Initializing agents...")
+logger.info("🤖 Initializing Dynamic Agents...")
 try:
-    extraction_agent = ExtractionAgent(gemini_service)
-    validation_agent = ValidationAgent(gemini_service)
-    risk_agent = RiskAnalysisAgent(gemini_service)
-    alert_agent = AlertGenerationAgent(gemini_service)
+    super_agent = SuperAgent(gemini_service)
     data_assistant = DataAssistantAgent(gemini_service)
-    logger.info("✅ All agents initialized successfully")
+    logger.info("✅ Dynamic Agents initialized successfully")
 except Exception as e:
     logger.error(f"❌ Failed to initialize agents: {e}")
     raise
+
+def get_ocr_engine():
+    global ocr_engine
+    if ocr_engine is None:
+        logger.info("🔍 Loading OCR Engine...")
+        from services.ocr_engine import OCREngine
+        ocr_engine = OCREngine()
+    return ocr_engine
 
 logger.info("✅ Aegis Lite initialization complete!")
 
@@ -66,14 +78,14 @@ logger.info("✅ Aegis Lite initialization complete!")
 async def root():
     """Health check endpoint."""
     return {
-        "message": "Aegis Lite - Multi-Agent Disease Outbreak Detection System",
+        "message": "Aegis Lite - Dynamic Multi-Agent Outbreak Detection",
         "status": "running",
-        "agents": ["extraction", "validation", "risk_analysis", "alert_generation", "data_assistant"]
+        "system": "SuperAgent Orchestration"
     }
 
 @app.post("/outbreak/process", response_model=OutbreakProcessResponse)
 async def process_outbreak_report(request: dict):
-    """Process an outbreak report through the multi-agent pipeline."""
+    """Process an outbreak report through the dynamic multi-agent pipeline."""
     text = request.get("text", "").strip()
     if not text:
         raise HTTPException(status_code=400, detail="Text field is required and cannot be empty")
@@ -84,50 +96,121 @@ async def process_outbreak_report(request: dict):
     session_id = str(uuid.uuid4())
     start_time = datetime.now()
 
-    logger.info(f"--- 🚨 Outbreak Report Processing: {session_id} ---")
+    logger.info(f"--- 🚨 Outbreak Report Processing (Dynamic): {session_id} ---")
     logger.info(f"📝 Input: {text}")
 
     try:
-        # Agent 1: Extraction
-        logger.info("🤖 Agent 1: Extracting structured data...")
-        extracted_data = extraction_agent.extract(text)
-
-        # Agent 2: Validation
-        logger.info("🤖 Agent 2: Validating data...")
-        validation = validation_agent.validate(extracted_data)
-
-        # Agent 3: Risk Analysis
-        logger.info("🤖 Agent 3: Analyzing risk...")
-        risk_analysis = risk_agent.analyze_risk(extracted_data)
-
-        # Agent 4: Alert Generation
-        logger.info("🤖 Agent 4: Generating alert...")
-        alert = alert_agent.generate_alert(extracted_data, risk_analysis)
-
+        # Using SuperAgent to orchestrate everything
+        result = await super_agent.process_outbreak_parallel(text)
+        
         # Store in data assistant
-        data_assistant.add_report(extracted_data)
+        data_assistant.add_report(result["extracted_data"])
 
         processing_time = (datetime.now() - start_time).total_seconds()
 
         logger.info(f"--- ✅ Outbreak Processing Complete: {session_id} ({processing_time:.2f}s) ---")
 
+        risk_analysis = result["risk_analysis"]
+        consensus = result["consensus"]
+
         return OutbreakProcessResponse(
-            extracted_data=extracted_data,
-            validation=validation,
+            extracted_data=result["extracted_data"],
+            validation=result["validation"],
             risk_analysis=risk_analysis,
-            alert=alert,
+            consensus=consensus,
+            alert=result["alert"],
             session_id=session_id,
             metadata={
                 "processed_at": str(datetime.now()),
                 "processing_time_seconds": processing_time,
-                "agents_used": ["extraction", "validation", "risk_analysis", "alert_generation"]
+                "orchestrator": "SuperAgent",
+                "consensus_reached": consensus.consensus_reached
             },
-            message="🚨 Outbreak report processed through multi-agent pipeline.",
-            human_validation_required=risk_analysis.risk_level in ["HIGH", "MEDIUM"]
+            message="🚨 Outbreak report processed through dynamic multi-agent pipeline.",
+            human_validation_required=consensus.final_risk_level in ["HIGH", "MEDIUM"]
         )
     except Exception as e:
         logger.error(f"❌ Processing error for session {session_id}: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
+
+@app.post("/outbreak/upload", response_model=OutbreakProcessResponse)
+async def upload_outbreak_file(file: UploadFile = File(...)):
+    """Upload and process an outbreak report file (PDF, CSV, or Image)."""
+    session_id = str(uuid.uuid4())
+    start_time = datetime.now()
+    
+    logger.info(f"--- 📂 Processing Uploaded File: {file.filename} ({session_id}) ---")
+    
+    content = await file.read()
+    extracted_text = ""
+    
+    try:
+        # 1. Branch processing by file type
+        if file.content_type == "text/csv" or file.filename.endswith(".csv"):
+            logger.info("📄 Processing CSV data...")
+            df = pd.read_csv(io.BytesIO(content))
+            # Merge all rows into a summary text block
+            extracted_text = "Outbreak CSV Dump:\n" + df.to_string()
+            
+        elif file.content_type == "application/pdf" or file.filename.endswith(".pdf"):
+            logger.info("📄 Processing PDF with Gemini Vision...")
+            from pdf2image import convert_from_bytes
+            images = convert_from_bytes(content)
+            all_text = []
+            prompt = "Extract all text from this medical/epidemiological report page. Return ONLY the text."
+            for img_pil in images:
+                # Convert PIL to bytes
+                img_byte_arr = io.BytesIO()
+                img_pil.save(img_byte_arr, format='JPEG')
+                text = gemini_service.generate_vision_text(img_byte_arr.getvalue(), prompt)
+                all_text.append(text)
+            extracted_text = "\n".join(all_text)
+            
+        elif file.content_type.startswith("image/") or file.filename.endswith((".jpg", ".jpeg", ".png")):
+            logger.info("🖼️ Processing Image with Gemini Vision...")
+            prompt = "Extract all text from this medical note/report. Return ONLY the text."
+            extracted_text = gemini_service.generate_vision_text(content, prompt)
+            
+        else:
+            # Assume plain text
+            extracted_text = content.decode("utf-8", errors="ignore")
+
+        if not extracted_text.strip():
+            raise HTTPException(status_code=400, detail="Could not extract any text from the provided file.")
+
+        logger.info(f"📝 Extracted text length: {len(extracted_text)}")
+        
+        # 2. Feed extracted text to SuperAgent
+        result = await super_agent.process_outbreak_parallel(extracted_text)
+        
+        # 3. Store and return
+        data_assistant.add_report(result["extracted_data"])
+        processing_time = (datetime.now() - start_time).total_seconds()
+
+        return OutbreakProcessResponse(
+            extracted_data=result["extracted_data"],
+            validation=result["validation"],
+            risk_analysis=result["risk_analysis"],
+            consensus=result["consensus"],
+            alert=result["alert"],
+            session_id=session_id,
+            metadata={
+                "processed_at": str(datetime.now()),
+                "processing_time_seconds": processing_time,
+                "file_name": file.filename,
+                "extracted_text_snippet": extracted_text[:100] + "..."
+            },
+            message=f"🚨 File '{file.filename}' processed via Dynamic Multi-Agent Pipeline.",
+            human_validation_required=result["consensus"].final_risk_level in ["HIGH", "MEDIUM"]
+        )
+
+    except Exception as e:
+        logger.error(f"❌ File processing failed: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"File processing failed: {str(e)}")
 
 @app.post("/outbreak/approve/{session_id}")
 async def approve_alert(session_id: str, request: dict = None):
@@ -148,6 +231,24 @@ async def approve_alert(session_id: str, request: dict = None):
     }
 
 @app.post("/outbreak/query", response_model=QueryResponse)
+async def query_outbreak_data(request: dict):
+    """Query the outbreak data using the Data Assistant Agent."""
+    query = request.get("query", "").strip()
+    if not query:
+        raise HTTPException(status_code=400, detail="Query field is required")
+
+    if len(query) > MAX_QUERY_LENGTH:
+        raise HTTPException(status_code=400, detail=f"Query too long (max {MAX_QUERY_LENGTH} characters)")
+
+    logger.info(f"--- 🔍 Data Query: {query} ---")
+
+    try:
+        result = await data_assistant.query(query)
+        logger.info("--- ✅ Query Complete ---")
+        return QueryResponse(**result)
+    except Exception as e:
+        logger.error(f"❌ Query error: {e}")
+        raise HTTPException(status_code=500, detail=f"Query failed: {str(e)}")
 async def query_outbreak_data(request: dict):
     """Query the outbreak data using the Data Assistant Agent."""
     query = request.get("query", "").strip()

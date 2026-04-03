@@ -59,15 +59,25 @@ class RiskAnalysis(BaseModel):
     possible_disease: str
     reason: str
 
+class ConsensusResult(BaseModel):
+    final_risk_level: str
+    average_confidence: float
+    consensus_reached: bool
+    agent_opinions: List[RiskAnalysis] = Field(default_factory=list)
+    final_reasoning: str
+
 class AlertMessage(BaseModel):
     title: str
     message: str
     recommendations: List[str] = Field(default_factory=list)
+    prevention_strategy: Optional[str] = None
+    why_urgent: Optional[str] = None
 
 class OutbreakProcessResponse(BaseModel):
     extracted_data: OutbreakReport
     validation: ValidationResult
     risk_analysis: RiskAnalysis
+    consensus: Optional[ConsensusResult] = None
     alert: AlertMessage
     session_id: str
     metadata: dict = Field(default_factory=dict)

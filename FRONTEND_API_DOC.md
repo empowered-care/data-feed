@@ -8,7 +8,7 @@ This document provides the API specifications and JSON response examples for the
 ---
 
 ## 🚨 1. Process Outbreak Report
-Processes a raw text report through the 4-agent pipeline (Extractor, Validator, Risk Analyzer, Alert Generator).
+Processes a raw text report through the **Dynamic Hierarchical Multi-Agent Pipeline** (SuperAgent Orchestrator).
 
 ### **Endpoint**
 `POST /outbreak/process`
@@ -41,6 +41,26 @@ Processes a raw text report through the 4-agent pipeline (Extractor, Validator, 
     "possible_disease": "Malaria",
     "reason": "Jimma is located in a region of Ethiopia endemic for malaria..."
   },
+  "consensus": {
+    "final_risk_level": "MEDIUM",
+    "average_confidence": 72.5,
+    "consensus_reached": true,
+    "agent_opinions": [
+      {
+        "risk_level": "MEDIUM",
+        "confidence": "75%",
+        "possible_disease": "Malaria",
+        "reason": "Symptom-based perspective..."
+      },
+      {
+        "risk_level": "HIGH",
+        "confidence": "70%",
+        "possible_disease": "Cholera",
+        "reason": "Statistical pattern perspective..."
+      }
+    ],
+    "final_reasoning": "Consensus reached from multiple perspectives..."
+  },
   "alert": {
     "title": "Public Health Alert: Suspected Malaria in Jimma",
     "message": "A cluster of 4 cases showing fever and vomiting has been reported in Jimma.",
@@ -48,15 +68,18 @@ Processes a raw text report through the 4-agent pipeline (Extractor, Validator, 
       "Use mosquito nets",
       "Visit clinic if fever persists",
       "Remove standing water"
-    ]
+    ],
+    "prevention_strategy": "To prevent more cases, everyone should sleep under treated nets and remove any stagnant water around their homes where mosquitoes breed.",
+    "why_urgent": "We are seeing more cases than usual for this time of year, which could mean a local outbreak is starting."
   },
   "session_id": "550e8400-e29b-41d4-a716-446655440000",
   "metadata": {
     "processed_at": "2026-04-03T17:00:00Z",
-    "processing_time_seconds": 2.45,
-    "agents_used": ["extraction", "validation", "risk_analysis", "alert_generation"]
+    "processing_time_seconds": 3.15,
+    "orchestrator": "SuperAgent",
+    "consensus_reached": true
   },
-  "message": "🚨 Outbreak report processed through multi-agent pipeline.",
+  "message": "🚨 Outbreak report processed through dynamic multi-agent pipeline.",
   "human_validation_required": true
 }
 ```
