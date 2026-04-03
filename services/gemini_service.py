@@ -109,5 +109,39 @@ class GeminiService:
         
         raise ValueError(f"❌ Gemini failed: {last_error}")
 
+    def generate_text(self, prompt: str) -> str:
+        """Generate text response using Gemini for text-only prompts."""
+        last_error = None
+        for model_name in self.models:
+            try:
+                print(f"🧠 Text Generation: Using {model_name}...")
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content(prompt)
+                
+                if not response or not hasattr(response, 'text'):
+                    if response.candidates:
+                        raw_text = response.candidates[0].content.parts[0].text
+                    else:
+                        raise ValueError("Empty response")
+                else:
+                    raw_text = response.text
+                
+                # Extract JSON from code blocks if present
+                if "```json" in raw_text:
+                    json_text = raw_text.split("```json")[1].split("```")[0].strip()
+                elif "```" in raw_text:
+                    json_text = raw_text.split("```")[1].split("```")[0].strip()
+                else:
+                    json_text = raw_text.strip()
+                
+                return json_text
+                
+            except Exception as e:
+                print(f"⚠️ {model_name} Error: {e}")
+                last_error = e
+                continue
+        
+        raise ValueError(f"❌ Gemini text generation failed: {last_error}")
+
 
 

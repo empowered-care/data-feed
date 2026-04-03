@@ -38,3 +38,43 @@ class ProcessResponse(BaseModel):
     metadata: dict = Field(default_factory=dict)
     message: str
     annotated_image_base64: str
+
+# Outbreak Detection Schemas
+
+class OutbreakReport(BaseModel):
+    location: str
+    symptoms: List[str] = Field(default_factory=list)
+    cases: int
+    date: Optional[str] = None
+    additional_info: Dict[str, Any] = Field(default_factory=dict)
+
+class ValidationResult(BaseModel):
+    valid: bool
+    confidence: float
+    issues: List[str] = Field(default_factory=list)
+
+class RiskAnalysis(BaseModel):
+    risk_level: str  # HIGH, MEDIUM, LOW
+    confidence: str
+    possible_disease: str
+    reason: str
+
+class AlertMessage(BaseModel):
+    title: str
+    message: str
+    recommendations: List[str] = Field(default_factory=list)
+
+class OutbreakProcessResponse(BaseModel):
+    extracted_data: OutbreakReport
+    validation: ValidationResult
+    risk_analysis: RiskAnalysis
+    alert: AlertMessage
+    session_id: str
+    metadata: dict = Field(default_factory=dict)
+    message: str
+    human_validation_required: bool = True
+
+class QueryResponse(BaseModel):
+    query: str
+    response: str
+    data_summary: Dict[str, Any] = Field(default_factory=dict)
