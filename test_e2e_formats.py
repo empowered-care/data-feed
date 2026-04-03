@@ -50,7 +50,7 @@ if __name__ == "__main__":
         requests.get(BASE_URL, timeout=5)
         run_all_tests()
     except requests.exceptions.ConnectionError:
-        print("❌ Server is NOT running! Please start aegis_main.py first.")
+        print("❌ Server is NOT running! Please start main.py first.")
     
     print("\n" + "=" * 50)
     print("✨ End-to-End Tests Complete!")

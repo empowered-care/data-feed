@@ -431,6 +431,62 @@ class DataAssistantAgent:
                 "data_summary": data_summary
             }
 
+    async def perform_full_analysis(self) -> Dict[str, Any]:
+        """Perform a deep analysis comparing new data with historical trends."""
+        logger.info("Performing full system analysis and comparison...")
+        
+        if not self.data_store:
+            return {
+                "status": "No data available",
+                "analysis": "No data points collected yet for analysis.",
+                "timestamp": str(datetime.now())
+            }
+
+        # Split data into "new" (last 5 reports) and "old" (everything else)
+        new_data = self.data_store[-5:]
+        old_data = self.data_store[:-5] if len(self.data_store) > 5 else []
+
+        prompt = f"""
+        You are a Senior Epidemiological Analyst. Perform a full system analysis.
+        
+        HISTORICAL DATA (Summarized):
+        {json.dumps(old_data[:20]) if old_data else "No historical data."}
+        
+        NEW RECENT DATA (Last 5 reports):
+        {json.dumps(new_data)}
+        
+        TASK:
+        1. Compare the new data with historical trends.
+        2. Identify if any new outbreaks are emerging or if existing ones are worsening.
+        3. Provide a 'Result' summary including an overall risk level (LOW/MEDIUM/HIGH).
+        4. Detect anomalies (e.g., sudden case spikes in new locations).
+        
+        Format your response as valid JSON:
+        {{
+          "overall_risk": "string",
+          "comparison_summary": "string",
+          "anomalies_detected": ["string"],
+          "trend_analysis": "string",
+          "recommendations": ["string"]
+        }}
+        """
+
+        try:
+            loop = asyncio.get_event_loop()
+            from datetime import datetime
+            response = await loop.run_in_executor(None, self.gemini.generate_text, prompt)
+            analysis_result = json.loads(response)
+            analysis_result["timestamp"] = str(datetime.now())
+            analysis_result["data_points_analyzed"] = len(self.data_store)
+            return analysis_result
+        except Exception as e:
+            logger.error(f"Full analysis failed: {e}")
+            return {
+                "error": str(e),
+                "status": "Analysis failed",
+                "timestamp": str(datetime.now())
+            }
+
 # --- NEW POWERFUL CHATBOT SYSTEM ---
 
 class ChatSpecialistAgent:

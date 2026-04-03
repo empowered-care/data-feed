@@ -80,6 +80,6 @@ def test_auth_flow():
 
 if __name__ == "__main__":
     # Ensure the server is running before executing this
-    print("🚀 Ensure 'python aegis_main.py' is running in another terminal.")
+    print("🚀 Ensure 'python main.py' is running in another terminal.")
     time.sleep(2)
     test_auth_flow()
