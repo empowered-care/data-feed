@@ -16,5 +16,14 @@
         "role": "vw",
         "is_active": true,
         "created_at": "2026-04-03T22:55:59.714597"
+    },
+    {
+        "id": "367c0acd-8db4-45cd-879e-87e670080f17",
+        "email": "admin@aegis-lite.com",
+        "hashed_password": "$2b$12$6DfTzB66cSn2pVQm5/DxbuTmKfsHYY/jvUi4kI5b/fi1TE.dzq0xq",
+        "full_name": "System Administrator",
+        "role": "admin",
+        "is_active": true,
+        "created_at": "2026-04-04T01:50:01.831970"
     }
 ]
