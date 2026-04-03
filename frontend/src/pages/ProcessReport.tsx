@@ -54,7 +54,23 @@ export default function ProcessReport() {
       addNotification(`New report processed: ${result.extracted_data.location}`);
       toast.success('Report processed successfully');
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Processing failed';
+      let msg = 'Processing failed';
+      if (e && typeof e === 'object' && 'response' in e) {
+        const axiosErr = e as { response?: { status?: number; data?: { detail?: string } } };
+        const status = axiosErr.response?.status;
+        const detail = axiosErr.response?.data?.detail;
+        if (status === 500) {
+          msg = `Backend error: ${detail || 'The AI agent pipeline crashed. Check that your GEMINI_API_KEY is valid.'}`;
+        } else if (status === 422) {
+          msg = 'Request format error: The backend rejected the input format.';
+        } else if (detail) {
+          msg = detail;
+        }
+      } else if (e instanceof Error) {
+        msg = e.message.includes('Network Error') 
+          ? 'Cannot reach backend — is the server running on port 8000?' 
+          : e.message;
+      }
       setPipelineError(msg);
       toast.error(msg);
     } finally {
