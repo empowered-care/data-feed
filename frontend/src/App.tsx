@@ -3,13 +3,19 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Landing from "@/pages/Landing";
+import LoginPage from "@/pages/LoginPage";
+import RegisterPage from "@/pages/RegisterPage";
+import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import Dashboard from "@/pages/Dashboard";
 import ProcessReport from "@/pages/ProcessReport";
 import QueryPage from "@/pages/QueryPage";
 import AlertsPage from "@/pages/AlertsPage";
 import SummaryPage from "@/pages/SummaryPage";
 import SettingsPage from "@/pages/SettingsPage";
+import AdminPage from "@/pages/AdminPage";
+import ProfilePage from "@/pages/ProfilePage";
 import NotFound from "@/pages/NotFound";
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/store/appStore";
@@ -30,7 +36,6 @@ const App = () => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // Simulate initial application loading/warming up
     const timer = setTimeout(() => {
       setIsLoaded(true);
     }, 2000);
@@ -66,15 +71,28 @@ const App = () => {
               <Sonner />
               <BrowserRouter>
                 <Routes>
+                  {/* Public routes */}
                   <Route path="/" element={<Landing />} />
-                  <Route element={<DashboardLayout />}>
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+                  {/* Protected dashboard routes */}
+                  <Route element={
+                    <ProtectedRoute>
+                      <DashboardLayout />
+                    </ProtectedRoute>
+                  }>
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/process" element={<ProcessReport />} />
                     <Route path="/query" element={<QueryPage />} />
                     <Route path="/alerts" element={<AlertsPage />} />
                     <Route path="/summary" element={<SummaryPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/admin" element={<AdminPage />} />
                   </Route>
+
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>

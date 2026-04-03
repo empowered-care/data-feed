@@ -8,15 +8,22 @@ import {
   Settings,
   Shield,
   X,
+  ShieldCheck,
+  User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/authStore';
 
-const navItems = [
+const baseNavItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/process', icon: FileText, label: 'Process Report' },
   { to: '/query', icon: Search, label: 'Query Data' },
   { to: '/alerts', icon: AlertTriangle, label: 'Alerts' },
   { to: '/summary', icon: BarChart3, label: 'Summary' },
+];
+
+const bottomNavItems = [
+  { to: '/profile', icon: User, label: 'My Profile' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -27,6 +34,14 @@ interface Props {
 
 export function AppSidebar({ open, onClose }: Props) {
   const { pathname } = useLocation();
+  const { user } = useAuthStore();
+
+  const navItems = [
+    ...baseNavItems,
+    ...(user?.role === 'admin'
+      ? [{ to: '/admin', icon: ShieldCheck, label: 'Admin Panel' }]
+      : []),
+  ];
 
   return (
     <>
@@ -53,6 +68,7 @@ export function AppSidebar({ open, onClose }: Props) {
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1">
+          <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40">Main</p>
           {navItems.map((item) => {
             const active = pathname === item.to;
             return (
@@ -72,17 +88,45 @@ export function AppSidebar({ open, onClose }: Props) {
               </Link>
             );
           })}
+
+          <div className="pt-4">
+            <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40">Account</p>
+            {bottomNavItems.map((item) => {
+              const active = pathname === item.to;
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onClick={onClose}
+                  className={cn(
+                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                    active
+                      ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                      : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
+                  )}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
         </nav>
 
         <div className="px-4 py-4 border-t border-sidebar-border">
-          {/* <div className="flex items-center gap-2 text-[10px]">
-            <div className="flex gap-0.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-ethiopian-green" />
-              <span className="w-2.5 h-2.5 rounded-full bg-ethiopian-gold" />
-              <span className="w-2.5 h-2.5 rounded-full bg-ethiopian-red" />
+          {user && (
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-sidebar-primary/20 flex items-center justify-center text-xs font-bold text-sidebar-primary">
+                {user.full_name
+                  ? user.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+                  : user.email[0].toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold truncate">{user.full_name || user.email}</p>
+                <p className="text-[10px] text-sidebar-foreground/50 capitalize">{user.role === 'admin' ? 'Administrator' : 'Viewer'}</p>
+              </div>
             </div>
-            <span className="text-sidebar-foreground/50">HSIL Hackathon 2026 • Addis Ababa</span>
-          </div> */}
+          )}
         </div>
       </aside>
     </>
