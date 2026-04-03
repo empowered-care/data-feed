@@ -5,6 +5,7 @@ import { RiskBadge } from '@/components/RiskBadge';
 import { useAppStore } from '@/store/appStore';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
+import { EthiopiaMap } from '@/components/EthiopiaMap';
 
 export default function AlertsPage() {
   const { reports, updateReportStatus } = useAppStore();
@@ -27,7 +28,11 @@ export default function AlertsPage() {
     <div className="space-y-6 max-w-4xl">
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Alerts & Validation</h2>
-        <p className="text-sm text-muted-foreground">Review and approve high-risk outbreak alerts</p>
+        <p className="text-sm text-muted-foreground">Review and approve high-risk outbreak alerts on the map</p>
+      </div>
+
+      <div className="mb-6">
+        <EthiopiaMap />
       </div>
 
       {pending.length === 0 && (

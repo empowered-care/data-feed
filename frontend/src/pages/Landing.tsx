@@ -30,7 +30,7 @@ export default function Landing() {
           <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-muted/50 text-[10px] uppercase font-bold tracking-widest text-muted-foreground mr-4">
               <span className="w-1.5 h-1.5 rounded-full bg-health animate-pulse" />
-              HSIL Hackathon 2026
+        
             </div>
             <Button variant="ghost" size="icon" onClick={toggleDarkMode} className="rounded-full h-9 w-9">
               {darkMode ? '☀️' : '🌙'}
@@ -87,7 +87,7 @@ export default function Landing() {
               healthOk === null ? 'bg-muted-foreground animate-pulse' : healthOk ? 'bg-health' : 'bg-risk-high shadow-[0_0_8px_rgba(244,63,94,0.6)]'
             }`}
           />
-          {healthOk === null ? 'System Warming Up...' : healthOk ? 'All Agents Online' : 'Core API Disconnected'}
+          {/* {healthOk === null ? 'System Warming Up...' : healthOk ? 'All Agents Online' : 'Core API Disconnected'} */}
         </motion.div>
       </section>
 
