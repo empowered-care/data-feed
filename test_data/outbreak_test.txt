@@ -1,0 +1,18 @@
+patient name: Mulugeta Tadesse
+sex: Male
+age: 10
+City: Bahir Dar
+Subcity: Zenzelma
+Woreda: 04
+MRN: MRN-77889
+Occupation: Student
+Date: 2026-04-03
+
+Chief complaint: Abdominal pain and diarrhea
+History: Started this morning after drinking from the river...
+Physical exam: T: 38.0C, HR: 105, BP: 90/60. Abdomen tender.
+Assessment: Suspected Waterborne Disease
+
+Past medical hisotry: None
+
+Plan: Stool sample and rehydration.

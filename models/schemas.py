@@ -1,5 +1,53 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional, Dict, Any
+from datetime import datetime
+from enum import Enum
+
+class UserRole(str, Enum):
+    ADMIN = "admin"
+    VW = "vw"  # Viewer/Worker
+
+class UserBase(BaseModel):
+    email: EmailStr
+    full_name: Optional[str] = None
+    role: UserRole = UserRole.VW
+
+class UserCreate(UserBase):
+    password: str
+
+class UserInvite(BaseModel):
+    email: EmailStr
+    role: UserRole = UserRole.VW
+
+class UserAcceptInvite(BaseModel):
+    token: str
+    password: str
+    full_name: str
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+class PasswordResetConfirm(BaseModel):
+    token: str
+    new_password: str
+
+class ChangePassword(BaseModel):
+    old_password: str
+    new_password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    role: str
+    full_name: Optional[str]
+
+class User(UserBase):
+    id: str
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=datetime.now)
+
+    class Config:
+        from_attributes = True
 
 class Medication(BaseModel):
     name: str
@@ -38,3 +86,73 @@ class ProcessResponse(BaseModel):
     metadata: dict = Field(default_factory=dict)
     message: str
     annotated_image_base64: str
+
+# Outbreak Detection Schemas
+
+class OutbreakReport(BaseModel):
+    location: str
+    symptoms: List[str] = Field(default_factory=list)
+    cases: int
+    date: Optional[str] = None
+    additional_info: Dict[str, Any] = Field(default_factory=dict)
+
+class ValidationResult(BaseModel):
+    valid: bool
+    confidence: float
+    issues: List[str] = Field(default_factory=list)
+
+class RiskAnalysis(BaseModel):
+    risk_level: str  # HIGH, MEDIUM, LOW
+    confidence: str
+    possible_disease: str
+    reason: str
+
+class ConsensusResult(BaseModel):
+    final_risk_level: str
+    average_confidence: float
+    consensus_reached: bool
+    agent_opinions: List[RiskAnalysis] = Field(default_factory=list)
+    final_reasoning: str
+
+class AlertMessage(BaseModel):
+    title: str
+    message: str
+    recommendations: List[str] = Field(default_factory=list)
+    prevention_strategy: Optional[str] = None
+    why_urgent: Optional[str] = None
+
+class OutbreakProcessResponse(BaseModel):
+    extracted_data: OutbreakReport
+    validation: ValidationResult
+    risk_analysis: RiskAnalysis
+    consensus: Optional[ConsensusResult] = None
+    alert: AlertMessage
+    session_id: str
+    metadata: dict = Field(default_factory=dict)
+    message: str
+    human_validation_required: bool = True
+
+class QueryResponse(BaseModel):
+    query: str
+    response: str
+    data_summary: Dict[str, Any] = Field(default_factory=dict)
+
+# Chatbot Schemas
+class ChatMessage(BaseModel):
+    role: str  # "user" or "assistant"
+    content: str
+    timestamp: datetime = Field(default_factory=datetime.now)
+
+class ChatSession(BaseModel):
+    session_id: str
+    history: List[ChatMessage] = Field(default_factory=list)
+
+class ChatRequest(BaseModel):
+    message: str
+    session_id: Optional[str] = None
+
+class ChatResponse(BaseModel):
+    response: str
+    session_id: str
+    agent_used: str
+    history_count: int

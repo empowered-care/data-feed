@@ -1,0 +1,37 @@
+Patient ID,Medical Record,Source
+P001,"patient name: Abebe Kebede
+sex: Male
+age: 45
+City: Addis Ababa
+Subcity: Bole
+Woreda: 03
+MRN: MRN-12345
+Occupation: Teacher
+Date: 2026-04-03
+
+Chief complaint: Persistent cough and fever
+History: Patient has been feeling unwell for 5 days...
+Physical exam: T: 38.5C, BP: 120/80, HR: 88
+Assessment: Suspected Respiratory Infection
+
+Past medical hisotry: None
+
+Plan: Chest X-ray and antibiotics",Clinic A
+P002,"patient name: Fatuma Mohammed
+sex: Female
+age: 28
+City: Jimma
+Subcity: Jimma Town
+Woreda: 01
+MRN: MRN-67890
+Occupation: Merchant
+Date: 2026-04-03
+
+Chief complaint: Vomiting and nausea
+History: Symptoms started after eating at a local market...
+Physical exam: T: 37.2C, BP: 110/70, HR: 95, Signs of dehydration
+Assessment: Acute Gastroenteritis
+
+Past medical hisotry: None
+
+Plan: IV fluids and rest",Clinic B
