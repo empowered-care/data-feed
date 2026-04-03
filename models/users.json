@@ -24,6 +24,13 @@
         "full_name": "System Administrator",
         "role": "admin",
         "is_active": true,
-        "created_at": "2026-04-04T01:50:01.831970"
+        "created_at": "2026-04-04T01:50:01.831970",
+        "id": "20a50804-cedf-4441-af49-fe48bbf8d535",
+        "email": "admin@aegis-lite.com",
+        "hashed_password": "$2b$12$lOyfw7eSpnjhW63m8/rUHOyeSoPfMXirPWMlp3r4ZllmxKnU14PVa",
+        "full_name": "System Administrator",
+        "role": "admin",
+        "is_active": true,
+        "created_at": "2026-04-04T01:44:10.167669"
     }
 ]
