@@ -1,8 +1,8 @@
-# Aegis Lite - Multi-Agent Disease Outbreak Detection System
+# Empowered Care - Multi-Agent Disease Outbreak Detection System
 
 ## Overview
 
-Aegis Lite is an intelligent multi-agent AI system for early disease outbreak detection. Built on FastAPI with Google Gemini AI, it processes outbreak reports through specialized agents to provide accurate risk assessment and actionable alerts.
+Empowered Care is an intelligent multi-agent AI system for early disease outbreak detection. Built on FastAPI with Google Gemini AI, it processes outbreak reports through specialized agents to provide accurate risk assessment and actionable alerts.
 
 ## Architecture
 
@@ -159,4 +159,4 @@ curl -X POST "http://localhost:8000/outbreak/query" \
 
 ## License
 
-This implementation is based on the Aegis Lite design specification for disease outbreak detection.
+This implementation is based on the Empowered Care design specification for disease outbreak detection.
