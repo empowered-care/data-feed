@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
-from models.schemas import ProcessResponse, Detection
+from models.schemas import ProcessResponse, Detection, StructuredMedicalRecord
 from services.layout_detector import LayoutDetector
 from services.preprocessor import Preprocessor
 from services.ocr_engine import OCREngine
@@ -14,7 +14,14 @@ from services.structurer import Structurer
 from services.gemini_service import GeminiService
 from utils.image_utils import image_to_base64, draw_boxes, save_all_versions
 from utils.pdf_utils import pdf_to_images
+from utils.excel_utils import parse_excel_or_csv 
 from config import get_session_dir
+
+# Database Imports
+from sqlalchemy.orm import Session
+from fastapi import Depends
+from database.db import get_db
+from database.models import PatientRecord, init_db
 
 app = FastAPI(title="Patient Record Digitizer")
 
@@ -25,14 +32,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Initialize models and services on startup
+@app.on_event("startup")
+def on_startup():
+    print("🛠️ Initializing Medical Database (SQLite)...")
+    init_db()
+
 # Initialize services once
 layout_detector = LayoutDetector()
 ocr_engine = OCREngine()
 gemini_service = GeminiService()
 
 
+
 @app.post("/process", response_model=ProcessResponse)
-async def process_document(file: UploadFile = File(...)):
+async def process_document(file: UploadFile = File(...), db: Session = Depends(get_db)):
     if not file.content_type.startswith(("image/", "application/pdf")):
         raise HTTPException(status_code=400, detail="Only images and PDF files are allowed")
 
@@ -113,6 +127,34 @@ async def process_document(file: UploadFile = File(...)):
     if final_annotated is not None:
         save_all_versions(session_dir, original_img, final_annotated, all_crops, all_enhanced)
 
+    # Step 5: Save to SQLite Database
+    try:
+        new_record = PatientRecord(
+            session_id=session_id,
+            source_file=file.filename,
+            patient_name=structured_record.patient_name,
+            patient_id=structured_record.patient_id,
+            date_of_birth=structured_record.date_of_birth,
+            gender=structured_record.gender,
+            visit_date=structured_record.visit_date,
+            document_type=structured_record.document_type,
+            referred_from=structured_record.referred_from,
+            referred_to=structured_record.referred_to,
+            diagnosis=structured_record.diagnosis,
+            symptoms=structured_record.symptoms,
+            investigations=structured_record.investigations,
+            medications=[m.dict() for m in structured_record.medications],
+            allergies=structured_record.allergies,
+            notes=structured_record.notes,
+            additional_info=structured_record.additional_info,
+            confidence=structured_record.confidence
+        )
+        db.add(new_record)
+        db.commit()
+        print(f"💾 Saved record to SQLite for session: {session_id}")
+    except Exception as db_err:
+        print(f"❌ Database Save Error: {db_err}")
+
     annotated_b64 = image_to_base64(final_annotated) if final_annotated is not None else ""
 
     print(f"--- ✨ Session Complete: {session_id} ---\n")
@@ -129,11 +171,100 @@ async def process_document(file: UploadFile = File(...)):
             "file_type": file.content_type,
             "engine": "Gemini-1.5-Flash"
         },
-        message="✅ Processing completed successfully using Gemini Vision."
+        message="✅ Processing completed successfully and saved to DB."
     )
 
+@app.post("/import-spreadsheet")
+async def import_spreadsheet(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    """
+    Endpoint to process Excel (.xlsx) or CSV files, Log to Terminal, and Return Data.
+    """
+    content = await file.read()
+    print(f"\n--- 📊 IMPORTING CLINICAL SPREADSHEET: {file.filename} ---")
+    
+    try:
+        records = parse_excel_or_csv(content, file.filename)
+        saved_count = 0
+        response_data = []
+        
+        for r in records:
+            # Live Logging to Terminal
+            print(f"📄 Processing Record: {r.patient_name} | Diagnosis: {r.diagnosis}")
+            
+            new_record = PatientRecord(
+                source_file=file.filename,
+                patient_name=r.patient_name,
+                patient_id=r.patient_id,
+                date_of_birth=r.date_of_birth,
+                gender=r.gender,
+                visit_date=r.visit_date,
+                document_type=r.document_type,
+                diagnosis=r.diagnosis,
+                medications=[m.dict() for m in r.medications],
+                notes=r.notes,
+                confidence=r.confidence
+            )
+            db.add(new_record)
+            saved_count += 1
+            response_data.append(r)
+            
+        db.commit()
+        print(f"✅ SUCCESSFULLY SAVED {saved_count} RECORDS TO SQLITE.")
+        print(f"--------------------------------------------------\n")
+        
+        return {
+            "status": "success",
+            "message": f"Successfully processed {saved_count} records.",
+            "count": saved_count,
+            "data": response_data # Return the full structured list
+        }
+        
+    except Exception as e:
+        print(f"❌ Spreadsheet Import Error: {e}")
+        return {"status": "error", "message": f"Failed to process spreadsheet: {str(e)}"}
 
-
+@app.post("/insert-record")
+async def insert_record(record: StructuredMedicalRecord, db: Session = Depends(get_db)):
+    """
+    Endpoint for Manual Form Entry. Logs full data and returns it.
+    """
+    print(f"\n--- 📝 MANUAL FORM ENTRY RECEIVED ---")
+    print(f"📄 Full Patient Data:\n{record.model_dump_json(indent=2)}")
+    
+    try:
+        new_record = PatientRecord(
+            source_file="Manual Entry",
+            patient_name=record.patient_name,
+            patient_id=record.patient_id,
+            date_of_birth=record.date_of_birth,
+            gender=record.gender,
+            visit_date=record.visit_date,
+            document_type=record.document_type or "Manual Entry",
+            referred_from=record.referred_from,
+            referred_to=record.referred_to,
+            diagnosis=record.diagnosis,
+            symptoms=record.symptoms,
+            investigations=record.investigations,
+            medications=[m.dict() for m in record.medications],
+            allergies=record.allergies,
+            notes=record.notes,
+            additional_info=record.additional_info,
+            confidence=1.0
+        )
+        db.add(new_record)
+        db.commit()
+        
+        print(f"✅ SUCCESSFULLY SAVED TO DATABASE: {record.patient_name}")
+        print(f"--------------------------------------------------\n")
+        
+        return {
+            "status": "success",
+            "message": f"Successfully inserted record for {record.patient_name}.",
+            "data": record
+        }
+    except Exception as e:
+        print(f"❌ Manual Entry Error: {e}")
+        return {"status": "error", "message": f"Failed to insert record: {str(e)}"}
 
 
 if __name__ == "__main__":

@@ -2,28 +2,28 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 
 class Medication(BaseModel):
-    name: str
-    dosage: str
-    frequency: str
+    name: str = "string"
+    dosage: str = "string"
+    frequency: str = "string"
 
 class StructuredMedicalRecord(BaseModel):
-    document_type: Optional[str] = "Medical Record"
-    patient_name: str
-    patient_id: Optional[str] = None
-
-    date_of_birth: Optional[str] = None
-    gender: Optional[str] = None
-    visit_date: Optional[str] = None
-    referred_from: Optional[str] = None
-    referred_to: Optional[str] = None
-    diagnosis: List[str] = Field(default_factory=list)
-    symptoms: List[str] = Field(default_factory=list)
-    investigations: List[str] = Field(default_factory=list)
-    medications: List[Medication] = Field(default_factory=list)
-    allergies: List[str] = Field(default_factory=list)
-    notes: Optional[str] = None
+    document_type: str = "Medical Record"
+    patient_name: str = "string"
+    patient_id: str = "string"
+    date_of_birth: str = "string"
+    gender: str = "string"
+    visit_date: str = "string"
+    referred_from: str = "string"
+    referred_to: str = "string"
+    diagnosis: List[str] = Field(default_factory=lambda: ["string"])
+    symptoms: List[str] = Field(default_factory=lambda: ["string"])
+    investigations: List[str] = Field(default_factory=lambda: ["string"])
+    medications: List[Medication] = Field(default_factory=lambda: [Medication()])
+    allergies: List[str] = Field(default_factory=lambda: ["string"])
+    notes: str = "string"
     additional_info: Dict[str, Any] = Field(default_factory=dict)
-    confidence: float
+    confidence: float = 0.0
+
 
 class Detection(BaseModel):
     label: str
