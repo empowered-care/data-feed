@@ -11,10 +11,10 @@ import pandas as pd
 import io
 from datetime import datetime
 
-from models.schemas import OutbreakProcessResponse, QueryResponse
+from models.schemas import OutbreakProcessResponse, QueryResponse, ChatRequest, ChatResponse
 from services.gemini_service import GeminiService
 from services.agents import (
-    SuperAgent, DataAssistantAgent
+    SuperAgent, DataAssistantAgent, ChatSupervisor
 )
 from services.ocr_engine import OCREngine
 from utils.pdf_utils import pdf_to_images
@@ -57,7 +57,8 @@ logger.info("🤖 Initializing Dynamic Agents...")
 try:
     super_agent = SuperAgent(gemini_service)
     data_assistant = DataAssistantAgent(gemini_service)
-    logger.info("✅ Dynamic Agents initialized successfully")
+    chat_supervisor = ChatSupervisor(gemini_service, data_assistant)
+    logger.info("✅ Dynamic Agents and Chatbot initialized successfully")
 except Exception as e:
     logger.error(f"❌ Failed to initialize agents: {e}")
     raise
@@ -286,6 +287,26 @@ async def get_outbreak_summary():
     except Exception as e:
         logger.error(f"❌ Summary error: {e}")
         raise HTTPException(status_code=500, detail=f"Summary failed: {str(e)}")
+
+# --- NEW POWERFUL CHATBOT ENDPOINTS ---
+
+@app.post("/outbreak/chat", response_model=ChatResponse)
+async def chat_with_assistant(request: ChatRequest):
+    """Powerful multi-agent chatbot with memory and data awareness."""
+    try:
+        result = await chat_supervisor.chat(request.message, request.session_id)
+        return ChatResponse(**result)
+    except Exception as e:
+        logger.error(f"❌ Chat error: {e}")
+        raise HTTPException(status_code=500, detail=f"Chat failed: {str(e)}")
+
+@app.delete("/outbreak/chat/{session_id}")
+async def clear_chat_session(session_id: str):
+    """Clear the conversation history for a specific session."""
+    if chat_supervisor.clear_session(session_id):
+        return {"message": f"Session {session_id} cleared successfully"}
+    else:
+        return {"message": f"Session {session_id} not found or already empty"}
 
 @app.get("/health")
 async def health_check():

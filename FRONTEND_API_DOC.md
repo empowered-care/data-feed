@@ -187,7 +187,36 @@ Check system and agent status.
 
 ---
 
-## 🛠️ Integration Notes for Frontend
+## � 6. Multi-Agent Chatbot
+Powerful AI assistant with memory that can answer questions about locations, symptoms, and timelines.
+
+### **Endpoint**
+`POST /outbreak/chat`
+
+### **Request Body**
+```json
+{
+  "message": "Where are the most cases reported?",
+  "session_id": "optional-uuid"
+}
+```
+
+### **Success Response (200 OK)**
+```json
+{
+  "response": "Most cases are currently reported in Hawassa (10 cases) and Jimma (4 cases).",
+  "session_id": "uuid-returned-or-provided",
+  "agent_used": "location",
+  "history_count": 1
+}
+```
+
+### **Endpoint (Clear History)**
+`DELETE /outbreak/chat/{session_id}`
+
+---
+
+## �🛠️ Integration Notes for Frontend
 
 1. **Human Validation**: If `human_validation_required` is `true` in the `/process` response, the UI should show an "Approve/Reject" interface for a supervisor.
 2. **Risk Levels**: Use the following color coding for `risk_level`:

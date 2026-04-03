@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
+from datetime import datetime
 
 class Medication(BaseModel):
     name: str
@@ -88,3 +89,23 @@ class QueryResponse(BaseModel):
     query: str
     response: str
     data_summary: Dict[str, Any] = Field(default_factory=dict)
+
+# Chatbot Schemas
+class ChatMessage(BaseModel):
+    role: str  # "user" or "assistant"
+    content: str
+    timestamp: datetime = Field(default_factory=datetime.now)
+
+class ChatSession(BaseModel):
+    session_id: str
+    history: List[ChatMessage] = Field(default_factory=list)
+
+class ChatRequest(BaseModel):
+    message: str
+    session_id: Optional[str] = None
+
+class ChatResponse(BaseModel):
+    response: str
+    session_id: str
+    agent_used: str
+    history_count: int

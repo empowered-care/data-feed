@@ -1,6 +1,7 @@
 import json
 import logging
 import asyncio
+import uuid
 from typing import Dict, Any, List, Optional, Union
 from models.schemas import OutbreakReport, ValidationResult, RiskAnalysis, AlertMessage, ConsensusResult
 from services.gemini_service import GeminiService
@@ -429,3 +430,112 @@ class DataAssistantAgent:
                 "response": "Unable to process query.",
                 "data_summary": data_summary
             }
+
+# --- NEW POWERFUL CHATBOT SYSTEM ---
+
+class ChatSpecialistAgent:
+    def __init__(self, gemini_service: GeminiService, role: str, expertise: str):
+        self.gemini = gemini_service
+        self.role = role
+        self.expertise = expertise
+
+    async def respond(self, message: str, history: List[Dict[str, str]], data_context: str) -> str:
+        history_str = "\n".join([f"{m['role']}: {m['content']}" for m in history])
+        
+        prompt = f"""
+        You are the {self.role} for Aegis Lite. Your expertise is {self.expertise}.
+        
+        DATA CONTEXT FROM SYSTEM:
+        {data_context}
+        
+        CONVERSATION HISTORY:
+        {history_str}
+        
+        USER QUESTION:
+        {message}
+        
+        INSTRUCTIONS:
+        1. Answer based ON THE DATA provided above.
+        2. If the data doesn't contain the answer, say so clearly.
+        3. Be professional and epidemiological in your tone.
+        4. Keep your answer concise but complete.
+        """
+        
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, self.gemini.generate_text, prompt)
+
+class ChatSupervisor:
+    def __init__(self, gemini_service: GeminiService, data_assistant: DataAssistantAgent):
+        self.gemini = gemini_service
+        self.data_assistant = data_assistant
+        self.sessions: Dict[str, List[Dict[str, Any]]] = {}
+        
+        # Initialize specialists
+        self.specialists = {
+            "location": ChatSpecialistAgent(gemini_service, "Location Specialist", "Geographic trends, hotspots, and area-specific data."),
+            "infection": ChatSpecialistAgent(gemini_service, "Infection Specialist", "Symptoms, disease types, risk levels, and clinical details."),
+            "history": ChatSpecialistAgent(gemini_service, "History Specialist", "Timelines, dates, and historical comparison of reports."),
+            "general": ChatSpecialistAgent(gemini_service, "General Assistant", "Overall summaries and general epidemiological support.")
+        }
+
+    def _get_history(self, session_id: str) -> List[Dict[str, Any]]:
+        if session_id not in self.sessions:
+            self.sessions[session_id] = []
+        return self.sessions[session_id]
+
+    async def chat(self, message: str, session_id: Optional[str] = None) -> Dict[str, Any]:
+        sid = session_id or str(uuid.uuid4())
+        history = self._get_history(sid)
+        
+        # 1. Route the query to the correct agent
+        route_prompt = f"""
+        Analyze this user message and route it to the best specialist:
+        - "location": If they ask WHERE, hotspots, or about specific cities.
+        - "infection": If they ask about symptoms, WHAT disease, or risk levels.
+        - "history": If they ask WHEN, dates, or trends over time.
+        - "general": For greetings or overall summaries.
+        
+        MESSAGE: "{message}"
+        
+        Return ONLY the word: location, infection, history, or general.
+        """
+        
+        loop = asyncio.get_event_loop()
+        agent_key = await loop.run_in_executor(None, self.gemini.generate_text, route_prompt)
+        agent_key = agent_key.lower().strip()
+        if agent_key not in self.specialists:
+            agent_key = "general"
+            
+        # 2. Prepare data context
+        data_summary = {
+            "total": len(self.data_assistant.data_store),
+            "recent_reports": self.data_assistant.data_store[-10:]
+        }
+        data_context = json.dumps(data_summary, indent=2)
+        
+        # 3. Get response from specialist
+        agent = self.specialists[agent_key]
+        logger.info(f"🤖 Chat: Routing to {agent_key} agent for session {sid}")
+        
+        response_text = await agent.respond(message, history, data_context)
+        
+        # 4. Update history
+        history.append({"role": "user", "content": message})
+        history.append({"role": "assistant", "content": response_text})
+        
+        # Keep history manageable (last 10 turns)
+        if len(history) > 20:
+            self.sessions[sid] = history[-20:]
+            
+        return {
+            "response": response_text,
+            "session_id": sid,
+            "agent_used": agent_key,
+            "history_count": len(history) // 2
+        }
+
+    def clear_session(self, session_id: str):
+        if session_id in self.sessions:
+            del self.sessions[session_id]
+            return True
+        return False
