@@ -1,6 +1,53 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional, Dict, Any
 from datetime import datetime
+from enum import Enum
+
+class UserRole(str, Enum):
+    ADMIN = "admin"
+    VW = "vw"  # Viewer/Worker
+
+class UserBase(BaseModel):
+    email: EmailStr
+    full_name: Optional[str] = None
+    role: UserRole = UserRole.VW
+
+class UserCreate(UserBase):
+    password: str
+
+class UserInvite(BaseModel):
+    email: EmailStr
+    role: UserRole = UserRole.VW
+
+class UserAcceptInvite(BaseModel):
+    token: str
+    password: str
+    full_name: str
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+class PasswordResetConfirm(BaseModel):
+    token: str
+    new_password: str
+
+class ChangePassword(BaseModel):
+    old_password: str
+    new_password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    role: str
+    full_name: Optional[str]
+
+class User(UserBase):
+    id: str
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=datetime.now)
+
+    class Config:
+        from_attributes = True
 
 class Medication(BaseModel):
     name: str

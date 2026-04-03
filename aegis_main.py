@@ -4,21 +4,29 @@ Aegis Lite - Multi-Agent Disease Outbreak Detection System
 """
 
 import logging
-from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import FastAPI, HTTPException, UploadFile, File, Depends, status, Security
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import uuid
 import pandas as pd
 import io
-from datetime import datetime
+from datetime import datetime, timedelta
+from typing import List, Optional
 
-from models.schemas import OutbreakProcessResponse, QueryResponse, ChatRequest, ChatResponse
+from models.schemas import (
+    OutbreakProcessResponse, QueryResponse, ChatRequest, ChatResponse,
+    UserRole, UserInvite, UserAcceptInvite, PasswordResetRequest, 
+    PasswordResetConfirm, ChangePassword, Token, User, UserBase
+)
 from services.gemini_service import GeminiService
 from services.agents import (
     SuperAgent, DataAssistantAgent, ChatSupervisor
 )
 from services.ocr_engine import OCREngine
+from services.auth_service import AuthService
 from utils.pdf_utils import pdf_to_images
-from config import API_TITLE, API_VERSION, LOG_LEVEL, LOG_FORMAT, ALLOWED_ORIGINS, MAX_TEXT_LENGTH, MAX_QUERY_LENGTH
+from utils.security import create_access_token, decode_token
+from config import API_TITLE, API_VERSION, LOG_LEVEL, LOG_FORMAT, ALLOWED_ORIGINS, MAX_TEXT_LENGTH, MAX_QUERY_LENGTH, ACCESS_TOKEN_EXPIRE_MINUTES
 
 # Configure logging
 logging.basicConfig(
@@ -29,11 +37,42 @@ logger = logging.getLogger(__name__)
 
 logger.info("🚀 Starting Aegis Lite...")
 
+# Initialize services
+auth_service = AuthService()
+
 app = FastAPI(
     title=API_TITLE,
     description="AI-powered disease outbreak detection using specialized agents",
     version=API_VERSION
 )
+
+# Authentication logic
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    payload = decode_token(token)
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    email: str = payload.get("sub")
+    if email is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    user = auth_service.get_user_by_email(email)
+    if user is None:
+        raise HTTPException(status_code=401, detail="User not found")
+    return user
+
+async def get_current_admin(user: dict = Depends(get_current_user)):
+    if user["role"] != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    return user
 
 app.add_middleware(
     CORSMiddleware,
@@ -84,8 +123,94 @@ async def root():
         "system": "SuperAgent Orchestration"
     }
 
+# Authentication and User Management Endpoints
+
+@app.post("/auth/login", response_model=Token)
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    """Authenticate a user and return a JWT token."""
+    user = await auth_service.authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user["email"]}, expires_delta=access_token_expires
+    )
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "role": user["role"],
+        "full_name": user.get("full_name")
+    }
+
+@app.post("/admin/invite")
+async def invite_user(
+    invite_data: UserInvite, 
+    admin: dict = Depends(get_current_admin)
+):
+    """Admin endpoint to invite new employees via email."""
+    try:
+        return await auth_service.invite_user(invite_data, admin)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/auth/register")
+async def register_user(accept_data: UserAcceptInvite):
+    """Register a new user using the invitation token from email."""
+    try:
+        return await auth_service.register_user(accept_data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/auth/forgot-password")
+async def forgot_password(request: PasswordResetRequest):
+    """Request a password reset link to be sent via email."""
+    try:
+        return await auth_service.request_password_reset(request.email)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/auth/reset-password")
+async def reset_password(confirm_data: PasswordResetConfirm):
+    """Reset password using the reset token from email."""
+    try:
+        return await auth_service.reset_password(confirm_data.token, confirm_data.new_password)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/auth/change-password")
+async def change_password(
+    password_data: ChangePassword,
+    user: dict = Depends(get_current_user)
+):
+    """Change password for an authenticated user."""
+    try:
+        return await auth_service.change_password(
+            user["id"], password_data.old_password, password_data.new_password
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/auth/me")
+async def get_me(user: dict = Depends(get_current_user)):
+    """Get information about the currently logged-in user."""
+    return {
+        "email": user["email"],
+        "full_name": user.get("full_name"),
+        "role": user["role"],
+        "created_at": user["created_at"]
+    }
+
 @app.post("/outbreak/process", response_model=OutbreakProcessResponse)
-async def process_outbreak_report(request: dict):
+async def process_outbreak_report(
+    request: dict,
+    user: dict = Depends(get_current_user)
+):
     """Process an outbreak report through the dynamic multi-agent pipeline."""
     text = request.get("text", "").strip()
     if not text:
@@ -137,7 +262,10 @@ async def process_outbreak_report(request: dict):
         raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
 
 @app.post("/outbreak/upload", response_model=OutbreakProcessResponse)
-async def upload_outbreak_file(file: UploadFile = File(...)):
+async def upload_outbreak_file(
+    file: UploadFile = File(...),
+    user: dict = Depends(get_current_user)
+):
     """Upload and process an outbreak report file (PDF, CSV, or Image)."""
     session_id = str(uuid.uuid4())
     start_time = datetime.now()
@@ -214,8 +342,12 @@ async def upload_outbreak_file(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"File processing failed: {str(e)}")
 
 @app.post("/outbreak/approve/{session_id}")
-async def approve_alert(session_id: str, request: dict = None):
-    """Human validation endpoint for alerts."""
+async def approve_alert(
+    session_id: str, 
+    request: dict = None,
+    user: dict = Depends(get_current_admin)
+):
+    """Human validation endpoint for alerts (Admin Only)."""
     if not session_id:
         raise HTTPException(status_code=400, detail="Session ID is required")
 
@@ -232,7 +364,10 @@ async def approve_alert(session_id: str, request: dict = None):
     }
 
 @app.post("/outbreak/query", response_model=QueryResponse)
-async def query_outbreak_data(request: dict):
+async def query_outbreak_data(
+    request: dict,
+    user: dict = Depends(get_current_user)
+):
     """Query the outbreak data using the Data Assistant Agent."""
     query = request.get("query", "").strip()
     if not query:
@@ -250,27 +385,9 @@ async def query_outbreak_data(request: dict):
     except Exception as e:
         logger.error(f"❌ Query error: {e}")
         raise HTTPException(status_code=500, detail=f"Query failed: {str(e)}")
-async def query_outbreak_data(request: dict):
-    """Query the outbreak data using the Data Assistant Agent."""
-    query = request.get("query", "").strip()
-    if not query:
-        raise HTTPException(status_code=400, detail="Query field is required")
-
-    if len(query) > MAX_QUERY_LENGTH:
-        raise HTTPException(status_code=400, detail=f"Query too long (max {MAX_QUERY_LENGTH} characters)")
-
-    logger.info(f"--- 🔍 Data Query: {query} ---")
-
-    try:
-        result = data_assistant.query(query)
-        logger.info("--- ✅ Query Complete ---")
-        return QueryResponse(**result)
-    except Exception as e:
-        logger.error(f"❌ Query error: {e}")
-        raise HTTPException(status_code=500, detail=f"Query failed: {str(e)}")
 
 @app.get("/outbreak/summary")
-async def get_outbreak_summary():
+async def get_outbreak_summary(user: dict = Depends(get_current_user)):
     """Get a summary of all outbreak reports."""
     try:
         total_reports = len(data_assistant.data_store)
@@ -291,7 +408,10 @@ async def get_outbreak_summary():
 # --- NEW POWERFUL CHATBOT ENDPOINTS ---
 
 @app.post("/outbreak/chat", response_model=ChatResponse)
-async def chat_with_assistant(request: ChatRequest):
+async def chat_with_assistant(
+    request: ChatRequest,
+    user: dict = Depends(get_current_user)
+):
     """Powerful multi-agent chatbot with memory and data awareness."""
     try:
         result = await chat_supervisor.chat(request.message, request.session_id)

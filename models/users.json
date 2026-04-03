@@ -1,0 +1,20 @@
+[
+    {
+        "id": "3a8c47da-960c-40ca-a297-2ece50a30ac9",
+        "email": "masrialemuwork@gmail.com",
+        "hashed_password": "$2b$12$ki8mjyUXRV8vlTHKIXHmGe8gA3d9fm/3nctUIIXZgfGXf.0837CWq",
+        "full_name": "Admin User",
+        "role": "admin",
+        "is_active": true,
+        "created_at": "2026-04-03T22:51:21.979289"
+    },
+    {
+        "id": "7ed320d6-b8d9-4cd8-82fb-47d5379ac02b",
+        "email": "new_employee@example.com",
+        "hashed_password": "$2b$12$optFg3kajUdLWLUCVrpap.otUuNbCg81q3h1eeb6w3uBUrGrQlfom",
+        "full_name": "New Employee",
+        "role": "vw",
+        "is_active": true,
+        "created_at": "2026-04-03T22:55:59.714597"
+    }
+]
