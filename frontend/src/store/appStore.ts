@@ -35,7 +35,7 @@ const initialPipeline: AgentPipelineState = {
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
-      apiBaseUrl: 'http://localhost:8000',
+      apiBaseUrl: import.meta.env.VITE_API_URL || 'http://localhost:8000',
       setApiBaseUrl: (url) => set({ apiBaseUrl: url }),
       darkMode: false,
       toggleDarkMode: () =>

@@ -19,16 +19,34 @@ export interface RiskAnalysis {
   reason: string;
 }
 
+export interface ConsensusOpinion {
+  risk_level: string;
+  confidence: string;
+  possible_disease: string;
+  reason: string;
+}
+
+export interface ConsensusResult {
+  final_risk_level: string;
+  average_confidence: number;
+  consensus_reached: boolean;
+  agent_opinions: ConsensusOpinion[];
+  final_reasoning: string;
+}
+
 export interface AlertMessage {
   title: string;
   message: string;
   recommendations: string[];
+  prevention_strategy?: string;
+  why_urgent?: string;
 }
 
 export interface OutbreakProcessResponse {
   extracted_data: OutbreakReportPayload;
   validation: ValidationResult;
   risk_analysis: RiskAnalysis;
+  consensus?: ConsensusResult;
   alert: AlertMessage;
   session_id: string;
   metadata: Record<string, any>;
@@ -38,6 +56,7 @@ export interface OutbreakProcessResponse {
   status?: 'pending' | 'approved' | 'rejected';
   created_at?: string;
   raw_report?: string;
+  file_name?: string;
 }
 
 // Keep the internal UI model but allow it to be compatible
@@ -53,15 +72,31 @@ export interface QueryResponse {
   data_summary: Record<string, any>;
 }
 
+export interface ChatRequest {
+  message: string;
+  session_id?: string;
+}
+
+export interface ChatResponse {
+  response: string;
+  session_id: string;
+  agent_used?: string;
+  history_count?: number;
+}
+
 export interface SummaryData {
   total_reports: number;
   total_cases?: number;
   locations: string[];
   timestamp: string;
+  data_points?: number;
 }
 
 export interface HealthStatus {
   status: string;
+  version?: string;
+  timestamp?: string;
+  agents?: Record<string, string>;
   detail?: string;
 }
 

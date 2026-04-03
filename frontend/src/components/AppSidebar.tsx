@@ -1,8 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
-  FileText,
-  Search,
+  ShieldAlert,
+  MessageSquare,
   AlertTriangle,
   BarChart3,
   Settings,
@@ -13,8 +13,8 @@ import { cn } from '@/lib/utils';
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/process', icon: FileText, label: 'Process Report' },
-  { to: '/query', icon: Search, label: 'Query Data' },
+  { to: '/process', icon: ShieldAlert, label: 'Outbreak Analysis' },
+  { to: '/query', icon: MessageSquare, label: 'AI Consultation' },
   { to: '/alerts', icon: AlertTriangle, label: 'Alerts' },
   { to: '/summary', icon: BarChart3, label: 'Summary' },
   { to: '/settings', icon: Settings, label: 'Settings' },
@@ -40,12 +40,12 @@ export function AppSidebar({ open, onClose }: Props) {
         )}
       >
         <div className="flex items-center gap-3 px-5 py-5 border-b border-sidebar-border">
-          <div className="p-1.5 bg-primary rounded-lg">
+          <div className="p-1.5 bg-primary rounded-lg shadow-lg shadow-primary/20">
             <Shield className="h-5 w-5 text-primary-foreground" />
           </div>
           <div className="flex-1">
-            <h1 className="text-base font-bold tracking-tight">Empowered Care</h1>
-            <p className="text-[10px] text-sidebar-foreground/60">Multi-Agent Outbreak Detection</p>
+            <h1 className="text-base font-bold tracking-tight">Aegis <span className="text-primary">Lite</span></h1>
+            <p className="text-[10px] text-sidebar-foreground/60">Multi-Agent Intelligence</p>
           </div>
           <button onClick={onClose} className="lg:hidden text-sidebar-foreground/60 hover:text-sidebar-foreground">
             <X className="h-5 w-5" />
