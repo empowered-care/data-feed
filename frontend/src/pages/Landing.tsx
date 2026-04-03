@@ -172,7 +172,7 @@ export default function Landing() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold border border-primary/20 backdrop-blur-sm"
             >
               <Zap className="h-4 w-4" />
-              Multi-Agent AI • Harvard HSIL Hackathon 2026
+              Multi-Agent AI Surveillance System
             </motion.div>
 
             {/* Title */}
@@ -472,7 +472,7 @@ export default function Landing() {
             <span className="text-sm font-semibold">Empowered Care</span>
           </div>
           <p className="text-xs text-muted-foreground text-center">
-            Built with ❤️ for the Harvard HSIL Hackathon 2026 • Addis Ababa, Ethiopia
+            © 2026 Empowered Care. AI-Powered Disease Surveillance Platform.
           </p>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span className="w-1.5 h-1.5 rounded-full bg-health animate-pulse" />

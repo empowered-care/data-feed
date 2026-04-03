@@ -41,7 +41,7 @@ export function TopNav({ onMenuClick }: Props) {
         </button>
         <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
           <span className="w-1.5 h-1.5 rounded-full bg-health animate-pulse" />
-          HSIL Hackathon 2026
+          System Active
         </div>
       </div>
 
