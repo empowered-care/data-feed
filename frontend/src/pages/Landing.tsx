@@ -1,17 +1,19 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Shield, Activity, Zap, Users, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Shield, Activity, Zap, Users, ArrowRight, CheckCircle2, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { useAppStore } from '@/store/appStore';
+import { useAuthStore } from '@/store/authStore';
 
 export default function Landing() {
   const { darkMode, toggleDarkMode } = useAppStore();
+  const { isAuthenticated } = useAuthStore();
   const [healthOk, setHealthOk] = useState<boolean | null>(null);
 
   useEffect(() => {
-    api.getSummary().then(() => setHealthOk(true)).catch(() => setHealthOk(false));
+    api.getHealth().then(() => setHealthOk(true)).catch(() => setHealthOk(false));
   }, []);
 
   return (
@@ -26,15 +28,22 @@ export default function Landing() {
             <span className="font-bold text-lg">Empowered Care</span>
           </div>
           <div className="flex items-center gap-3">
-            {/* <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-xs font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-ethiopian-green" />
-              <span className="w-1.5 h-1.5 rounded-full bg-ethiopian-gold" />
-              <span className="w-1.5 h-1.5 rounded-full bg-ethiopian-red" />
-              <span className="ml-1 text-muted-foreground">HSIL Hackathon 2026 • Addis Ababa</span>
-            </div> */}
             <Button variant="ghost" size="sm" onClick={toggleDarkMode}>
               {darkMode ? '☀️' : '🌙'}
             </Button>
+            {isAuthenticated ? (
+              <Link to="/dashboard">
+                <Button size="sm" className="gap-2">
+                  Dashboard <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/login">
+                <Button size="sm" className="gap-2">
+                  <LogIn className="h-3.5 w-3.5" /> Sign In
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </nav>
@@ -61,16 +70,33 @@ export default function Landing() {
             Built for the Harvard Health Systems Innovation Lab Hackathon 2026.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link to="/dashboard">
-              <Button size="lg" className="gap-2 px-8">
-                Try Demo <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            <Link to="/process">
-              <Button size="lg" variant="outline" className="gap-2 px-8">
-                Process a Report
-              </Button>
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <Link to="/dashboard">
+                  <Button size="lg" className="gap-2 px-8">
+                    Go to Dashboard <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link to="/process">
+                  <Button size="lg" variant="outline" className="gap-2 px-8">
+                    Process a Report
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button size="lg" className="gap-2 px-8">
+                    Get Started <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link to="/register">
+                  <Button size="lg" variant="outline" className="gap-2 px-8">
+                    Register with Token
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </motion.div>
 
@@ -86,7 +112,7 @@ export default function Landing() {
               healthOk === null ? 'bg-muted-foreground animate-pulse' : healthOk ? 'bg-health' : 'bg-risk-high'
             }`}
           />
-          {healthOk === null ? 'Checking system...' : healthOk ? 'System Online' : 'API Offline (using mock data)'}
+          {healthOk === null ? 'Checking system...' : healthOk ? 'System Online' : 'API Offline'}
         </motion.div>
       </section>
 

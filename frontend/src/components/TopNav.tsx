@@ -1,6 +1,17 @@
-import { Menu, Bell, Moon, Sun, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Menu, Bell, Moon, Sun, LogOut, User } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
+import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 
 interface Props {
   onMenuClick: () => void;
@@ -8,7 +19,19 @@ interface Props {
 
 export function TopNav({ onMenuClick }: Props) {
   const { darkMode, toggleDarkMode, notifications, markAllRead } = useAppStore();
+  const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
   const unread = notifications.filter((n) => !n.read).length;
+
+  const handleLogout = () => {
+    logout();
+    toast.success('Signed out successfully');
+    navigate('/login');
+  };
+
+  const initials = user?.full_name
+    ? user.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : user?.email?.[0]?.toUpperCase() || '?';
 
   return (
     <header className="sticky top-0 z-30 h-14 bg-card/80 backdrop-blur-md border-b border-border flex items-center justify-between px-4 gap-4">
@@ -41,14 +64,38 @@ export function TopNav({ onMenuClick }: Props) {
           )}
         </Button>
 
-        <div className="flex items-center gap-2 pl-2 border-l border-border">
-          <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
-            <User className="h-4 w-4 text-primary" />
-          </div>
-          <div className="hidden sm:block">
-            <p className="text-xs font-semibold leading-none">Ethiopia MoH</p>
-            <p className="text-[10px] text-muted-foreground">Administrator</p>
-          </div>
+        <div className="pl-2 border-l border-border">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-xs font-bold">
+                  {initials}
+                </div>
+                <div className="hidden sm:block text-left">
+                  <p className="text-xs font-semibold leading-none">{user?.full_name || user?.email || 'User'}</p>
+                  <p className="text-[10px] text-muted-foreground capitalize">
+                    {user?.role === 'admin' ? 'Administrator' : 'Viewer'}
+                  </p>
+                </div>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel className="font-normal">
+                <p className="text-sm font-medium">{user?.full_name || 'User'}</p>
+                <p className="text-xs text-muted-foreground">{user?.email}</p>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
+                <User className="h-4 w-4 mr-2" />
+                My Profile
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-risk-high focus:text-risk-high">
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>
