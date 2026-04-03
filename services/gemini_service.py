@@ -1,0 +1,113 @@
+import os
+import PIL.Image
+import google.generativeai as genai
+import json
+from dotenv import load_dotenv
+from models.schemas import StructuredMedicalRecord, Medication
+
+load_dotenv()
+
+class GeminiService:
+    def __init__(self):
+        self.api_key = os.getenv("GEMINI_API_KEY")
+        if not self.api_key:
+            raise ValueError("❌ GEMINI_API_KEY not found in .env file")
+        
+        genai.configure(api_key=self.api_key)
+        self.models = ['gemini-flash-latest', 'gemini-1.5-flash', 'gemini-1.5-pro']
+
+    def process_medical_record(self, image_path) -> StructuredMedicalRecord:
+        img = PIL.Image.open(image_path)
+        prompt = """
+        You are a Universal Medical Intelligence Agent. Analyze this medical document (Handwritten or Printed) with 100% precision.
+        
+        GOAL: 
+        1. Identify the TYPE of document (e.g. Prescription, Lab Report, Referral, Chart).
+        2. Detect all handwritten and printed text in any language detected.
+        3. Extract the 'CORE entities': Patient Identity, Date, and Clinical Narrative.
+        4. Capture ALL specific medical details (Diagnosis, Medications, Tests, Symptoms).
+        
+        DYNAMIC STRUCTURING:
+        If the form has unique headers or fields that do not fit the common schema, capture them exactly as key-value pairs in 'additional_info'.
+        
+        Return a single JSON object ONLY:
+        {
+          "document_type": "Autodetected type",
+          "patient_name": "...",
+          "patient_id": "...",
+          "date_of_birth": "...",
+          "gender": "...",
+          "visit_date": "Original date on document",
+          "referred_from": "...",
+          "referred_to": "...",
+          "diagnosis": ["..."],
+          "symptoms": ["..."],
+          "investigations": ["..."],
+          "medications": [{"name": "...", "dosage": "...", "frequency": "..."}],
+          "allergies": [],
+          "notes": "Concise professional summary",
+          "additional_info": {
+            "AUTO_DETECTED_FIELD": "Handwritten/Printed Value"
+          },
+          "confidence": 1.0
+        }
+        """
+
+        last_error = None
+        for model_name in self.models:
+            try:
+                print(f"🧠 Universal Scan: Using {model_name}...")
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content([prompt, img])
+                
+                # Check response text
+                if not response or not hasattr(response, 'text'):
+                     if response.candidates:
+                         raw_text = response.candidates[0].content.parts[0].text
+                     else:
+                         raise ValueError("Empty response")
+                else:
+                    raw_text = response.text
+                
+                print(f"\n📂 UNIVERSAL VISION RESULT:\n{raw_text}\n--------------------------\n")
+
+
+                if "```json" in raw_text:
+                    json_text = raw_text.split("```json")[1].split("```")[0].strip()
+                elif "```" in raw_text:
+                    json_text = raw_text.split("```")[1].split("```")[0].strip()
+                else:
+                    json_text = raw_text.strip()
+                
+                data = json.loads(json_text)
+                
+                return StructuredMedicalRecord(
+                    document_type=data.get("document_type", "Medical Record"),
+                    patient_name=data.get("patient_name", "Unknown"),
+                    patient_id=data.get("patient_id"),
+
+                    date_of_birth=data.get("date_of_birth"),
+                    gender=data.get("gender"),
+                    visit_date=data.get("visit_date"),
+                    referred_from=data.get("referred_from"),
+                    referred_to=data.get("referred_to"),
+                    diagnosis=data.get("diagnosis", []),
+                    symptoms=data.get("symptoms", []),
+                    investigations=data.get("investigations", []),
+                    medications=[Medication(**m) for m in data.get("medications", [])],
+                    allergies=data.get("allergies", []),
+                    notes=data.get("notes", ""),
+                    additional_info=data.get("additional_info", {}),
+                    confidence=float(data.get("confidence", 0.99))
+                )
+
+
+            except Exception as e:
+                print(f"⚠️ {model_name} Error: {e}")
+                last_error = e
+                continue
+        
+        raise ValueError(f"❌ Gemini failed: {last_error}")
+
+
+

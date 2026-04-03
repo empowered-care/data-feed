@@ -1,0 +1,24 @@
+# Core Framework
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-multipart==0.0.9
+
+# Data Validation
+pydantic==2.9.2
+
+# Image & PDF Processing
+pillow==10.4.0
+opencv-python==4.10.0.84
+numpy==1.26.4
+pdf2image==1.17.0
+
+# YOLO Layout Detection (Fixed version)
+doclayout-yolo==0.0.4
+
+# OCR Engine
+paddleocr==2.8.1
+paddlepaddle==2.6.2
+huggingface_hub
+
+# Utilities
+python-dotenv==1.0.1
