@@ -13,16 +13,21 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom icons based on risk level
 const getIcon = (risk: string) => {
-  const color = risk === 'HIGH' ? 'red' : risk === 'MEDIUM' ? 'orange' : 'green';
-  return new L.Icon({
-    iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
+  const colorClass = risk === 'HIGH' ? 'bg-red-500' : risk === 'MEDIUM' ? 'bg-orange-500' : 'bg-green-500';
+  const pulseClass = risk === 'HIGH' ? 'animate-ping opacity-75' : 'opacity-0';
+  
+  return L.divIcon({
+    className: 'custom-pulse-icon bg-transparent border-none', // Override default leaflet div icon styles
+    html: `
+      <div class="relative flex items-center justify-center w-6 h-6">
+        <span class="absolute inline-flex w-full h-full rounded-full ${colorClass} ${pulseClass}"></span>
+        <span class="relative inline-flex rounded-full h-4 w-4 border-2 border-white shadow-sm ${colorClass}"></span>
+      </div>
+    `,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12],
   });
 };
 
