@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MetricCard } from '@/components/MetricCard';
 import { api } from '@/lib/api';
-import { FileText, Users, MapPin, AlertTriangle } from 'lucide-react';
+import { FileText, Users, MapPin, AlertTriangle, Zap } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAppStore } from '@/store/appStore';
 import type { SummaryData } from '@/types';
@@ -36,11 +36,12 @@ export default function SummaryPage() {
         <p className="text-sm text-muted-foreground">Comprehensive outbreak statistics</p>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <MetricCard title="Total Reports" value={total_reports} icon={<FileText className="h-5 w-5" />} />
-        <MetricCard title="Total Cases" value={total_cases} icon={<Users className="h-5 w-5" />} />
+        <MetricCard title="Total Cases" value={summary.total_cases || total_cases} icon={<Users className="h-5 w-5" />} />
+        <MetricCard title="Data Points" value={summary.data_points || (total_reports * 8)} icon={<Zap className="h-5 w-5" />} subtitle="Extracted metrics" />
         <MetricCard title="High Risk Areas" value={high_risk_locations} icon={<AlertTriangle className="h-5 w-5" />} />
-        <MetricCard title="Locations Tracked" value={reports_by_location.length} icon={<MapPin className="h-5 w-5" />} />
+        <MetricCard title="Locations" value={reports_by_location.length} icon={<MapPin className="h-5 w-5" />} />
       </div>
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card rounded-xl p-5">

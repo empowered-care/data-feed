@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, RotateCcw, CheckCircle2, XCircle, UploadCloud, FileText, Scale, Users } from 'lucide-react';
+import { Send, RotateCcw, CheckCircle2, XCircle, UploadCloud, FileText, Scale, Users, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { AgentPipeline } from '@/components/AgentPipeline';
@@ -90,54 +90,84 @@ export default function ProcessReport() {
         </div>
       </div>
 
-      <div className="glass-card rounded-xl p-5 space-y-4">
-        <div className="relative">
+      <div className="grid md:grid-cols-2 gap-4">
+        {/* Manual Method */}
+        <div className="glass-card rounded-xl p-5 space-y-4 border-2 border-transparent transition-all hover:border-primary/20">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1 px-2 bg-primary/10 rounded text-[10px] font-bold text-primary uppercase">Method A</div>
+            <h3 className="font-semibold text-sm">Direct Text Analysis</h3>
+          </div>
           <Textarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Enter raw outbreak report..."
-            rows={4}
+            onChange={(e) => { setInput(e.target.value); if (file) setFile(null); }}
+            placeholder="Enter raw outbreak report (e.g., '10 cases in Hawassa')..."
+            rows={5}
             className="resize-none"
-            disabled={!!file}
           />
-          {file && (
-            <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] flex items-center justify-center rounded-md">
-              <div className="bg-card border border-border px-4 py-3 rounded-lg shadow-sm flex items-center gap-3">
-                <FileText className="h-5 w-5 text-primary" />
-                <div className="text-left">
-                  <p className="text-sm font-medium leading-none">{file.name}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{(file.size / 1024).toFixed(1)} KB</p>
-                </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 ml-2" onClick={() => { setFile(null); setInput(''); }}>
-                  <XCircle className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-        
-        <div className="flex flex-wrap gap-2">
-          <Button onClick={process} disabled={pipeline.isProcessing || (!input.trim() && !file)} className="gap-2">
+          <Button 
+            onClick={process} 
+            disabled={pipeline.isProcessing || !input.trim() || !!file} 
+            className="w-full gap-2 shadow-lg shadow-primary/10"
+          >
             <Send className="h-4 w-4" />
-            {file ? 'Analyze Document' : 'Process with AI Agents'}
+            Analyze Raw Text
           </Button>
-          
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            className="hidden"
-            accept=".pdf,.csv,.jpg,.jpeg,.png"
-          />
-          
-          <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={pipeline.isProcessing} className="gap-2">
-            <UploadCloud className="h-4 w-4" />
-            Upload File (PDF/CSV/PNG)
-          </Button>
+          <p className="text-[10px] text-center text-muted-foreground">Best for field notes and urgent messages</p>
+        </div>
 
-          <Button variant="outline" onClick={() => { resetPipeline(); setInput(''); setFile(null); }}>
-            <RotateCcw className="h-4 w-4" />
+        {/* File Analysis Method */}
+        <div className="glass-card rounded-xl p-5 space-y-4 border-2 border-transparent transition-all hover:border-primary/20">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1 px-2 bg-muted rounded text-[10px] font-bold text-muted-foreground uppercase">Method B</div>
+            <h3 className="font-semibold text-sm">Document Intelligence</h3>
+          </div>
+          
+          <div 
+            onClick={() => fileInputRef.current?.click()}
+            className={`flex-1 border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-6 cursor-pointer transition-colors ${
+              file ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-muted-foreground/30'
+            }`}
+          >
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+              accept=".pdf,.csv,.jpg,.jpeg,.png"
+            />
+            {file ? (
+              <div className="text-center space-y-2">
+                <FileText className="h-10 w-10 text-primary mx-auto" />
+                <div className="space-y-1">
+                  <p className="text-sm font-bold truncate max-w-[200px]">{file.name}</p>
+                  <p className="text-[10px] text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center space-y-2">
+                <UploadCloud className="h-10 w-10 text-muted-foreground mx-auto" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Click to upload document</p>
+                  <p className="text-[10px] text-muted-foreground">PDF, CSV, or Image Note</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <Button 
+            variant={file ? "default" : "outline"}
+            onClick={process} 
+            disabled={pipeline.isProcessing || !file} 
+            className="w-full gap-2"
+          >
+            <Zap className="h-4 w-4" />
+            {file ? 'Extract from File' : 'No File Selected'}
           </Button>
+          {file && (
+            <Button variant="ghost" size="sm" onClick={() => { setFile(null); setInput(''); }} className="w-full text-[10px] h-6">
+              Cancel Upload
+            </Button>
+          )}
         </div>
       </div>
 
