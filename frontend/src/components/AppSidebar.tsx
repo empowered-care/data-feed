@@ -44,7 +44,7 @@ export function AppSidebar({ open, onClose }: Props) {
             <Shield className="h-5 w-5 text-primary-foreground" />
           </div>
           <div className="flex-1">
-            <h1 className="text-base font-bold tracking-tight">Aegis Lite</h1>
+            <h1 className="text-base font-bold tracking-tight">Empowered Care</h1>
             <p className="text-[10px] text-sidebar-foreground/60">Multi-Agent Outbreak Detection</p>
           </div>
           <button onClick={onClose} className="lg:hidden text-sidebar-foreground/60 hover:text-sidebar-foreground">

@@ -23,7 +23,7 @@ export default function Landing() {
             <div className="p-1.5 bg-primary rounded-lg">
               <Shield className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg">Aegis Lite</span>
+            <span className="font-bold text-lg">Empowered Care</span>
           </div>
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-xs font-medium">
@@ -52,7 +52,7 @@ export default function Landing() {
             Multi-Agent AI System
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight">
-            Aegis Lite
+            Empowered Care
             <br />
             <span className="text-primary">Outbreak Detection</span>
           </h1>

@@ -21,7 +21,7 @@ export default function SettingsPage() {
     <div className="space-y-6 max-w-2xl">
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
-        <p className="text-sm text-muted-foreground">Configure Aegis Lite</p>
+        <p className="text-sm text-muted-foreground">Configure Empowered Care</p>
       </div>
 
       <div className="glass-card rounded-xl p-5 space-y-5">
@@ -33,7 +33,7 @@ export default function SettingsPage() {
               <Save className="h-4 w-4" /> Save
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">The base URL for the Aegis Lite backend API</p>
+          <p className="text-xs text-muted-foreground">The base URL for the Empowered Care backend API</p>
         </div>
 
         <div className="flex items-center justify-between py-3 border-t border-border">

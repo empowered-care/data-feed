@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { OutbreakReport, AlertData, AgentPipelineState, AgentStep } from '@/types';
+import type { OutbreakReport, AgentPipelineState, AgentStep, AlertMessage } from '@/types';
 
 interface AppState {
   apiBaseUrl: string;
@@ -10,8 +10,8 @@ interface AppState {
   reports: OutbreakReport[];
   addReport: (r: OutbreakReport) => void;
   updateReportStatus: (id: string, status: 'approved' | 'rejected') => void;
-  alerts: AlertData[];
-  addAlert: (a: AlertData) => void;
+  alerts: AlertMessage[];
+  addAlert: (a: AlertMessage) => void;
   pipeline: AgentPipelineState;
   setPipelineStep: (step: AgentStep | null) => void;
   completePipelineStep: (step: AgentStep) => void;
@@ -71,7 +71,7 @@ export const useAppStore = create<AppState>()(
         set((s) => ({ notifications: s.notifications.map((n) => ({ ...n, read: true })) })),
     }),
     {
-      name: 'aegis-lite-store',
+      name: 'empowered-care-store',
       partialize: (s) => ({ apiBaseUrl: s.apiBaseUrl, darkMode: s.darkMode }),
     }
   )
