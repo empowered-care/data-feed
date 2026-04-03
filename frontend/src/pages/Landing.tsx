@@ -26,12 +26,12 @@ export default function Landing() {
             <span className="font-bold text-lg">Empowered Care</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-xs font-medium">
+            {/* <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-xs font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-ethiopian-green" />
               <span className="w-1.5 h-1.5 rounded-full bg-ethiopian-gold" />
               <span className="w-1.5 h-1.5 rounded-full bg-ethiopian-red" />
               <span className="ml-1 text-muted-foreground">HSIL Hackathon 2026 • Addis Ababa</span>
-            </div>
+            </div> */}
             <Button variant="ghost" size="sm" onClick={toggleDarkMode}>
               {darkMode ? '☀️' : '🌙'}
             </Button>

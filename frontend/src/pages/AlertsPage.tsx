@@ -3,18 +3,24 @@ import { CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RiskBadge } from '@/components/RiskBadge';
 import { useAppStore } from '@/store/appStore';
-import { mockReports } from '@/lib/mockData';
+import { api } from '@/lib/api';
 import { toast } from 'sonner';
 
 export default function AlertsPage() {
   const { reports, updateReportStatus } = useAppStore();
-  const allReports = reports.length > 0 ? reports : mockReports;
+  const allReports = reports; // Only use real reports from the store
   const pending = allReports.filter((r) => r.status === 'pending');
   const resolved = allReports.filter((r) => r.status !== 'pending');
 
-  const handle = (id: string, approved: boolean) => {
-    updateReportStatus(id, approved ? 'approved' : 'rejected');
-    toast.success(approved ? 'Alert approved' : 'Alert rejected');
+  const handle = async (id: string, approved: boolean) => {
+    try {
+      await api.approveReport(id, approved);
+      updateReportStatus(id, approved ? 'approved' : 'rejected');
+      toast.success(approved ? 'Alert approved' : 'Alert rejected');
+    } catch (error) {
+      toast.error('Failed to update alert status');
+      console.error(error);
+    }
   };
 
   return (

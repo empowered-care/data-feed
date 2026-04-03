@@ -7,7 +7,6 @@ import { AgentPipeline } from '@/components/AgentPipeline';
 import { RiskBadge } from '@/components/RiskBadge';
 import { useAppStore } from '@/store/appStore';
 import { api } from '@/lib/api';
-import { mockReports } from '@/lib/mockData';
 import { toast } from 'sonner';
 import type { AgentStep, OutbreakReport } from '@/types';
 
@@ -177,6 +176,14 @@ export default function ProcessReport() {
             }`}>
               <h3 className="font-bold">{result.alert.title}</h3>
               <p className="text-sm text-muted-foreground">{result.alert.message}</p>
+            </div>
+
+            {/* Raw JSON for 'best format output display' request */}
+            <div className="glass-card rounded-xl p-5 space-y-3">
+              <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Raw Backend Response</h3>
+              <div className="p-4 rounded-lg bg-black/80 font-mono text-[10px] sm:text-xs text-green-400 overflow-auto max-h-60 scrollbar-thin">
+                <pre>{JSON.stringify(result, null, 2)}</pre>
+              </div>
             </div>
 
             {/* Approve / Reject */}

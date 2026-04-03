@@ -75,14 +75,14 @@ export function AppSidebar({ open, onClose }: Props) {
         </nav>
 
         <div className="px-4 py-4 border-t border-sidebar-border">
-          <div className="flex items-center gap-2 text-[10px]">
+          {/* <div className="flex items-center gap-2 text-[10px]">
             <div className="flex gap-0.5">
               <span className="w-2.5 h-2.5 rounded-full bg-ethiopian-green" />
               <span className="w-2.5 h-2.5 rounded-full bg-ethiopian-gold" />
               <span className="w-2.5 h-2.5 rounded-full bg-ethiopian-red" />
             </div>
             <span className="text-sidebar-foreground/50">HSIL Hackathon 2026 • Addis Ababa</span>
-          </div>
+          </div> */}
         </div>
       </aside>
     </>

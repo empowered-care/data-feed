@@ -10,12 +10,14 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  raw?: any;
 }
 
 export default function QueryPage() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showRaw, setShowRaw] = useState<number | null>(null);
 
   const send = async () => {
     if (!input.trim()) return;
@@ -26,7 +28,7 @@ export default function QueryPage() {
 
     try {
       const resp = await api.query(q);
-      setMessages((m) => [...m, { role: 'assistant', content: resp.response, timestamp: new Date() }]);
+      setMessages((m) => [...m, { role: 'assistant', content: resp.response, timestamp: new Date(), raw: resp }]);
     } catch (e: any) {
       const msg = e.response?.data?.detail || e.message || 'Query failed';
       toast.error(msg);
@@ -82,7 +84,24 @@ export default function QueryPage() {
                   msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'glass-card'
                 }`}
               >
-                {msg.content}
+                <div className="space-y-2">
+                  <div>{msg.content}</div>
+                  {msg.raw && (
+                    <div className="mt-2 text-[10px]">
+                      <button 
+                        onClick={() => setShowRaw(showRaw === i ? null : i)}
+                        className="text-primary hover:underline font-mono"
+                      >
+                        {showRaw === i ? 'Hide details' : 'Show raw metadata'}
+                      </button>
+                      {showRaw === i && (
+                        <pre className="mt-2 p-2 bg-black/80 text-green-400 rounded overflow-auto max-h-40 scrollbar-thin">
+                          {JSON.stringify(msg.raw, null, 2)}
+                        </pre>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
               {msg.role === 'user' && (
                 <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
