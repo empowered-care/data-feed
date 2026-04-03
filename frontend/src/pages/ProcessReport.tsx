@@ -21,15 +21,17 @@ export default function ProcessReport() {
     setPipelineProcessing(true);
 
     try {
-      // Simulate step-by-step pipeline
+      // Start API call immediately
+      const apiPromise = api.processReport(input);
+
+      // Ultra-fast progress through visual steps (50ms) to make the UI feel very snappy
       for (const step of STEPS) {
         setPipelineStep(step);
-        await new Promise((r) => setTimeout(r, 1200));
+        await new Promise((r) => setTimeout(r, 50));
         completePipelineStep(step);
       }
-      setPipelineStep(null);
-
-      const result = await api.processReport(input);
+      
+      const result = await apiPromise;
 
       setPipelineResult(result);
       addReport(result);

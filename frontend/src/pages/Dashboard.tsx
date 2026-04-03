@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Users, AlertTriangle, TrendingUp } from 'lucide-react';
 import { MetricCard } from '@/components/MetricCard';
@@ -23,6 +24,8 @@ export default function Dashboard() {
   const timeline = reports.map(r => ({ date: r.extracted_data.date || 'Today', cases: r.extracted_data.cases }));
       
   const displayReports = reports.slice(0, 10);
+
+  const [showRaw, setShowRaw] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -108,6 +111,26 @@ export default function Dashboard() {
           </table>
         </div>
       </motion.div>
+
+      <div className="pt-8 pb-10">
+        <button 
+          onClick={() => setShowRaw(!showRaw)}
+          className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
+        >
+          {showRaw ? 'Hide' : 'Show'} Full Session Data
+        </button>
+        {showRaw && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="mt-4 glass-card p-4 rounded-lg overflow-hidden"
+          >
+            <pre className="text-[10px] font-mono text-green-400 bg-black/80 p-4 rounded overflow-auto max-h-80 scrollbar-thin">
+              {JSON.stringify(reports, null, 2)}
+            </pre>
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 }

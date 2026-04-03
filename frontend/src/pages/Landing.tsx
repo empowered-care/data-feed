@@ -11,7 +11,7 @@ export default function Landing() {
   const [healthOk, setHealthOk] = useState<boolean | null>(null);
 
   useEffect(() => {
-    api.health().then(() => setHealthOk(true)).catch(() => setHealthOk(false));
+    api.getSummary().then(() => setHealthOk(true)).catch(() => setHealthOk(false));
   }, []);
 
   return (

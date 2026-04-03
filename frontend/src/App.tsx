@@ -11,8 +11,10 @@ import AlertsPage from "@/pages/AlertsPage";
 import SummaryPage from "@/pages/SummaryPage";
 import SettingsPage from "@/pages/SettingsPage";
 import NotFound from "@/pages/NotFound";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAppStore } from "@/store/appStore";
+import SplashScreen from "@/components/SplashScreen";
+import { motion, AnimatePresence } from "framer-motion";
 
 const queryClient = new QueryClient();
 
@@ -24,27 +26,64 @@ function DarkModeInit() {
   return null;
 }
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <DarkModeInit />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route element={<DashboardLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/process" element={<ProcessReport />} />
-            <Route path="/query" element={<QueryPage />} />
-            <Route path="/alerts" element={<AlertsPage />} />
-            <Route path="/summary" element={<SummaryPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    // Simulate initial application loading/warming up
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <AnimatePresence mode="wait">
+      {!isLoaded ? (
+        <motion.div
+          key="splash"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full h-full"
+        >
+          <TooltipProvider>
+            <DarkModeInit />
+            <SplashScreen />
+          </TooltipProvider>
+        </motion.div>
+      ) : (
+        <motion.div
+          key="app"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="w-full h-full"
+        >
+          <QueryClientProvider client={queryClient}>
+            <TooltipProvider>
+              <DarkModeInit />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Landing />} />
+                  <Route element={<DashboardLayout />}>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/process" element={<ProcessReport />} />
+                    <Route path="/query" element={<QueryPage />} />
+                    <Route path="/alerts" element={<AlertsPage />} />
+                    <Route path="/summary" element={<SummaryPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                  </Route>
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </QueryClientProvider>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
 
 export default App;

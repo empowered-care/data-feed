@@ -10,6 +10,7 @@ import type { SummaryData } from '@/types';
 export default function SummaryPage() {
   const { reports } = useAppStore();
   const [summary, setSummary] = useState<SummaryData>({ total_reports: 0, total_cases: 0, locations: [], timestamp: '' });
+  const [showRaw, setShowRaw] = useState(false);
 
   useEffect(() => {
     api.getSummary().then(setSummary).catch(() => {});
@@ -83,6 +84,26 @@ export default function SummaryPage() {
           </table>
         </div>
       </motion.div>
+
+      <div className="pt-8">
+        <button 
+          onClick={() => setShowRaw(!showRaw)}
+          className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
+        >
+          {showRaw ? 'Hide' : 'Show'} Raw Analysis Data
+        </button>
+        {showRaw && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="mt-4 glass-card p-4 rounded-lg overflow-hidden"
+          >
+            <pre className="text-[10px] font-mono text-green-400 bg-black/80 p-4 rounded overflow-auto max-h-80">
+              {JSON.stringify({ summary, internal_reports: reports }, null, 2)}
+            </pre>
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 }
