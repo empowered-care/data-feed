@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuthStore } from '@/store/authStore';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
+import EthiopiaMap from '@/components/EthiopiaMap';
 
 const CRON_PRESETS = [
   { label: 'Every hour', value: '0 * * * *' },
@@ -110,8 +111,9 @@ export default function AdminPage() {
       toast.error(err.response?.data?.detail || 'Failed to send invite');
     } finally {
       setInviteLoading(false);
-    }
+    };
   };
+
 
   if (user?.role !== 'admin') {
     return (
@@ -205,17 +207,20 @@ export default function AdminPage() {
           {analysisStatus?.status?.last_result && (
             <AnimatePresence>
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="p-3 rounded-lg bg-health/5 border border-health/20"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-lg border border-health/20 bg-health/5 overflow-hidden"
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <CheckCircle2 className="h-4 w-4 text-health" />
-                  <span className="text-sm font-medium text-health">Last Analysis Result</span>
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-health/10">
+                  <CheckCircle2 className="h-4 w-4 text-health shrink-0" />
+                  <span className="text-sm font-semibold text-health">Analysis Complete</span>
+                  <span className="ml-auto text-[10px] text-muted-foreground">
+                    {analysisStatus.status.last_run
+                      ? new Date(analysisStatus.status.last_run).toLocaleString()
+                      : ''}
+                  </span>
                 </div>
-                <pre className="text-[10px] font-mono text-muted-foreground max-h-32 overflow-auto">
-                  {JSON.stringify(analysisStatus.status.last_result, null, 2)}
-                </pre>
+                <AnalysisResultCard result={analysisStatus.status.last_result} />
               </motion.div>
             </AnimatePresence>
           )}
@@ -361,6 +366,104 @@ export default function AdminPage() {
           </div>
         )}
       </motion.div>
+    </div>
+  );
+}
+
+// ── Premium Analysis Result Card ─────────────────────────────────────────────
+function AnalysisResultCard({ result }: { result: any }) {
+  if (!result || typeof result !== 'object') {
+    return (
+      <div className="px-4 py-4 text-sm text-muted-foreground italic">
+        Analysis completed — no detailed metrics returned.
+      </div>
+    );
+  }
+
+  const LABELS: Record<string, { label: string; icon: string }> = {
+    total_reports:     { label: 'Reports Scanned',    icon: '📋' },
+    reports_analyzed:  { label: 'Reports Analyzed',   icon: '🔍' },
+    threats_detected:  { label: 'Threats Detected',   icon: '⚠️' },
+    high_risk:         { label: 'High Risk',           icon: '🔴' },
+    medium_risk:       { label: 'Medium Risk',         icon: '🟡' },
+    low_risk:          { label: 'Low Risk',            icon: '🟢' },
+    new_outbreaks:     { label: 'New Outbreaks',       icon: '🦠' },
+    locations_affected:{ label: 'Locations Affected',  icon: '📍' },
+    cases_total:       { label: 'Total Cases',         icon: '👥' },
+  };
+
+  const RISK_COLORS: Record<string, string> = {
+    HIGH:   'text-risk-high bg-risk-high/15 border-risk-high/30',
+    MEDIUM: 'text-risk-medium bg-risk-medium/15 border-risk-medium/30',
+    LOW:    'text-risk-low bg-risk-low/15 border-risk-low/30',
+  };
+
+  // Separate numeric stats from text fields
+  const numericEntries = Object.entries(result).filter(
+    ([, v]) => typeof v === 'number'
+  );
+  const textEntries = Object.entries(result).filter(
+    ([, v]) => typeof v === 'string' && v !== ''
+  );
+
+  return (
+    <div className="p-4 space-y-4">
+      {/* Stat chips */}
+      {numericEntries.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {numericEntries.map(([key, value]) => {
+            const meta = LABELS[key];
+            return (
+              <div key={key} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-background/60 border border-border">
+                {meta && <span className="text-base leading-none">{meta.icon}</span>}
+                <div className="min-w-0">
+                  <p className="text-lg font-extrabold tabular-nums leading-none">
+                    {(value as number).toLocaleString()}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground truncate mt-0.5">
+                    {meta?.label ?? key.replace(/_/g, ' ')}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Text/status fields */}
+      {textEntries.map(([key, value]) => {
+        const strVal = String(value).toUpperCase();
+        const riskClass = RISK_COLORS[strVal];
+        const meta = LABELS[key];
+        const label = meta?.label ?? key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+        if (riskClass) {
+          return (
+            <div key={key} className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border ${riskClass}`}>
+              <span className="text-base">{meta?.icon ?? '⚡'}</span>
+              <div>
+                <p className="text-[10px] uppercase tracking-wider font-semibold opacity-70">{label}</p>
+                <p className="font-bold text-sm">{String(value)}</p>
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div key={key} className="px-3 py-2.5 rounded-xl bg-background/60 border border-border">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium mb-0.5">{label}</p>
+            <p className="text-sm font-medium leading-snug">{String(value)}</p>
+          </div>
+        );
+      })}
+
+      {/* Map Distribution */}
+      <div className="pt-2">
+        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-2">
+          Geographic Distribution
+        </p>
+        <EthiopiaMap />
+      </div>
     </div>
   );
 }
