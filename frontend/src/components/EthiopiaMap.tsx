@@ -77,18 +77,18 @@ export default function EthiopiaMap() {
         
         {/* Legend Key */}
         <div className="px-4 py-3 rounded-2xl bg-background/80 border border-border/50 backdrop-blur-md flex flex-col gap-2 w-fit pointer-events-auto shadow-xl">
-          <p className="text-[9px] uppercase tracking-[0.2em] font-black text-muted-foreground mb-1">Risk Intensity</p>
+          <p className="text-[9px] uppercase tracking-[0.2em] font-black text-foreground mb-1">Risk Intensity</p>
           <div className="flex items-center gap-3">
             <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
-            <span className="text-[10px] font-bold uppercase tracking-tighter">Critical</span>
+            <span className="text-[10px] font-bold uppercase tracking-tighter text-foreground">Critical</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]" />
-            <span className="text-[10px] font-bold uppercase tracking-tighter">Moderate</span>
+            <span className="text-[10px] font-bold uppercase tracking-tighter text-foreground">Moderate</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.3)]" />
-            <span className="text-[10px] font-bold uppercase tracking-tighter">Stable</span>
+            <span className="text-[10px] font-bold uppercase tracking-tighter text-foreground">Stable</span>
           </div>
         </div>
       </div>
@@ -259,7 +259,7 @@ export default function EthiopiaMap() {
                     <div className="flex items-center justify-between">
                        <RiskBadge level={r.risk_analysis?.risk_level} />
                        <span className="text-[9px] font-mono font-bold text-muted-foreground">
-                         {new Date(r.timestamp).toLocaleDateString()}
+                         {r.created_at ? new Date(r.created_at).toLocaleDateString() : 'Today'}
                        </span>
                     </div>
                     
