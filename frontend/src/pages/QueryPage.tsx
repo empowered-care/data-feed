@@ -6,8 +6,6 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
-import ReactMarkdown from 'react-markdown';
-
 
 interface Message {
   role: 'user' | 'assistant';
@@ -17,14 +15,13 @@ interface Message {
   raw?: any;
 }
 
-const SUGGESTIONS = [
-  'Which locations have the highest risk?',
-  'How many cholera cases this week?',
-  'Summarize recent outbreak trends',
-  'What are the top recommendations?',
-];
-
 export default function QueryPage() {
+  const SUGGESTIONS = [
+    "Which locations have the highest risk?",
+    "How many cholera cases this week?",
+    "Summarize recent outbreak trends",
+    "What are the top recommendations?",
+  ];
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
@@ -167,7 +164,7 @@ export default function QueryPage() {
                       m.content
                     ) : (
                       <div className="prose prose-sm dark:prose-invert max-w-none">
-                        <ReactMarkdown>{m.content}</ReactMarkdown>
+                        <div className="whitespace-pre-wrap">{m.content}</div>
                       </div>
                     )}
                   </div>

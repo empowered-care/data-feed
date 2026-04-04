@@ -6,8 +6,6 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
-import ReactMarkdown from 'react-markdown';
-
 
 interface Message {
   role: 'user' | 'assistant';
@@ -17,14 +15,13 @@ interface Message {
   isNew?: boolean;
 }
 
-const SUGGESTIONS = [
-  'Which locations have the highest risk?',
-  'How many cholera cases this week?',
-  'Summarize recent outbreak trends',
-  'What are the top recommendations?',
-];
-
 export function FloatingAssistant() {
+  const SUGGESTIONS = [
+    "Which locations have the highest risk?",
+    "How many cholera cases this week?",
+    "Summarize recent outbreak trends",
+    "What are the top recommendations?",
+  ];
   const [isOpen, setIsOpen] = useState(false);
   const [hasNewMessage, setHasNewMessage] = useState(false);
   const location = useLocation();
@@ -191,7 +188,7 @@ export function FloatingAssistant() {
                     {m.role === 'user' ? (
                       m.content
                     ) : (
-                      <ReactMarkdown>{m.content}</ReactMarkdown>
+                      <div className="whitespace-pre-wrap">{m.content}</div>
                     )}
                     {m.role === 'assistant' && (
                       <div className="mt-2 pt-2 border-t border-border/20 flex items-center justify-between">
