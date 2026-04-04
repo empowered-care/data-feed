@@ -41,6 +41,11 @@ export default function Dashboard() {
   const { reports, setReports } = useAppStore();
   const [loading, setLoading] = useState(reports.length === 0);
   const [activeTab, setActiveTab] = useState('overview');
+  
+  // Real-world dynamic filtering
+  const [timeFilter, setTimeFilter] = useState<'last24h' | 'all'>('last24h');
+  const [riskFilter, setRiskFilter] = useState<'all' | 'HIGH' | 'MEDIUM' | 'LOW'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved'>('all');
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -57,23 +62,88 @@ export default function Dashboard() {
     fetchReports();
   }, [setReports]);
   
-  // Compute metrics from real reports
-  const total_reports = reports.length;
-  const total_cases = reports.reduce((acc, r) => acc + (r.extracted_data?.cases || 0), 0);
-  const high_risk_locations = reports.filter(r => r.risk_analysis?.risk_level === 'HIGH').length;
+  // Derived filtered reports
+  const filteredReports = reports.filter(r => {
+    // 1. Time Filter
+    if (timeFilter === 'last24h') {
+      const now = new Date();
+      const reportDate = new Date(r.created_at);
+      const hoursDiff = (now.getTime() - reportDate.getTime()) / (1000 * 60 * 60);
+      if (hoursDiff > 24) return false;
+    }
+
+    // 2. Risk Filter
+    if (riskFilter !== 'all' && r.risk_analysis?.risk_level !== riskFilter) return false;
+
+    // 3. Status Filter
+    if (statusFilter !== 'all' && (r.status || 'pending') !== statusFilter) return false;
+
+    return true;
+  });
+
+  // Compute metrics from filtered reports
+  const total_reports = filteredReports.length;
+  const total_cases = filteredReports.reduce((acc, r) => acc + (r.extracted_data?.cases || 0), 0);
+  const high_risk_locations = filteredReports.filter(r => r.risk_analysis?.risk_level === 'HIGH').length;
   
-  const risk_distribution = Object.entries(reports.reduce((acc: any, r) => {
+  const risk_distribution = Object.entries(filteredReports.reduce((acc: any, r) => {
     const level = r.risk_analysis?.risk_level || 'UNKNOWN';
     acc[level] = (acc[level] || 0) + 1;
     return acc;
   }, {})).map(([level, count]) => ({ name: level, value: count as number }));
 
-  const timeline = reports.map(r => ({ 
-    date: r.extracted_data?.date || (r.timestamp ? new Date(r.timestamp).toLocaleDateString() : 'Today'), 
+  const timeline = filteredReports.map(r => ({ 
+    date: r.extracted_data?.date || (r.created_at ? new Date(r.created_at).toLocaleDateString() : 'Today'), 
     cases: r.extracted_data?.cases || 0 
   })).reverse();
       
-  const displayReports = reports.slice(0, 15);
+  const displayReports = filteredReports.slice(0, 15);
+
+  const exportToCSV = () => {
+    if (filteredReports.length === 0) {
+      alert("No data available to export with current filters");
+      return;
+    }
+
+    // Define headers
+    const headers = ["Location", "Cases", "Report Date", "Disease", "Risk Level", "Status", "Timestamp"];
+    
+    // Map data
+    const rows = filteredReports.map(r => [
+      r.extracted_data?.location || "Unknown",
+      r.extracted_data?.cases || 0,
+      r.extracted_data?.date || "N/A",
+      r.risk_analysis?.possible_disease || "Unknown",
+      r.risk_analysis?.risk_level || "Unknown",
+      r.status || "Pending",
+      r.created_at || "N/A"
+    ]);
+
+    // Construct CSV content
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(val => `"${val}"`).join(","))
+    ].join("\n");
+
+    // Create filename: day_month_year_hour
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const hour = String(now.getHours()).padStart(2, '0');
+    const filename = `${day}_${month}_${year}_${hour}_Outbreak_Data.csv`;
+
+    // Download blob
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const [showRaw, setShowRaw] = useState(false);
 
@@ -96,15 +166,46 @@ export default function Dashboard() {
         </div>
         
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="h-9 gap-2">
-            <Clock className="h-4 w-4" />
-            Last 24h
+          {/* Time Filter Toggle */}
+          <div className="bg-muted px-1 py-1 rounded-lg flex items-center gap-1 border border-border/50">
+            <Button 
+               variant={timeFilter === 'last24h' ? 'secondary' : 'ghost'} 
+               size="sm" 
+               onClick={() => setTimeFilter('last24h')}
+               className="h-7 px-3 text-[10px] font-black uppercase tracking-widest"
+            >
+               <Clock className="h-3 w-3 mr-1.5" />
+               Last 24h
+            </Button>
+            <Button 
+               variant={timeFilter === 'all' ? 'secondary' : 'ghost'} 
+               size="sm" 
+               onClick={() => setTimeFilter('all')}
+               className="h-7 px-3 text-[10px] font-black uppercase tracking-widest"
+            >
+               All Time
+            </Button>
+          </div>
+
+          {/* Risk Filter Indicator/Action */}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setRiskFilter(riskFilter === 'all' ? 'HIGH' : riskFilter === 'HIGH' ? 'MEDIUM' : 'all')}
+            className={cn(
+              "h-9 gap-2 font-black text-[10px] uppercase tracking-widest transition-all",
+              riskFilter !== 'all' && "border-primary/50 bg-primary/5"
+            )}
+          >
+            <Filter className={cn("h-4 w-4", riskFilter !== 'all' && "text-primary")} />
+            {riskFilter === 'all' ? 'Filters' : `Risk: ${riskFilter}`}
           </Button>
-          <Button variant="outline" size="sm" className="h-9 gap-2">
-            <Filter className="h-4 w-4" />
-            Filters
-          </Button>
-          <Button size="sm" className="h-9 gap-2 shadow-lg shadow-primary/20">
+
+          <Button 
+            size="sm" 
+            onClick={exportToCSV}
+            className="h-9 gap-2 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90"
+          >
             Export Data
           </Button>
         </div>
@@ -321,7 +422,7 @@ export default function Dashboard() {
                   >
                     <td className="px-6 py-4">
                       <div className="font-bold text-foreground group-hover:text-primary transition-colors">{r.extracted_data.location}</div>
-                      <div className="text-[10px] text-muted-foreground">{r.timestamp ? new Date(r.timestamp).toLocaleTimeString() : 'Recently'}</div>
+                      <div className="text-[10px] text-muted-foreground">{r.created_at ? new Date(r.created_at).toLocaleTimeString() : 'Recently'}</div>
                     </td>
                     <td className="px-6 py-4">
                       <Badge variant="secondary" className="font-bold text-[10px] uppercase tracking-tighter bg-muted/50">
@@ -390,7 +491,7 @@ export default function Dashboard() {
               </div>
             </div>
             <pre className="text-[10px] font-mono text-green-400 p-4 rounded overflow-auto max-h-96 scrollbar-thin selection:bg-green-500/30">
-              {JSON.stringify(reports, null, 2)}
+              {JSON.stringify(filteredReports, null, 2)}
             </pre>
           </motion.div>
         )}
