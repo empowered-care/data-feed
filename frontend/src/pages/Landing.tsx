@@ -3,7 +3,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import {
   Shield, Activity, Zap, Users, ArrowRight, CheckCircle2, LogIn,
   Brain, FileSearch, AlertTriangle, BarChart3, Bot, Clock, Cpu,
-  Globe, HeartPulse, Microscope, Stethoscope, TrendingUp,
+  Globe, HeartPulse, Microscope, Stethoscope, TrendingUp, Target, TrendingDown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState, useRef } from 'react';
@@ -323,6 +323,58 @@ export default function Landing() {
               { icon: BarChart3, title: 'Risk Scoring & Consensus', desc: 'Multiple AI models independently assess threat level. A consensus mechanism ensures reliable risk classification.', tag: 'Multi-Agent' },
               { icon: HeartPulse, title: 'Automated Alerts', desc: 'Generates actionable alerts with prevention strategies, transmission analysis, and urgency assessment.', tag: 'Response' },
               { icon: Users, title: 'Human-in-the-Loop', desc: 'High-risk alerts are flagged for expert validation. Admins approve or reject before escalation.', tag: 'Governance' },
+            ].map((f, i) => (
+              <motion.div
+                key={f.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ delay: i * 0.08 }}
+                className="glass-card rounded-2xl p-6 space-y-4 group hover:border-primary/30 transition-all duration-300"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="p-2.5 rounded-xl bg-primary/10 group-hover:bg-primary/15 transition-colors">
+                    <f.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
+                    {f.tag}
+                  </span>
+                </div>
+                <h3 className="font-bold text-lg">{f.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Real-World Impact Section ─── */}
+      <section id="impact" className="py-20 border-y border-border">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16 space-y-4"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider">
+              <TrendingUp className="h-3.5 w-3.5" /> Performance Metrics
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+              Real-world <span className="text-primary">Impact</span>
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Measuring our success by the speed and accuracy of our response network.
+            </p>
+          </motion.div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[
+              { icon: Zap, title: 'Detection speed', desc: 'Signal → alert in <24h (vs weeks today)', tag: 'Speed' },
+              { icon: Target, title: 'Alert accuracy', desc: '>70% confirmed by officers', tag: 'Precision' },
+              { icon: Users, title: 'Adoption', desc: 'Active SMS reporters per woreda per week', tag: 'Network' },
+              { icon: TrendingDown, title: 'False positive rate', desc: 'Decreasing over time via feedback learning', tag: 'Learning' },
+              { icon: Globe, title: 'Coverage', desc: '% of health facilities with active digital reporting', tag: 'Reach' },
             ].map((f, i) => (
               <motion.div
                 key={f.title}
