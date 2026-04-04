@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Aegis Lite - Unified Multi-Agent Disease Outbreak Detection & Document Processing System
+Empowered Care - Unified Multi-Agent Disease Outbreak Detection & Document Processing System
 """
 
 import logging
@@ -53,7 +53,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-logger.info("🚀 Starting Aegis Lite Unified System...")
+logger.info("🚀 Starting Empowered Care Unified System...")
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -184,7 +184,7 @@ def get_layout_detector():
         layout_detector = LayoutDetector()
     return layout_detector
 
-logger.info("✅ Aegis Lite initialization complete!")
+logger.info("✅ Empowered Care initialization complete!")
 
 # --- ADMIN ANALYSIS & SCHEDULING ENDPOINTS ---
 
@@ -256,7 +256,7 @@ async def get_analysis_status(user: dict = Depends(get_current_user)):
 async def root():
     """Health check endpoint."""
     return {
-        "message": "Aegis Lite - Unified Multi-Agent System",
+        "message": "Empowered Care - Unified Multi-Agent System",
         "status": "running",
         "version": API_VERSION
     }
@@ -489,8 +489,13 @@ async def process_outbreak_report(
         # Using SuperAgent to orchestrate everything
         result = await super_agent.process_outbreak_parallel(text)
         
-        # Store in data assistant
-        data_assistant.add_report(result["extracted_data"])
+        # Store in data assistant with full context
+        data_assistant.add_report(
+            result["extracted_data"],
+            session_id=session_id,
+            risk_analysis=result["risk_analysis"].dict() if hasattr(result["risk_analysis"], "dict") else result["risk_analysis"],
+            alert=result["alert"].dict() if hasattr(result["alert"], "dict") else result["alert"]
+        )
 
         processing_time = (datetime.now() - start_time).total_seconds()
         logger.info(f"--- ✅ Outbreak Processing Complete: {session_id} ({processing_time:.2f}s) ---")
@@ -559,8 +564,14 @@ async def upload_outbreak_file(
         # Feed extracted text to SuperAgent
         result = await super_agent.process_outbreak_parallel(extracted_text)
         
-        # Store and return
-        data_assistant.add_report(result["extracted_data"])
+        # Store in data assistant with full context
+        data_assistant.add_report(
+            result["extracted_data"],
+            session_id=session_id,
+            risk_analysis=result["risk_analysis"].dict() if hasattr(result["risk_analysis"], "dict") else result["risk_analysis"],
+            alert=result["alert"].dict() if hasattr(result["alert"], "dict") else result["alert"]
+        )
+        
         processing_time = (datetime.now() - start_time).total_seconds()
 
         return OutbreakProcessResponse(
@@ -623,8 +634,8 @@ async def get_outbreak_summary(user: dict = Depends(get_current_user)):
     """Get a summary of all outbreak reports."""
     try:
         total_reports = len(data_assistant.data_store)
-        locations = list(set(r["location"] for r in data_assistant.data_store if r["location"] != "Unknown"))
-        total_cases = sum(r.get("cases", 0) for r in data_assistant.data_store)
+        locations = list(set(r["extracted_data"]["location"] for r in data_assistant.data_store if r["extracted_data"]["location"] != "Unknown"))
+        total_cases = sum(r["extracted_data"].get("cases", 0) for r in data_assistant.data_store)
 
         return {
             "total_reports": total_reports,
@@ -636,6 +647,11 @@ async def get_outbreak_summary(user: dict = Depends(get_current_user)):
     except Exception as e:
         logger.error(f"❌ Summary error: {e}")
         raise HTTPException(status_code=500, detail=f"Summary failed: {str(e)}")
+
+@app.get("/outbreak/reports")
+async def get_all_reports(user: dict = Depends(get_current_user)):
+    """Get all processed reports from the data store."""
+    return data_assistant.data_store
 
 # --- CHATBOT ENDPOINTS ---
 

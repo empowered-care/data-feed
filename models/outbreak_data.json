@@ -1,0 +1,39 @@
+[
+    {
+        "session_id": "f2fe955a-1518-4739-bde0-e93219455047",
+        "extracted_data": {
+            "location": "Addis Ababa",
+            "symptoms": [
+                "rash",
+                "vomiting",
+                "fever",
+                "nausea"
+            ],
+            "cases": 39,
+            "date": "2026-03-27",
+            "additional_info": {
+                "note": "Reported by local clinic"
+            }
+        },
+        "risk_analysis": {
+            "risk_level": "HIGH",
+            "confidence": "85%",
+            "possible_disease": "Meningococcal Meningitis",
+            "reason": "The clinical presentation of fever and rash combined with gastrointestinal distress (vomiting and nausea) is a significant red flag for systemic infection. In the context of Addis Ababa\u2014located within the African Meningitis Belt\u2014this symptom cluster strongly matches the clinical pattern of Meningococcal Meningitis. A cluster of 39 cases with these acute symptoms indicates a high risk of rapid transmission and severe morbidity."
+        },
+        "alert": {
+            "title": "Urgent Health Alert: Meningitis Outbreak in Addis Ababa",
+            "message": "Health officials have reported 39 cases of a serious illness in Addis Ababa. Patients are experiencing high fever, skin rashes, vomiting, and nausea. Experts believe this is Meningococcal Meningitis, a dangerous infection that can spread quickly in busy city areas. We are advising all residents to stay alert and take immediate action if they feel unwell.",
+            "recommendations": [
+                "Seek medical help immediately if you or a family member develops a sudden fever and a rash.",
+                "Go to the nearest health center if you experience a stiff neck, severe headache, or sensitivity to light.",
+                "Avoid close contact with people who are coughing or showing signs of illness.",
+                "Check with your local clinic to ensure your meningitis vaccinations are up to date."
+            ],
+            "prevention_strategy": "The most effective way to prevent meningitis is through vaccination. You should also wash your hands frequently with soap, avoid sharing personal items like water bottles or utensils, and cover your mouth and nose when coughing or sneezing.",
+            "why_urgent": "This alert is urgent because meningitis can become life-threatening in a very short time. Since Addis Ababa is a crowded city, the disease can spread easily from person to person, making it vital to stop the outbreak now."
+        },
+        "status": "pending",
+        "timestamp": "2026-04-04 03:14:31.947508"
+    }
+]

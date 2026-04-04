@@ -95,7 +95,16 @@
 
 @layer utilities {
   .glass-card {
-    @apply bg-card/80 backdrop-blur-xl border border-border shadow-lg;
+    @apply bg-card/60 backdrop-blur-xl border border-border/50 shadow-[0_8px_32px_0_rgba(0,0,0,0.08)];
+  }
+  .glass-card-hover {
+    @apply hover:bg-card/80 hover:shadow-[0_8px_32px_0_rgba(0,0,0,0.12)] transition-all duration-300;
+  }
+  .neo-blur {
+    @apply backdrop-blur-2xl bg-white/10 border border-white/20;
+  }
+  .text-glow-blue {
+    @apply shadow-[0_0_15px_rgba(37,99,235,0.5)];
   }
   .risk-high {
     @apply bg-[hsl(var(--risk-high))] text-white;
@@ -105,5 +114,12 @@
   }
   .risk-low {
     @apply bg-[hsl(var(--risk-low))] text-white;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

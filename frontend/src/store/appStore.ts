@@ -8,6 +8,7 @@ interface AppState {
   darkMode: boolean;
   toggleDarkMode: () => void;
   reports: OutbreakReport[];
+  setReports: (reports: OutbreakReport[]) => void;
   addReport: (r: OutbreakReport) => void;
   updateReportStatus: (id: string, status: 'approved' | 'rejected') => void;
   alerts: AlertMessage[];
@@ -45,6 +46,7 @@ export const useAppStore = create<AppState>()(
           return { darkMode: next };
         }),
       reports: [],
+      setReports: (reports) => set({ reports }),
       addReport: (r) => set((s) => ({ reports: [r, ...s.reports] })),
       updateReportStatus: (id, status) =>
         set((s) => ({

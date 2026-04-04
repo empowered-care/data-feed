@@ -42,10 +42,10 @@ async def send_email(to: str, subject: str, content: str):
 async def send_invitation_email(email: str, token: str):
     """Send an invitation email to a new employee."""
     invite_link = f"{FRONTEND_URL}/register?token={token}"
-    subject = "Invitation to Join Aegis Lite"
-    content = f"""Welcome to Aegis Lite!
+    subject = "Invitation to Join Empowered Care"
+    content = f"""Welcome to Empowered Care!
 
-An administrator has invited you to join the Aegis Lite system.
+An administrator has invited you to join the Empowered Care system.
 Please click the link below to complete your registration and set your password:
 
 {invite_link}

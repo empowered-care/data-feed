@@ -1,136 +1,394 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { FileText, Users, AlertTriangle, TrendingUp } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  FileText, 
+  Users, 
+  AlertTriangle, 
+  TrendingUp, 
+  Map as MapIcon, 
+  Activity, 
+  Clock, 
+  ArrowUpRight,
+  Filter
+} from 'lucide-react';
 import { MetricCard } from '@/components/MetricCard';
 import { RiskBadge } from '@/components/RiskBadge';
+import EthiopiaMap from '@/components/EthiopiaMap';
 import { useAppStore } from '@/store/appStore';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { api } from '@/lib/api';
+import { cn } from '@/lib/utils';
+import { 
+  AreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  PieChart, 
+  Pie, 
+  Cell,
+  Legend
+} from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 const RISK_COLORS = { HIGH: '#f43f5e', MEDIUM: '#f59e0b', LOW: '#10b981', UNKNOWN: '#6b7280' };
 
 export default function Dashboard() {
-  const { reports } = useAppStore();
+  const { reports, setReports } = useAppStore();
+  const [loading, setLoading] = useState(reports.length === 0);
+  const [activeTab, setActiveTab] = useState('overview');
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const data = await api.getReports();
+        setReports(data);
+      } catch (err) {
+        console.error('Failed to fetch reports:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReports();
+  }, [setReports]);
   
   // Compute metrics from real reports
   const total_reports = reports.length;
-  const total_cases = reports.reduce((acc, r) => acc + r.extracted_data.cases, 0);
-  const high_risk_locations = reports.filter(r => r.risk_analysis.risk_level === 'HIGH').length;
+  const total_cases = reports.reduce((acc, r) => acc + (r.extracted_data?.cases || 0), 0);
+  const high_risk_locations = reports.filter(r => r.risk_analysis?.risk_level === 'HIGH').length;
   
   const risk_distribution = Object.entries(reports.reduce((acc: any, r) => {
-    acc[r.risk_analysis.risk_level] = (acc[r.risk_analysis.risk_level] || 0) + 1;
+    const level = r.risk_analysis?.risk_level || 'UNKNOWN';
+    acc[level] = (acc[level] || 0) + 1;
     return acc;
-  }, {})).map(([level, count]) => ({ level, count: count as number }));
+  }, {})).map(([level, count]) => ({ name: level, value: count as number }));
 
-  const timeline = reports.map(r => ({ date: r.extracted_data.date || 'Today', cases: r.extracted_data.cases }));
+  const timeline = reports.map(r => ({ 
+    date: r.extracted_data?.date || (r.timestamp ? new Date(r.timestamp).toLocaleDateString() : 'Today'), 
+    cases: r.extracted_data?.cases || 0 
+  })).reverse();
       
-  const displayReports = reports.slice(0, 10);
+  const displayReports = reports.slice(0, 8);
 
   const [showRaw, setShowRaw] = useState(false);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
-        <p className="text-sm text-muted-foreground">Outbreak monitoring overview</p>
-      </div>
-
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard title="Total Reports" value={total_reports} icon={<FileText className="h-5 w-5" />} subtitle="+12 this week" trend="up" />
-        <MetricCard title="Total Cases" value={total_cases} icon={<Users className="h-5 w-5" />} subtitle="+47 this week" trend="up" />
-        <MetricCard title="High Risk Locations" value={high_risk_locations} icon={<AlertTriangle className="h-5 w-5" />} subtitle="Requires attention" trend="up" />
-        <MetricCard title="Risk Score (avg)" value="0.56" icon={<TrendingUp className="h-5 w-5" />} subtitle="Medium" />
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-4">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="lg:col-span-2 glass-card rounded-xl p-5">
-          <h3 className="font-semibold mb-4">Cases Over Time</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <AreaChart data={timeline}>
-              <defs>
-                <linearGradient id="caseGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-              <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-              <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid hsl(var(--border))', background: 'hsl(var(--card))' }} />
-              <Area type="monotone" dataKey="cases" stroke="#2563eb" fill="url(#caseGrad)" strokeWidth={2} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="glass-card rounded-xl p-5">
-          <h3 className="font-semibold mb-4">Risk Distribution</h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <PieChart>
-              <Pie data={risk_distribution} dataKey="count" nameKey="level" cx="50%" cy="50%" outerRadius={80} label={({ level, count }) => `${level}: ${count}`}>
-                {risk_distribution.map((entry) => (
-                  <Cell key={entry.level} fill={RISK_COLORS[entry.level as keyof typeof RISK_COLORS]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </motion.div>
-      </div>
-
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="glass-card rounded-xl overflow-hidden">
-        <div className="p-5 border-b border-border">
-          <h3 className="font-semibold">Recent Reports</h3>
+    <div className="space-y-8 pb-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 animate-pulse">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary mr-1.5" />
+              Live Surveillance
+            </Badge>
+          </div>
+          <h2 className="text-3xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+            Epidemic Intelligence
+          </h2>
+          <p className="text-sm text-muted-foreground font-medium">
+            Real-time disease outbreak detection & risk analysis
+          </p>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-left text-muted-foreground">
-                <th className="px-5 py-3 font-medium">Location</th>
-                <th className="px-5 py-3 font-medium">Cases</th>
-                <th className="px-5 py-3 font-medium">Risk</th>
-                <th className="px-5 py-3 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayReports.length > 0 ? displayReports.map((r) => (
-                <tr key={r.session_id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
-                  <td className="px-5 py-3 font-medium">{r.extracted_data.location}</td>
-                  <td className="px-5 py-3">{r.extracted_data.cases}</td>
-                  <td className="px-5 py-3"><RiskBadge level={r.risk_analysis.risk_level} /></td>
-                  <td className="px-5 py-3">
-                    <span className={`text-xs font-medium capitalize ${r.status === 'pending' ? 'text-risk-medium' : r.status === 'approved' ? 'text-health' : 'text-risk-high'}`}>
-                      {r.status}
-                    </span>
-                  </td>
-                </tr>
-              )) : (
-                <tr className="text-center text-muted-foreground italic">
-                  <td colSpan={4} className="py-8">No reports processed yet</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="h-9 gap-2">
+            <Clock className="h-4 w-4" />
+            Last 24h
+          </Button>
+          <Button variant="outline" size="sm" className="h-9 gap-2">
+            <Filter className="h-4 w-4" />
+            Filters
+          </Button>
+          <Button size="sm" className="h-9 gap-2 shadow-lg shadow-primary/20">
+            Export Data
+          </Button>
         </div>
-      </motion.div>
+      </div>
 
-      <div className="pt-8 pb-10">
+      <div className="grid lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-3 space-y-6">
+          <Card className="border-none shadow-2xl shadow-primary/5 overflow-hidden bg-background/50 backdrop-blur-sm border border-border/50">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <div>
+                <CardTitle className="text-lg font-bold">Geospatial Distribution</CardTitle>
+                <CardDescription>Visualizing reported cases across regions</CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 bg-muted/50 px-2 py-1 rounded-md border border-border/50">
+                  <div className="w-2 h-2 rounded-full bg-risk-high" />
+                  <span className="text-[10px] font-bold uppercase">Active Hotspots</span>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <EthiopiaMap />
+            </CardContent>
+          </Card>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card className="border-none shadow-xl shadow-primary/5 bg-background/50 backdrop-blur-sm border border-border/50">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Cases Trend</CardTitle>
+                  <Activity className="h-4 w-4 text-primary" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[240px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={timeline}>
+                      <defs>
+                        <linearGradient id="colorCases" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border)/0.5)" />
+                      <XAxis 
+                        dataKey="date" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                        dy={10}
+                      />
+                      <YAxis 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          borderRadius: '12px', 
+                          border: '1px solid hsl(var(--border))', 
+                          background: 'hsl(var(--background)/0.8)',
+                          backdropFilter: 'blur(8px)',
+                          boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
+                        }} 
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="cases" 
+                        stroke="hsl(var(--primary))" 
+                        fillOpacity={1} 
+                        fill="url(#colorCases)" 
+                        strokeWidth={3}
+                        animationDuration={1500}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-xl shadow-primary/5 bg-background/50 backdrop-blur-sm border border-border/50">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Risk Profile</CardTitle>
+                  <AlertTriangle className="h-4 w-4 text-risk-medium" />
+                </div>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center justify-center pt-2">
+                <div className="h-[200px] w-full relative">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie 
+                        data={risk_distribution} 
+                        cx="50%" 
+                        cy="50%" 
+                        innerRadius={60} 
+                        outerRadius={80} 
+                        paddingAngle={5} 
+                        dataKey="value"
+                        animationBegin={200}
+                        animationDuration={1000}
+                      >
+                        {risk_distribution.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={RISK_COLORS[entry.name as keyof typeof RISK_COLORS]} strokeWidth={0} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-3xl font-black">{total_reports}</span>
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground">Reports</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 w-full mt-4">
+                  {risk_distribution.map((item) => (
+                    <div key={item.name} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/30 border border-border/50">
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: RISK_COLORS[item.name as keyof typeof RISK_COLORS] }} />
+                      <span className="text-[10px] font-bold uppercase">{item.name}</span>
+                      <span className="ml-auto text-xs font-bold">{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <MetricCard 
+            title="Total Reports" 
+            value={total_reports} 
+            icon={<FileText className="h-5 w-5" />} 
+            subtitle="+12 this week" 
+            trend="up" 
+            className="shadow-primary/5"
+          />
+          <MetricCard 
+            title="Active Cases" 
+            value={total_cases} 
+            icon={<Users className="h-5 w-5" />} 
+            subtitle="+47 from yesterday" 
+            trend="up" 
+            className="shadow-primary/5"
+          />
+          <MetricCard 
+            title="Critical Zones" 
+            value={high_risk_locations} 
+            icon={<AlertTriangle className="h-5 w-5" />} 
+            subtitle="Requires rapid response" 
+            trend="up" 
+            className="shadow-primary/5"
+          />
+          <MetricCard 
+            title="System Health" 
+            value="98.2%" 
+            icon={<TrendingUp className="h-5 w-5" />} 
+            subtitle="Agent nodes active" 
+            className="shadow-primary/5"
+          />
+
+          <Card className="border-none shadow-xl shadow-primary/5 bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 overflow-hidden relative group">
+            <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.5))]" />
+            <CardHeader className="relative z-10">
+              <CardTitle className="text-sm font-bold flex items-center gap-2 text-primary">
+                <MapIcon className="h-4 w-4" />
+                Regional Alert
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              <p className="text-xs font-medium text-foreground/80 leading-relaxed">
+                Mekelle region is showing a <span className="font-bold text-risk-high underline decoration-2 underline-offset-2">Significant Increase</span> in reported cases over the last 6 hours.
+              </p>
+              <Button size="sm" variant="link" className="px-0 mt-2 h-auto text-primary text-xs font-bold group-hover:gap-2 transition-all">
+                Investigate Cluster <ArrowUpRight className="h-3 w-3" />
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <Card className="border-none shadow-2xl shadow-primary/5 overflow-hidden bg-background/50 backdrop-blur-sm border border-border/50">
+        <CardHeader className="flex flex-row items-center justify-between bg-muted/30 border-b border-border/50">
+          <div>
+            <CardTitle className="text-lg font-bold">Surveillance Feed</CardTitle>
+            <CardDescription>Latest validated outbreak reports from agents</CardDescription>
+          </div>
+          <Button variant="ghost" size="sm" className="text-xs font-bold uppercase tracking-wider">
+            View All Reports
+          </Button>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border/50 text-left text-muted-foreground bg-muted/20">
+                  <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Location</th>
+                  <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Case Count</th>
+                  <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Risk Profile</th>
+                  <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Validation Status</th>
+                  <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px] text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/30">
+                {displayReports.length > 0 ? displayReports.map((r, i) => (
+                  <motion.tr 
+                    key={r.session_id} 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="hover:bg-primary/5 transition-colors group"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="font-bold text-foreground group-hover:text-primary transition-colors">{r.extracted_data.location}</div>
+                      <div className="text-[10px] text-muted-foreground">{r.timestamp ? new Date(r.timestamp).toLocaleTimeString() : 'Recently'} • {r.extracted_data.disease || 'General'}</div>
+                    </td>
+                    <td className="px-6 py-4 font-mono font-bold text-lg">{r.extracted_data.cases}</td>
+                    <td className="px-6 py-4"><RiskBadge level={r.risk_analysis.risk_level} /></td>
+                    <td className="px-6 py-4">
+                      <Badge variant="outline" className={cn(
+                        "capitalize font-bold border-none px-0",
+                        r.status === 'pending' ? 'text-risk-medium' : r.status === 'approved' ? 'text-health' : 'text-risk-high'
+                      )}>
+                        <span className={cn(
+                          "w-2 h-2 rounded-full mr-2",
+                          r.status === 'pending' ? 'bg-risk-medium' : r.status === 'approved' ? 'bg-health' : 'bg-risk-high'
+                        )} />
+                        {r.status}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <Button variant="ghost" size="icon" className="rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                        <ArrowUpRight className="h-4 w-4" />
+                      </Button>
+                    </td>
+                  </motion.tr>
+                )) : (
+                  <tr className="text-center text-muted-foreground italic">
+                    <td colSpan={5} className="py-20">
+                      <div className="flex flex-col items-center gap-2">
+                        <FileText className="h-10 w-10 text-muted/20" />
+                        <p>No surveillance reports available yet</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-center">
         <button 
           onClick={() => setShowRaw(!showRaw)}
-          className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
+          className="text-xs font-bold text-muted-foreground hover:text-primary transition-all flex items-center gap-2 px-4 py-2 rounded-full bg-muted/30 hover:bg-muted/50 border border-border/50"
         >
-          {showRaw ? 'Hide' : 'Show'} Full Session Data
+          {showRaw ? 'Hide' : 'Show'} System Kernel Data
         </button>
+      </div>
+
+      <AnimatePresence>
         {showRaw && (
           <motion.div 
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            className="mt-4 glass-card p-4 rounded-lg overflow-hidden"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="mt-4 glass-card p-4 rounded-xl overflow-hidden border border-border/50 bg-black/90 shadow-2xl"
           >
-            <pre className="text-[10px] font-mono text-green-400 bg-black/80 p-4 rounded overflow-auto max-h-80 scrollbar-thin">
+            <div className="flex items-center justify-between mb-4 px-2">
+              <span className="text-[10px] font-mono text-green-500 uppercase font-bold tracking-widest">DEBUG_SESSION_KERNEL_STREAM</span>
+              <div className="flex gap-1">
+                <div className="w-2 h-2 rounded-full bg-red-500/50" />
+                <div className="w-2 h-2 rounded-full bg-yellow-500/50" />
+                <div className="w-2 h-2 rounded-full bg-green-500/50" />
+              </div>
+            </div>
+            <pre className="text-[10px] font-mono text-green-400 p-4 rounded overflow-auto max-h-96 scrollbar-thin selection:bg-green-500/30">
               {JSON.stringify(reports, null, 2)}
             </pre>
           </motion.div>
         )}
-      </div>
+      </AnimatePresence>
     </div>
   );
 }
+

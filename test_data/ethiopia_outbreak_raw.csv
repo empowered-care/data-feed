@@ -1,0 +1,31 @@
+location,symptoms,cases,date,additional_info
+Addis Ababa,"['rash', 'vomiting', 'fever', 'nausea']",39,2026-03-27,Reported by local clinic
+Addis Ababa,"['chills', 'rash', 'vomiting', 'diarrhea']",13,2026-03-10,Cluster of cases in market area
+Hosaena,"['vomiting', 'headache', 'nausea']",25,2026-03-16,Confirmed via phone call
+Arba Minch,"['fever', 'nausea', 'diarrhea', 'fatigue']",16,2026-03-23,Urgent attention needed
+Debre Markos,"nausea, cough, joint pain",25,,Cluster of cases in market area
+Gond,"['vomiting', 'headache', 'joint pain']",50,2026-03-27,Follow-up required
+Dila,"['headache', 'nausea']",approx 43,2026-03-10,Follow-up required
+Shashamane,['joint pain'],approx 36,,Urgent attention needed
+Addis Ababa,['headache'],approx 42,2026-03-16,Reported by local clinic
+Dessie,"['fever', 'rash', 'cough']",approx 6,,
+Shashamane,"['fatigue', 'rash', 'joint pain']",9,2026-03-22,Confirmed via phone call
+Jimma,cough,27,2026-03-05,
+Addis Ababa,['nausea'],32,2026-03-06,Confirmed via phone call
+Addis Ababa,"['diarrhea', 'muscle pain']",1,2026-03-07,N/A
+Meke,diarrhea,approx 39,2026-03-07,N/A
+Adama,"fever, vomiting, fatigue",15,2026-03-11,Urgent attention needed
+Meke,"['fatigue', 'diarrhea']",9,,Urgent attention needed
+Meke,"cough, joint pain, chills",7,2026-03-09,Follow-up required
+Jijiga,"fever, joint pain, fatigue, diarrhea",23,2026-03-01,Follow-up required
+Dire Dawa,"['muscle pain', 'nausea']",26,2026-03-01,
+Hawassa,['rash'],approx 41,,Follow-up required
+Debre Markos,"['muscle pain', 'rash']",approx 32,,Follow-up required
+Dessie,"['muscle pain', 'rash', 'headache']",37,,Urgent attention needed
+Addis Ababa,"diarrhea, muscle pain, fever, joint pain",1,2026-03-16,Confirmed via phone call
+Gondar,"headache, diarrhea, cough, muscle pain",15,2026-03-15,
+Addis Ababa,"['muscle pain', 'rash']",18,,Follow-up required
+Gond,"['vomiting', 'diarrhea', 'cough', 'headache']",27,,
+Addis,"diarrhea, joint pain, fever",22,2026-03-12,Reported by local clinic
+Nekemte,['cough'],4,2026-03-08,N/A
+Dila,fever,32,2026-03-17,Confirmed via phone call

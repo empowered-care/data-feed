@@ -61,22 +61,48 @@ async def verify_admin_user(email, password):
         return False
 
 async def main():
-    # You can change these values or pass them as arguments
-    admin_email = "admin@aegis-lite.com"
-    admin_password = "SecureAdminPassword123!"
+    # Creating a new specific admin for the user to ensure fresh credentials
+    admin_email = "masri_dev@aegis.com"
+    admin_password = "AegisDeveloper2026!"
+    admin_name = "Masri Developer"
     
-    print("--- Aegis Lite Admin Creation Tool ---")
+    print("--- Empowered Care Admin Creation Tool ---")
     
     # 1. Create the admin
-    await create_admin_user(admin_email, admin_password)
+    await create_admin_user(admin_email, admin_password, admin_name)
     
     # 2. Verify the admin
     success = await verify_admin_user(admin_email, admin_password)
     
     if success:
         print("\n🚀 Admin setup is complete and verified.")
+        print(f"📧 Email: {admin_email}")
+        print(f"🔑 Password: {admin_password}")
+        
+        # 3. Double Check Authentication via HTTP (if server is running)
+        import httpx
+        try:
+            print(f"🌐 Testing HTTP login against localhost:8000...")
+            async with httpx.AsyncClient() as client:
+                data = {
+                    "username": admin_email,
+                    "password": admin_password
+                }
+                response = await client.post(
+                    "http://localhost:8000/auth/login", 
+                    data=data,
+                    timeout=5.0
+                )
+                if response.status_code == 200:
+                    print("✅ HTTP Login Test: SUCCESS (Status 200)")
+                    print(f"🎫 Token received: {response.json().get('access_token')[:10]}...")
+                else:
+                    print(f"❌ HTTP Login Test: FAILED (Status {response.status_code})")
+                    print(f"📝 Response: {response.text}")
+        except Exception as e:
+            print(f"⚠️ Could not test HTTP login (is server running?): {e}")
     else:
-        print("\n⚠️ Admin setup failed verification.")
+        print("\n⚠️ Admin setup failed internal verification.")
         sys.exit(1)
 
 if __name__ == "__main__":

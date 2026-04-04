@@ -34,47 +34,45 @@ export function TopNav({ onMenuClick }: Props) {
     : user?.email?.[0]?.toUpperCase() || '?';
 
   return (
-    <header className="sticky top-0 z-30 h-14 bg-card/80 backdrop-blur-md border-b border-border flex items-center justify-between px-4 gap-4">
+    <header className="sticky top-0 z-30 h-20 bg-background/60 backdrop-blur-xl border-b border-border/50 flex items-center justify-between px-8 gap-4">
       <div className="flex items-center gap-3">
-        <button onClick={onMenuClick} className="lg:hidden p-1.5 hover:bg-muted rounded-md">
-          <Menu className="h-5 w-5" />
+        <button onClick={onMenuClick} className="lg:hidden p-2 hover:bg-muted rounded-xl transition-colors">
+          <Menu className="h-6 w-6" />
         </button>
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
-          <span className="w-1.5 h-1.5 rounded-full bg-health animate-pulse" />
-          System Active
+        <div className="hidden sm:flex items-center gap-2.5 px-4 py-2 rounded-xl bg-muted/50 border border-border/50 text-[10px] font-black uppercase tracking-widest text-primary">
+          <span className="w-2 h-2 rounded-full bg-health animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+          Neural Link Active
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={toggleDarkMode} className="h-9 w-9">
-          {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={toggleDarkMode} className="h-10 w-10 rounded-xl hover:bg-primary/5 transition-all">
+          {darkMode ? <Sun className="h-5 w-5 text-yellow-500" /> : <Moon className="h-5 w-5 text-primary" />}
         </Button>
 
         <Button
           variant="ghost"
           size="icon"
-          className="h-9 w-9 relative"
+          className="h-10 w-10 rounded-xl relative hover:bg-primary/5 transition-all"
           onClick={markAllRead}
         >
-          <Bell className="h-4 w-4" />
+          <Bell className="h-5 w-5 text-muted-foreground" />
           {unread > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-risk-high text-[10px] text-card rounded-full flex items-center justify-center font-bold">
-              {unread}
-            </span>
+            <span className="absolute top-2 right-2 w-2 h-2 bg-risk-high rounded-full ring-2 ring-background animate-bounce" />
           )}
         </Button>
 
-        <div className="pl-2 border-l border-border">
+        <div className="pl-4 border-l border-border/50 ml-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-xs font-bold">
+              <button className="flex items-center gap-3 p-1 rounded-xl hover:bg-muted/50 transition-all group">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-xs font-black shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
                   {initials}
                 </div>
                 <div className="hidden sm:block text-left">
-                  <p className="text-xs font-semibold leading-none">{user?.full_name || user?.email || 'User'}</p>
-                  <p className="text-[10px] text-muted-foreground capitalize">
-                    {user?.role === 'admin' ? 'Administrator' : 'Viewer'}
+                  <p className="text-xs font-black leading-none tracking-tight">{user?.full_name || 'System User'}</p>
+                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
+                    {user?.role || 'operator'}
                   </p>
                 </div>
               </button>

@@ -2,14 +2,18 @@ import json
 import logging
 import asyncio
 import uuid
+from datetime import datetime
 from typing import Dict, Any, List, Optional, Union
 from models.schemas import OutbreakReport, ValidationResult, RiskAnalysis, AlertMessage, ConsensusResult
 from services.gemini_service import GeminiService
-from config import VALID_SYMPTOMS, MAX_STORED_REPORTS
+from config import VALID_SYMPTOMS, MAX_STORED_REPORTS, BASE_DIR
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Define absolute storage path
+DATA_STORE_PATH = BASE_DIR / "models" / "outbreak_data.json"
 
 class ExtractionAgent:
     def __init__(self, gemini_service: GeminiService):
@@ -73,6 +77,11 @@ class ExtractionAgent:
                     data["cases"] = int(data.get("cases", 1))
                 except:
                     data["cases"] = 1
+            
+            # Ensure additional_info is a dictionary
+            if not isinstance(data.get("additional_info"), dict):
+                val = data.get("additional_info")
+                data["additional_info"] = {"raw_value": val} if val else {}
 
             report = OutbreakReport(**data)
             logger.info(f"Successfully extracted: {report.location}, {report.cases} cases")
@@ -386,13 +395,54 @@ class DataAssistantAgent:
     def __init__(self, gemini_service: GeminiService):
         self.gemini = gemini_service
         self.data_store = []
-        logger.info("Data Assistant initialized")
+        self.storage_path = DATA_STORE_PATH
+        self._load_data()
+        logger.info(f"Data Assistant initialized with {len(self.data_store)} reports at {self.storage_path}")
 
-    def add_report(self, report: OutbreakReport):
-        """Add a report to the data store."""
-        self.data_store.append(report.dict())
+    def _load_data(self):
+        """Load data from local storage."""
+        try:
+            import os
+            import json
+            if os.path.exists(self.storage_path):
+                with open(self.storage_path, "r") as f:
+                    self.data_store = json.load(f)
+                logger.info(f"Successfully loaded {len(self.data_store)} reports from {self.storage_path}")
+        except Exception as e:
+            logger.error(f"❌ Failed to load data store from {self.storage_path}: {e}")
+            self.data_store = []
+
+    def _save_data(self):
+        """Save data to local storage."""
+        try:
+            import json
+            import os
+            os.makedirs(os.path.dirname(self.storage_path), exist_ok=True)
+            with open(self.storage_path, "w") as f:
+                json.dump(self.data_store, f, indent=4)
+            logger.info(f"Successfully saved {len(self.data_store)} reports to {self.storage_path}")
+        except Exception as e:
+            logger.error(f"❌ Failed to save data store to {self.storage_path}: {e}")
+
+    def add_report(self, report: Union[OutbreakReport, Dict[str, Any]], session_id: str = None, risk_analysis: Dict[str, Any] = None, alert: Dict[str, Any] = None):
+        """Add a report to the data store with full context."""
+        report_dict = report.dict() if hasattr(report, "dict") else report
+        
+        # Add metadata for dashboard
+        entry = {
+            "session_id": session_id or str(uuid.uuid4()),
+            "extracted_data": report_dict,
+            "risk_analysis": risk_analysis or {"risk_level": "LOW"},
+            "alert": alert or {"title": "New Report"},
+            "status": "pending",
+            "timestamp": str(datetime.now())
+        }
+        
+        self.data_store.insert(0, entry) # Newest first
         if len(self.data_store) > MAX_STORED_REPORTS:
-            self.data_store = self.data_store[-MAX_STORED_REPORTS:]
+            self.data_store = self.data_store[:MAX_STORED_REPORTS]
+        
+        self._save_data()
         logger.info(f"Added report to data store. Total reports: {len(self.data_store)}")
 
     async def query(self, query_text: str) -> Dict[str, Any]:
@@ -400,8 +450,8 @@ class DataAssistantAgent:
         logger.info(f"Processing query: {query_text}")
 
         total_reports = len(self.data_store)
-        locations = list(set(r["location"] for r in self.data_store if r["location"] != "Unknown"))
-        total_cases = sum(r.get("cases", 0) for r in self.data_store)
+        locations = list(set(r["extracted_data"]["location"] for r in self.data_store if r["extracted_data"]["location"] != "Unknown"))
+        total_cases = sum(r["extracted_data"].get("cases", 0) for r in self.data_store)
 
         data_summary = {
             "total_reports": total_reports,
@@ -410,9 +460,23 @@ class DataAssistantAgent:
         }
 
         prompt = f"""
-        Answer this query about outbreak data: "{query_text}"
-        Summary: {json.dumps(data_summary)}
-        Recent: {json.dumps(self.data_store[-5:] if self.data_store else [])}
+        You are a Senior Data Analyst for Empowered Care, a high-performance multi-agent disease outbreak monitoring system. 
+        Your goal is to provide intelligent, professional insights about epidemiological data.
+
+        USER QUERY: "{query_text}"
+        
+        AGGREGATE DATA SUMMARY:
+        {json.dumps(data_summary, indent=2)}
+        
+        DETAILED ENTRIES (Most Recent):
+        {json.dumps([r["extracted_data"] for r in self.data_store[-10:]] if self.data_store else [], indent=2)}
+        
+        INSTRUCTIONS:
+        1. IDENTITY: You are part of Empowered Care. 
+        2. PROFESSIONAL ANALYSIS: Interpret the data in the context of public health safety.
+        3. NATURAL LANGUAGE: Respond in a fluid, authoritative, and helpful manner.
+        4. ACCURACY: Base your answer strictly on the provided data. 
+        5. NO DATA SCENARIO: If there is zero data in the context above, acknowledge it professionally and explain that Empowered Care is currently in monitoring mode, awaiting data ingestion from field reports.
         """
 
         try:
@@ -442,15 +506,15 @@ class DataAssistantAgent:
                 "timestamp": str(datetime.now())
             }
 
-        # Split data into "new" (last 5 reports) and "old" (everything else)
-        new_data = self.data_store[-5:]
-        old_data = self.data_store[:-5] if len(self.data_store) > 5 else []
+        # Newest are at the beginning (index 0)
+        new_data = [r["extracted_data"] for r in self.data_store[:5]]
+        old_data = [r["extracted_data"] for r in self.data_store[5:25]] # Compare with next 20
 
         prompt = f"""
         You are a Senior Epidemiological Analyst. Perform a full system analysis.
         
         HISTORICAL DATA (Summarized):
-        {json.dumps(old_data[:20]) if old_data else "No historical data."}
+        {json.dumps(old_data) if old_data else "No historical data."}
         
         NEW RECENT DATA (Last 5 reports):
         {json.dumps(new_data)}
@@ -473,7 +537,6 @@ class DataAssistantAgent:
 
         try:
             loop = asyncio.get_event_loop()
-            from datetime import datetime
             response = await loop.run_in_executor(None, self.gemini.generate_text, prompt)
             analysis_result = json.loads(response)
             analysis_result["timestamp"] = str(datetime.now())
@@ -499,22 +562,31 @@ class ChatSpecialistAgent:
         history_str = "\n".join([f"{m['role']}: {m['content']}" for m in history])
         
         prompt = f"""
-        You are the {self.role} for Aegis Lite. Your expertise is {self.expertise}.
+        You are the {self.role} for Empowered Care, a sophisticated multi-agent disease outbreak detection system.
+        Your expertise is {self.expertise}.
+
+        SYSTEM IDENTITY:
+        Empowered Care is a cutting-edge AI-powered epidemiological surveillance tool designed to detect, analyze, and alert health officials about potential disease outbreaks in real-time. 
         
-        DATA CONTEXT FROM SYSTEM:
+        DATA CONTEXT (REAL-TIME SYSTEM DATA):
         {data_context}
         
         CONVERSATION HISTORY:
         {history_str}
         
-        USER QUESTION:
-        {message}
+        USER REQUEST:
+        "{message}"
         
-        INSTRUCTIONS:
-        1. Answer based ON THE DATA provided above.
-        2. If the data doesn't contain the answer, say so clearly.
-        3. Be professional and epidemiological in your tone.
-        4. Keep your answer concise but complete.
+        GUIDELINES:
+        1. IDENTITY: Always identify as Empowered Care.
+        2. BE PROFESSIONAL YET FRIENDLY: Use a tone suitable for a health official or clinical researcher, but be approachable. If the user greets you with "hey", "hello", or "hi", respond warmly and ask how you can help them specifically with their surveillance tasks.
+        3. BE SMART: Don't just list data. Interpret it. Identify transmission patterns and risks.
+        4. NO DATA SCENARIO: If the data context shows zero cases/reports and the user asks about outbreaks, explain that Empowered Care is in standby/monitoring mode, actively scanning for anomalies but currently reporting a clean epidemiological status.
+        5. PRECISION: Use exact numbers from the data when possible.
+        
+        RESPONSE EXAMPLE FOR GREETINGS:
+        User: "Hey"
+        Response: "Hello! I'm the Empowered Care Assistant. I'm currently monitoring our epidemiological data streams. How can I assist you with your outbreak detection or data analysis today?"
         """
         
         loop = asyncio.get_event_loop()
@@ -545,15 +617,18 @@ class ChatSupervisor:
         
         # 1. Route the query to the correct agent
         route_prompt = f"""
-        Analyze this user message and route it to the best specialist:
-        - "location": If they ask WHERE, hotspots, or about specific cities.
-        - "infection": If they ask about symptoms, WHAT disease, or risk levels.
-        - "history": If they ask WHEN, dates, or trends over time.
-        - "general": For greetings or overall summaries.
+        You are the Routing Logic for Empowered Care, a sophisticated multi-agent system.
+        Analyze the USER MESSAGE and route it to the best specialist agent.
         
         MESSAGE: "{message}"
         
-        Return ONLY the word: location, infection, history, or general.
+        AVAILABLE SPECIALISTS:
+        - "location": Geospatial surveillance and hotspots.
+        - "infection": Symptoms, clinical details, and risk levels.
+        - "history": Timelines, dates, and historical comparison.
+        - "general": Greetings, overall system summaries, or broad requests.
+        
+        Return ONLY the single word (lower case): location, infection, history, or general.
         """
         
         loop = asyncio.get_event_loop()
@@ -562,10 +637,16 @@ class ChatSupervisor:
         if agent_key not in self.specialists:
             agent_key = "general"
             
-        # 2. Prepare data context
+        # 2. Prepare data context (Enhanced with a more complete summary)
+        total_reports = len(self.data_assistant.data_store)
+        locations = list(set(r["extracted_data"]["location"] for r in self.data_assistant.data_store if r["extracted_data"]["location"] != "Unknown"))
+        total_cases = sum(r["extracted_data"].get("cases", 0) for r in self.data_assistant.data_store)
+        
         data_summary = {
-            "total": len(self.data_assistant.data_store),
-            "recent_reports": self.data_assistant.data_store[-10:]
+            "total_system_reports": total_reports,
+            "aggregate_cases": total_cases,
+            "monitored_locations": locations,
+            "most_recent_entries": [r["extracted_data"] for r in self.data_assistant.data_store[-15:]] if self.data_assistant.data_store else []
         }
         data_context = json.dumps(data_summary, indent=2)
         

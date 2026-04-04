@@ -16,20 +16,29 @@ export default function EthiopiaMap() {
   const [hoveredRegion, setHoveredRegion] = useState<typeof REGIONS[0] | null>(null);
 
   return (
-    <div className="relative w-full aspect-square md:aspect-[16/10] bg-background/40 rounded-xl overflow-hidden glass-card border border-border flex flex-col">
+    <div className="relative w-full aspect-square md:aspect-[16/10] bg-background/5 overflow-hidden flex flex-col">
       {/* Legend & Controls Overlay */}
       <div className="absolute top-4 left-4 flex flex-col gap-3 z-20 pointer-events-none">
-        <div className="px-3 py-1.5 rounded-md bg-background/90 border border-border backdrop-blur-md flex items-center gap-2 w-fit pointer-events-auto">
+        <div className="px-3 py-1.5 rounded-full bg-background/80 border border-border/50 backdrop-blur-md flex items-center gap-2 w-fit pointer-events-auto shadow-sm">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
-          <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/80">Live Surveillance</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-foreground/80">Live Feed</span>
         </div>
         
         {/* Legend Key */}
-        <div className="px-3 py-2 rounded-md bg-background/90 border border-border backdrop-blur-md flex flex-col gap-1.5 w-fit pointer-events-auto">
-          <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground mb-1">Risk Scale</p>
-          <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" /><span className="text-[10px] font-medium">High Risk</span></div>
-          <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]" /><span className="text-[10px] font-medium">Moderate</span></div>
-          <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-green-500" /><span className="text-[10px] font-medium">Low Risk</span></div>
+        <div className="px-4 py-3 rounded-2xl bg-background/80 border border-border/50 backdrop-blur-md flex flex-col gap-2 w-fit pointer-events-auto shadow-xl">
+          <p className="text-[9px] uppercase tracking-[0.2em] font-black text-muted-foreground mb-1">Risk Intensity</p>
+          <div className="flex items-center gap-3">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
+            <span className="text-[10px] font-bold uppercase tracking-tighter">Critical</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]" />
+            <span className="text-[10px] font-bold uppercase tracking-tighter">Moderate</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.3)]" />
+            <span className="text-[10px] font-bold uppercase tracking-tighter">Stable</span>
+          </div>
         </div>
       </div>
 
