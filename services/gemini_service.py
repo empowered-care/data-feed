@@ -6,6 +6,7 @@ import io
 from pathlib import Path
 from dotenv import load_dotenv
 from models.schemas import StructuredMedicalRecord, Medication
+from config import GEMINI_MODEL_PREFERENCES
 
 load_dotenv()
 
@@ -16,7 +17,7 @@ class GeminiService:
             raise ValueError("❌ GEMINI_API_KEY not found in .env file")
         
         genai.configure(api_key=self.api_key)
-        self.models = ['gemini-flash-latest', 'gemini-1.5-flash', 'gemini-1.5-pro']
+        self.models = GEMINI_MODEL_PREFERENCES
 
     def process_medical_record(self, image_path) -> StructuredMedicalRecord:
         img = PIL.Image.open(image_path)
