@@ -486,12 +486,12 @@ async def process_document(
 
 # --- OUTBREAK DETECTION ENDPOINTS ---
 
-@app.post("/outbreak/process", response_model=OutbreakProcessResponse)
+@app.post("/outbreak/process", response_model=List[OutbreakProcessResponse])
 async def process_outbreak_report(
     request: dict,
     user: dict = Depends(get_current_user)
 ):
-    """Process an outbreak report through the dynamic multi-agent pipeline."""
+    """Process one or more outbreak reports through the dynamic multi-agent pipeline."""
     text = request.get("text", "").strip()
     if not text:
         raise HTTPException(status_code=400, detail="Text field is required and cannot be empty")
@@ -499,58 +499,63 @@ async def process_outbreak_report(
     if len(text) > MAX_TEXT_LENGTH:
         raise HTTPException(status_code=400, detail=f"Text input too long (max {MAX_TEXT_LENGTH} characters)")
 
-    session_id = str(uuid.uuid4())
     start_time = datetime.now()
-
-    logger.info(f"--- 🚨 Outbreak Report Processing (Dynamic): {session_id} ---")
+    logger.info(f"--- 🚨 Outbreak Report Processing (Dynamic Multi-Record) ---")
     
     try:
-        # Using SuperAgent to orchestrate everything
-        result = await super_agent.process_outbreak_parallel(text)
+        # Get historical context for AI comparison
+        history = data_assistant.get_historical_context()
         
-        # Store in data assistant with full context
-        data_assistant.add_report(
-            result["extracted_data"],
-            session_id=session_id,
-            risk_analysis=result["risk_analysis"].dict() if hasattr(result["risk_analysis"], "dict") else result["risk_analysis"],
-            alert=result["alert"].dict() if hasattr(result["alert"], "dict") else result["alert"],
-            context_research=result["context_research"].dict() if result.get("context_research") and hasattr(result["context_research"], "dict") else result.get("context_research")
-        )
+        # SuperAgent now returns a LIST of results
+        batch_results = await super_agent.process_outbreak_parallel(text, history)
+        
+        response_list = []
+        for result in batch_results:
+            session_id = str(uuid.uuid4())
+            # Store in data assistant with full context
+            data_assistant.add_report(
+                result["extracted_data"],
+                session_id=session_id,
+                risk_analysis=result["risk_analysis"].model_dump(mode='json') if hasattr(result["risk_analysis"], "model_dump") else result["risk_analysis"],
+                alert=result["alert"].model_dump(mode='json') if hasattr(result["alert"], "model_dump") else result["alert"],
+                context_research=result["context_research"].model_dump(mode='json') if result.get("context_research") and hasattr(result["context_research"], "model_dump") else result.get("context_research"),
+                raw_report=text
+            )
+
+            response_list.append(OutbreakProcessResponse(
+                extracted_data=result["extracted_data"],
+                validation=result["validation"],
+                risk_analysis=result["risk_analysis"],
+                consensus=result["consensus"],
+                context_research=result["context_research"],
+                alert=result["alert"],
+                session_id=session_id,
+                metadata={
+                    "processed_at": str(datetime.now()),
+                    "orchestrator": "SuperAgent",
+                    "consensus_reached": result["consensus"].consensus_reached
+                },
+                message="🚨 Signal processed.",
+                human_validation_required=result["consensus"].final_risk_level in ["HIGH", "MEDIUM"]
+            ))
 
         processing_time = (datetime.now() - start_time).total_seconds()
-        logger.info(f"--- ✅ Outbreak Processing Complete: {session_id} ({processing_time:.2f}s) ---")
+        logger.info(f"--- ✅ Outbreak Processing Complete: {len(response_list)} records ({processing_time:.2f}s) ---")
 
-        return OutbreakProcessResponse(
-            extracted_data=result["extracted_data"],
-            validation=result["validation"],
-            risk_analysis=result["risk_analysis"],
-            consensus=result["consensus"],
-            context_research=result["context_research"],
-            alert=result["alert"],
-            session_id=session_id,
-            metadata={
-                "processed_at": str(datetime.now()),
-                "processing_time_seconds": processing_time,
-                "orchestrator": "SuperAgent",
-                "consensus_reached": result["consensus"].consensus_reached
-            },
-            message="🚨 Outbreak report processed through dynamic multi-agent pipeline.",
-            human_validation_required=result["consensus"].final_risk_level in ["HIGH", "MEDIUM"]
-        )
+        return response_list
     except Exception as e:
-        logger.error(f"❌ Processing error for session {session_id}: {e}")
+        logger.error(f"❌ Processing error: {e}")
         raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
 
-@app.post("/outbreak/upload", response_model=OutbreakProcessResponse)
+@app.post("/outbreak/upload", response_model=List[OutbreakProcessResponse])
 async def upload_outbreak_file(
     file: UploadFile = File(...),
     user: dict = Depends(get_current_user)
 ):
     """Upload and process an outbreak report file (PDF, CSV, or Image)."""
-    session_id = str(uuid.uuid4())
     start_time = datetime.now()
     
-    logger.info(f"--- 📂 Processing Uploaded File: {file.filename} ({session_id}) ---")
+    logger.info(f"--- 📂 Processing Uploaded File: {file.filename} ---")
     
     content = await file.read()
     extracted_text = ""
@@ -582,36 +587,47 @@ async def upload_outbreak_file(
         if not extracted_text.strip():
             raise HTTPException(status_code=400, detail="Could not extract any text from the provided file.")
 
-        # Feed extracted text to SuperAgent
-        result = await super_agent.process_outbreak_parallel(extracted_text)
-        
-        # Store in data assistant with full context
-        data_assistant.add_report(
-            result["extracted_data"],
-            session_id=session_id,
-            risk_analysis=result["risk_analysis"].dict() if hasattr(result["risk_analysis"], "dict") else result["risk_analysis"],
-            alert=result["alert"].dict() if hasattr(result["alert"], "dict") else result["alert"],
-            context_research=result["context_research"].dict() if result.get("context_research") and hasattr(result["context_research"], "dict") else result.get("context_research")
-        )
-        
-        processing_time = (datetime.now() - start_time).total_seconds()
+        # Get historical context
+        history = data_assistant.get_historical_context()
 
-        return OutbreakProcessResponse(
-            extracted_data=result["extracted_data"],
-            validation=result["validation"],
-            risk_analysis=result["risk_analysis"],
-            consensus=result["consensus"],
-            context_research=result["context_research"],
-            alert=result["alert"],
-            session_id=session_id,
-            metadata={
-                "processed_at": str(datetime.now()),
-                "processing_time_seconds": processing_time,
-                "file_name": file.filename
-            },
-            message=f"🚨 File '{file.filename}' processed via Dynamic Multi-Agent Pipeline.",
-            human_validation_required=result["consensus"].final_risk_level in ["HIGH", "MEDIUM"]
-        )
+        # Feed extracted text to SuperAgent
+        batch_results = await super_agent.process_outbreak_parallel(extracted_text, history)
+        
+        response_list = []
+        for result in batch_results:
+            session_id = str(uuid.uuid4())
+            # Store in data assistant with full context
+            data_assistant.add_report(
+                result["extracted_data"],
+                session_id=session_id,
+                risk_analysis=result["risk_analysis"].model_dump(mode='json') if hasattr(result["risk_analysis"], "model_dump") else result["risk_analysis"],
+                alert=result["alert"].model_dump(mode='json') if hasattr(result["alert"], "model_dump") else result["alert"],
+                context_research=result["context_research"].model_dump(mode='json') if result.get("context_research") and hasattr(result["context_research"], "model_dump") else result.get("context_research"),
+                raw_report=extracted_text
+            )
+
+            response_list.append(OutbreakProcessResponse(
+                extracted_data=result["extracted_data"],
+                validation=result["validation"],
+                risk_analysis=result["risk_analysis"],
+                consensus=result["consensus"],
+                context_research=result["context_research"],
+                alert=result["alert"],
+                session_id=session_id,
+                metadata={
+                    "processed_at": str(datetime.now()),
+                    "file_name": file.filename
+                },
+                message=f"🚨 Record extracted.",
+                human_validation_required=result["consensus"].final_risk_level in ["HIGH", "MEDIUM"]
+            ))
+
+        processing_time = (datetime.now() - start_time).total_seconds()
+        return response_list
+
+    except Exception as e:
+        logger.error(f"❌ File processing failed: {e}")
+        raise HTTPException(status_code=500, detail=f"File processing failed: {str(e)}")
 
     except Exception as e:
         logger.error(f"❌ File processing failed: {e}")
@@ -625,12 +641,20 @@ async def approve_alert(
 ):
     """Human validation endpoint for alerts (Admin Only)."""
     approved = request.get("approved", True) if request else True
-    logger.info(f"Alert {'approved' if approved else 'rejected'} for session {session_id}")
+    status = "approved" if approved else "rejected"
+    
+    logger.info(f"Alert {status} for session {session_id}")
+    
+    # Update status in persistent store
+    success = data_assistant.update_report_status(session_id, status)
+    
+    if not success:
+        raise HTTPException(status_code=404, detail="Report session not found")
 
     return {
         "session_id": session_id,
         "approved": approved,
-        "message": "Alert approved and sent to notification system." if approved else "Alert rejected.",
+        "message": f"Alert {status} and updated in intelligence vault.",
         "timestamp": str(datetime.now())
     }
 

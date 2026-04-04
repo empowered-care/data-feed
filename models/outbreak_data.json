@@ -43,38 +43,379 @@
     {
         "session_id": "f2fe955a-1518-4739-bde0-e93219455047",
         "extracted_data": {
-            "location": "Addis Ababa",
+            "location": "Arba Minch, Banana plantation",
             "symptoms": [
-                "rash",
-                "vomiting",
-                "fever",
-                "nausea"
+                "unusual insect bites",
+                "joint pain"
             ],
-            "cases": 39,
-            "date": "2026-03-27",
+            "cases": 15,
+            "date": null,
             "additional_info": {
-                "note": "Reported by local clinic"
+                "population": "plantation workers",
+                "mortality": 0,
+                "morbidity": "high",
+                "suspected_disease": "Chikungunya"
+            }
+        },
+        "risk_analysis": {
+            "risk_level": "MEDIUM",
+            "confidence": "80%",
+            "possible_disease": "Chikungunya Fever",
+            "reason": "The clinical triad of localized 'unusual insect bites' (likely representing a pruritic rash or vector exposure) combined with joint pain (arthralgia) is a classic presentation for alphaviral infections. Given the location in a banana plantation in Ethiopia\u2014where Aedes and Anopheles mosquito vectors are prevalent\u2014Chikungunya or O'nyong-nyong fever are the most probable matches. A cluster of 15 cases indicates an active transmission cycle requiring immediate vector control."
+        },
+        "context_research": {
+            "location": "Arba Minch, Banana plantation",
+            "security_status": "The region is under monitoring for security and conflict updates as of 2024. While search data indicates interest in conflict updates for the Gamo Zone, specific active hostilities are not detailed in the snippets.",
+            "water_quality": "Reports indicate existing challenges regarding water quality and accessibility within the banana plantations and surrounding rural areas.",
+            "temperature": "Not specified in the provided research data.",
+            "conflict_zone": false,
+            "nearby_facilities": [],
+            "recent_news": [
+                "Security situation and conflict updates for Arba Minch and Gamo Zone (2024)",
+                "Water quality challenges and accessibility in Arba Minch banana plantations and rural areas"
+            ],
+            "last_updated": "2026-04-04T04:59:48.443903"
+        },
+        "alert": {
+            "title": "Health Alert: Sudden Increase in Fever and Joint Pain in Arba Minch",
+            "message": "We have detected 15 cases of people working in Arba Minch banana plantations suffering from unusual insect bites and severe joint pain. These symptoms point to Chikungunya Fever, a disease carried by mosquitoes. Because many people in the same area are getting sick at once, we need to take action to stop it from spreading further to other workers and families.",
+            "recommendations": [
+                "Go to the nearest health center immediately if you have a fever or painful joints.",
+                "Rest as much as possible and drink plenty of clean water if you feel unwell.",
+                "Tell your coworkers and neighbors to watch for these symptoms.",
+                "Do not take medicine without a doctor's advice, as some painkillers can be dangerous depending on the illness."
+            ],
+            "prevention_strategy": "The best way to stay safe is to avoid mosquito bites. Wear long-sleeved shirts and long trousers while working in the plantation. Use mosquito nets when sleeping and empty out any containers with standing water where mosquitoes like to lay their eggs.",
+            "why_urgent": "This alert was generated because 15 people in a small area got sick very quickly. Arba Minch's warm environment and the plantation conditions make it easy for mosquitoes to spread this disease fast if we don't protect ourselves now."
+        },
+        "status": "pending",
+        "timestamp": "2026-04-04 05:00:08.419117",
+        "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                raw_content\n0  URGENT: Seeing a spike in respiratory issues in Addis Ababa, specifically around the Mercato area. At least 45 people reported similar symptoms of dry cough and shortness of breath in the last 48 hours. Air quality seems poor today.\n1                             Health report from Hawassa: 12 students at a local school are down with high fever and skin rashes. We suspect the local well might be contaminated after the heavy rains. Need immediate water testing kits.\n2                              Bahir Dar update - Lake Tana area: 8 fishermen showing signs of severe nausea and abdominal pain. They mentioned a strange smell coming from the water near the northern shore. Local clinic is overwhelmed.\n3             Logistics Alert: Jijiga region. Movement of medical supplies is being slowed down by recent roadblocks. Meanwhile, we have 5 cases of suspected measles in the displacement camp. Vaccination status of the group is unknown.\n4                      Semera Port: High temperature recorded at the border today (41C). 3 truck drivers collapsed due to heat stroke, but one is also showing signs of persistent vomiting. Possible viral infection or just extreme heat?\n5                                                    Arba Minch: Banana plantation workers reporting unusual insect bites followed by joint pain. 15 cases so far. No deaths, but high morbidity. Is this Chikungunya or something similar?"
+    },
+    {
+        "session_id": "af4292a6-41fb-451b-9295-a0cd7976f43e",
+        "extracted_data": {
+            "location": "Semera Port",
+            "symptoms": [
+                "heat stroke",
+                "collapse",
+                "persistent vomiting"
+            ],
+            "cases": 3,
+            "date": "Today",
+            "additional_info": {
+                "environmental_factors": "High temperature recorded (41C)",
+                "suspected_cause": "possible viral infection or extreme heat",
+                "population": "truck drivers"
+            }
+        },
+        "risk_analysis": {
+            "risk_level": "MEDIUM",
+            "confidence": "85%",
+            "possible_disease": "Severe Heatstroke or Acute Watery Diarrhea (AWD)",
+            "reason": "The clinical presentation of collapse and persistent vomiting, combined with the 'heat stroke' label, is highly consistent with the extreme environmental conditions of Semera (up to 45\u00b0C). While the case count is currently low (3), the severity of the symptoms suggests either critical environmental exposure or an acute reaction to contaminated water sources, which are reported issues in the Awash basin. This differs significantly from the respiratory pattern seen in recent regional historical data."
+        },
+        "context_research": {
+            "location": "Semera Port",
+            "security_status": "The region is undergoing active monitoring for conflict zones and security updates; it remains a critical but sensitive logistics hub for the Ethiopia-Djibouti corridor.",
+            "water_quality": "Significant accessibility issues reported; current research focuses on drinking water quality and supply challenges within the Awash basin.",
+            "temperature": "Typically hot and arid (average ranges from 30\u00b0C to 45\u00b0C), though specific current figures were not in the provided snippet.",
+            "conflict_zone": false,
+            "nearby_facilities": [
+                "Semera Dry Port",
+                "Awash River Basin infrastructure",
+                "Semera University (Regional Landmark)",
+                "Logistics and Customs Hub"
+            ],
+            "recent_news": [
+                "Assessments of water quality and drinking water accessibility in the Awash basin.",
+                "Security status monitoring and conflict zone updates for the Afar regional transit routes."
+            ],
+            "last_updated": "2026-04-04T04:59:01.630294"
+        },
+        "alert": {
+            "title": "URGENT HEALTH ALERT: Illness Cases at Semera Port",
+            "message": "Three people at Semera Port have recently collapsed and experienced severe vomiting. This may be caused by the extreme heat in the area or a waterborne illness (Acute Watery Diarrhea). We are monitoring the situation closely to protect everyone at the port.",
+            "recommendations": [
+                "Seek medical help immediately if you feel dizzy, extremely hot, or start vomiting.",
+                "Drink plenty of clean, safe water throughout the day, even if you are not thirsty.",
+                "If someone collapses, move them to a cool, shaded area and call for help right away.",
+                "Report any similar symptoms to port health officers or supervisors immediately."
+            ],
+            "prevention_strategy": "Stay cool and stay clean: Drink safe water, rest in the shade during the hottest parts of the day, and always wash your hands with soap and clean water before eating or touching your face.",
+            "why_urgent": "This alert was issued because the high temperatures in the Afar region can cause life-threatening heatstroke, and symptoms like vomiting can spread quickly if they are caused by a germ in the water or food."
+        },
+        "status": "pending",
+        "timestamp": "2026-04-04 05:00:08.415033",
+        "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                raw_content\n0  URGENT: Seeing a spike in respiratory issues in Addis Ababa, specifically around the Mercato area. At least 45 people reported similar symptoms of dry cough and shortness of breath in the last 48 hours. Air quality seems poor today.\n1                             Health report from Hawassa: 12 students at a local school are down with high fever and skin rashes. We suspect the local well might be contaminated after the heavy rains. Need immediate water testing kits.\n2                              Bahir Dar update - Lake Tana area: 8 fishermen showing signs of severe nausea and abdominal pain. They mentioned a strange smell coming from the water near the northern shore. Local clinic is overwhelmed.\n3             Logistics Alert: Jijiga region. Movement of medical supplies is being slowed down by recent roadblocks. Meanwhile, we have 5 cases of suspected measles in the displacement camp. Vaccination status of the group is unknown.\n4                      Semera Port: High temperature recorded at the border today (41C). 3 truck drivers collapsed due to heat stroke, but one is also showing signs of persistent vomiting. Possible viral infection or just extreme heat?\n5                                                    Arba Minch: Banana plantation workers reporting unusual insect bites followed by joint pain. 15 cases so far. No deaths, but high morbidity. Is this Chikungunya or something similar?"
+    },
+    {
+        "session_id": "da34f997-3485-47e4-912b-04a51cf0ca42",
+        "extracted_data": {
+            "location": "Jijiga region, displacement camp",
+            "symptoms": [
+                "suspected measles"
+            ],
+            "cases": 5,
+            "date": null,
+            "additional_info": {
+                "logistics_issues": "medical supplies slowed by roadblocks",
+                "vaccination_status": "unknown"
             }
         },
         "risk_analysis": {
             "risk_level": "HIGH",
             "confidence": "85%",
-            "possible_disease": "Meningococcal Meningitis",
-            "reason": "The clinical presentation of fever and rash combined with gastrointestinal distress (vomiting and nausea) is a significant red flag for systemic infection. In the context of Addis Ababa\u2014located within the African Meningitis Belt\u2014this symptom cluster strongly matches the clinical pattern of Meningococcal Meningitis. A cluster of 39 cases with these acute symptoms indicates a high risk of rapid transmission and severe morbidity."
+            "possible_disease": "Measles (Rubeola)",
+            "reason": "From a symptomatic perspective, measles is highly contagious with an R0 of 12-18. In a displacement camp setting, five cases suggest an active transmission chain within a dense, vulnerable population. Given the context of recent respiratory illness clusters in the area (45 cases of pneumonia), the healthcare infrastructure is likely stressed, increasing the risk that these suspected measles cases could lead to a rapid, high-mortality outbreak."
+        },
+        "context_research": {
+            "location": "Jijiga region, displacement camp",
+            "security_status": "Data not available in the provided source (text contains only search interface elements).",
+            "water_quality": "Not mentioned in the source.",
+            "temperature": "Not mentioned in the source.",
+            "conflict_zone": false,
+            "nearby_facilities": [],
+            "recent_news": [
+                "Current security status and conflict updates in Jijiga Somali region displacement camps 2024 (Search Query)"
+            ],
+            "last_updated": "2026-04-04T04:58:08.174081"
         },
         "alert": {
-            "title": "Urgent Health Alert: Meningitis Outbreak in Addis Ababa",
-            "message": "Health officials have reported 39 cases of a serious illness in Addis Ababa. Patients are experiencing high fever, skin rashes, vomiting, and nausea. Experts believe this is Meningococcal Meningitis, a dangerous infection that can spread quickly in busy city areas. We are advising all residents to stay alert and take immediate action if they feel unwell.",
+            "title": "URGENT HEALTH ALERT: Suspected Measles Outbreak in Jijiga Displacement Camp",
+            "message": "Five cases of suspected measles have been reported in a displacement camp in the Jijiga region. Measles is a very contagious disease that causes high fever and a red rash. Because the camp is crowded, the virus can spread very quickly from person to person. Health teams are working to confirm the cases and stop the spread.",
             "recommendations": [
-                "Seek medical help immediately if you or a family member develops a sudden fever and a rash.",
-                "Go to the nearest health center if you experience a stiff neck, severe headache, or sensitivity to light.",
-                "Avoid close contact with people who are coughing or showing signs of illness.",
-                "Check with your local clinic to ensure your meningitis vaccinations are up to date."
+                "Take any child with a fever and a rash to the nearest health center immediately.",
+                "Keep sick children away from other people, especially babies and pregnant women.",
+                "Ensure all children in your family have received their measles vaccinations.",
+                "Cover your mouth and nose when coughing or sneezing.",
+                "Wash your hands often with soap and clean water."
             ],
-            "prevention_strategy": "The most effective way to prevent meningitis is through vaccination. You should also wash your hands frequently with soap, avoid sharing personal items like water bottles or utensils, and cover your mouth and nose when coughing or sneezing.",
-            "why_urgent": "This alert is urgent because meningitis can become life-threatening in a very short time. Since Addis Ababa is a crowded city, the disease can spread easily from person to person, making it vital to stop the outbreak now."
+            "prevention_strategy": "The most effective way to prevent measles is through vaccination. Two doses of the measles vaccine provide lifelong protection. In crowded areas, keeping living spaces clean and well-ventilated also helps reduce the risk of infection.",
+            "why_urgent": "This is urgent because measles is one of the most contagious diseases in the world. In a displacement camp where many people live close together, even 5 cases can quickly turn into a massive outbreak that puts many children's lives at risk."
         },
         "status": "pending",
-        "timestamp": "2026-04-04 03:14:31.947508"
+        "timestamp": "2026-04-04 05:00:08.410769",
+        "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                raw_content\n0  URGENT: Seeing a spike in respiratory issues in Addis Ababa, specifically around the Mercato area. At least 45 people reported similar symptoms of dry cough and shortness of breath in the last 48 hours. Air quality seems poor today.\n1                             Health report from Hawassa: 12 students at a local school are down with high fever and skin rashes. We suspect the local well might be contaminated after the heavy rains. Need immediate water testing kits.\n2                              Bahir Dar update - Lake Tana area: 8 fishermen showing signs of severe nausea and abdominal pain. They mentioned a strange smell coming from the water near the northern shore. Local clinic is overwhelmed.\n3             Logistics Alert: Jijiga region. Movement of medical supplies is being slowed down by recent roadblocks. Meanwhile, we have 5 cases of suspected measles in the displacement camp. Vaccination status of the group is unknown.\n4                      Semera Port: High temperature recorded at the border today (41C). 3 truck drivers collapsed due to heat stroke, but one is also showing signs of persistent vomiting. Possible viral infection or just extreme heat?\n5                                                    Arba Minch: Banana plantation workers reporting unusual insect bites followed by joint pain. 15 cases so far. No deaths, but high morbidity. Is this Chikungunya or something similar?"
+    },
+    {
+        "session_id": "fef6e3c1-a464-4dbb-8e86-a5bbadaa9738",
+        "extracted_data": {
+            "location": "Bahir Dar, Lake Tana area",
+            "symptoms": [
+                "severe nausea",
+                "abdominal pain"
+            ],
+            "cases": 8,
+            "date": null,
+            "additional_info": {
+                "environmental_factors": "strange smell from water near northern shore",
+                "population": "fishermen",
+                "facility_status": "local clinic is overwhelmed"
+            }
+        },
+        "risk_analysis": {
+            "risk_level": "MEDIUM",
+            "confidence": "75%",
+            "possible_disease": "Waterborne Enteric Infection (e.g., Cholera or Typhoid Fever)",
+            "reason": "The clinical presentation of severe nausea and abdominal pain points to acute gastrointestinal distress. While the case count is currently low (8), the symptoms strongly correlate with waterborne pathogens prevalent in the Lake Tana region. The risk is elevated by the localized context of water pollution and conflict-related infrastructure breakdown, which often precedes larger outbreaks of enteric diseases."
+        },
+        "context_research": {
+            "location": "Bahir Dar, Lake Tana area",
+            "security_status": "The region is experiencing significant instability due to ongoing conflict in the Amhara region, with active travel advisories and security updates being issued for Bahir Dar.",
+            "water_quality": "Significant concerns regarding pollution in Lake Tana affecting water quality and challenges regarding the accessibility of safe drinking water in the Bahir Dar area.",
+            "temperature": "Typically ranges between 14\u00b0C and 29\u00b0C (Subtropical highland climate), though specific current figures were not provided in the snippet.",
+            "conflict_zone": true,
+            "nearby_facilities": [
+                "Felege Hiwot Referral Hospital",
+                "Tibebe Ghion Specialized Hospital",
+                "Bahir Dar Blue Nile River Bridge",
+                "Lake Tana Port"
+            ],
+            "recent_news": [
+                "Amhara region current security situation and conflict updates",
+                "Lake Tana water quality issues and pollution reports",
+                "Travel advisories issued for Bahir Dar and surrounding districts"
+            ],
+            "last_updated": "2026-04-04T04:57:23.791899"
+        },
+        "alert": {
+            "title": "URGENT HEALTH ALERT: Increase in Stomach Illnesses in Bahir Dar and Lake Tana Area",
+            "message": "Health officials have identified 8 cases of severe stomach illness near the Lake Tana area. Patients are suffering from intense nausea and abdominal pain. This cluster of cases suggests a waterborne infection, such as Cholera or Typhoid Fever, which can spread quickly through contaminated water and food.",
+            "recommendations": [
+                "If you experience severe stomach pain, vomiting, or diarrhea, go to the nearest health center immediately.",
+                "Only drink water that has been boiled for at least one minute or treated with water purification tablets.",
+                "Wash your hands thoroughly with soap and clean water after using the latrine and before preparing or eating food.",
+                "Avoid eating raw vegetables or unpeeled fruits; ensure all food is cooked thoroughly and served hot.",
+                "Avoid swimming or bathing directly in Lake Tana until further notice."
+            ],
+            "prevention_strategy": "The best way to stay safe is the 'Boil, Wash, and Cook' method: Always boil your drinking water, wash your hands frequently with soap, and ensure all food is freshly cooked and handled with clean hands.",
+            "why_urgent": "This alert was issued because 8 people getting sick at the same time in one area is a warning sign of an outbreak. Because Lake Tana is a major water source, the risk of the illness spreading to more people is high unless we take action now."
+        },
+        "status": "pending",
+        "timestamp": "2026-04-04 05:00:08.406199",
+        "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                raw_content\n0  URGENT: Seeing a spike in respiratory issues in Addis Ababa, specifically around the Mercato area. At least 45 people reported similar symptoms of dry cough and shortness of breath in the last 48 hours. Air quality seems poor today.\n1                             Health report from Hawassa: 12 students at a local school are down with high fever and skin rashes. We suspect the local well might be contaminated after the heavy rains. Need immediate water testing kits.\n2                              Bahir Dar update - Lake Tana area: 8 fishermen showing signs of severe nausea and abdominal pain. They mentioned a strange smell coming from the water near the northern shore. Local clinic is overwhelmed.\n3             Logistics Alert: Jijiga region. Movement of medical supplies is being slowed down by recent roadblocks. Meanwhile, we have 5 cases of suspected measles in the displacement camp. Vaccination status of the group is unknown.\n4                      Semera Port: High temperature recorded at the border today (41C). 3 truck drivers collapsed due to heat stroke, but one is also showing signs of persistent vomiting. Possible viral infection or just extreme heat?\n5                                                    Arba Minch: Banana plantation workers reporting unusual insect bites followed by joint pain. 15 cases so far. No deaths, but high morbidity. Is this Chikungunya or something similar?"
+    },
+    {
+        "session_id": "179a3e3f-9fcf-420b-9af6-6a7ec3733f12",
+        "extracted_data": {
+            "location": "Hawassa",
+            "symptoms": [
+                "high fever",
+                "skin rashes"
+            ],
+            "cases": 12,
+            "date": null,
+            "additional_info": {
+                "suspected_cause": "contaminated local well",
+                "environmental_context": "heavy rains",
+                "requirements": "water testing kits",
+                "population": "students"
+            }
+        },
+        "risk_analysis": {
+            "risk_level": "MEDIUM",
+            "confidence": "85%",
+            "possible_disease": "Measles (Rubeola)",
+            "reason": "The clinical presentation of high fever paired with skin rashes in a cluster of 12 cases is highly characteristic of Measles, which remains endemic in parts of Ethiopia. While the symptoms could also align with vector-borne diseases like Dengue or Chikungunya given the mild tropical climate and proximity to Lake Hawassa, the rapid appearance of a rash-fever cluster in an urban center typically suggests a highly contagious viral exanthem. The risk is marked as Medium because while the case count is currently low compared to historical respiratory data, the potential for rapid transmission in a densely populated urban area like Hawassa is significant."
+        },
+        "context_research": {
+            "location": "Hawassa",
+            "security_status": "Generally stable and considered one of the safer urban centers in Ethiopia; however, it remains under the national security oversight due to broader regional tensions and historical ethnic friction in the Sidama region.",
+            "water_quality": "Variable; reports indicate challenges with industrial runoff affecting Lake Hawassa and high fluoride levels in some local groundwater sources, impacting drinking water accessibility.",
+            "temperature": "Typical daily highs range from 24\u00b0C to 29\u00b0C (75\u00b0F - 84\u00b0F) with a mild tropical climate.",
+            "conflict_zone": false,
+            "nearby_facilities": [
+                "Hawassa University Referral Hospital",
+                "Adare General Hospital",
+                "Hawassa Industrial Park",
+                "Kibru Hospital"
+            ],
+            "recent_news": [
+                "Assessment of water quality and environmental impact on Lake Hawassa 2024",
+                "Security briefings regarding regional stability in the Sidama State",
+                "Infrastructure and industrial growth reports from the Hawassa Industrial Park"
+            ],
+            "last_updated": "2026-04-04T04:56:36.299991"
+        },
+        "alert": {
+            "title": "Health Alert: Possible Measles Outbreak in Hawassa",
+            "message": "Health officials have identified 12 cases of suspected Measles (Rubeola) in Hawassa. Patients are reporting high fever and skin rashes. Because this many cases have appeared at once, there is a medium risk that the illness could spread further into the community if precautions are not taken immediately.",
+            "recommendations": [
+                "Seek medical help immediately at the nearest health center if you or your child develop a high fever and a rash.",
+                "Keep children with symptoms at home and away from school or public places to prevent the virus from spreading.",
+                "Check your family's immunization records to ensure everyone has received their measles vaccinations.",
+                "Practice good hygiene by washing hands frequently with soap and water."
+            ],
+            "prevention_strategy": "The best way to prevent Measles is through vaccination. Ensure all children receive their two doses of the vaccine. Additionally, avoid crowded places and keep living areas well-ventilated to reduce the chance of the virus spreading through the air.",
+            "why_urgent": "This alert was generated because 12 cases in one area indicate the virus is actively moving through the community. Measles is highly contagious, and Hawassa\u2019s population density makes it easy for the disease to spread quickly to many families if we don't act now."
+        },
+        "status": "pending",
+        "timestamp": "2026-04-04 05:00:08.265498",
+        "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                raw_content\n0  URGENT: Seeing a spike in respiratory issues in Addis Ababa, specifically around the Mercato area. At least 45 people reported similar symptoms of dry cough and shortness of breath in the last 48 hours. Air quality seems poor today.\n1                             Health report from Hawassa: 12 students at a local school are down with high fever and skin rashes. We suspect the local well might be contaminated after the heavy rains. Need immediate water testing kits.\n2                              Bahir Dar update - Lake Tana area: 8 fishermen showing signs of severe nausea and abdominal pain. They mentioned a strange smell coming from the water near the northern shore. Local clinic is overwhelmed.\n3             Logistics Alert: Jijiga region. Movement of medical supplies is being slowed down by recent roadblocks. Meanwhile, we have 5 cases of suspected measles in the displacement camp. Vaccination status of the group is unknown.\n4                      Semera Port: High temperature recorded at the border today (41C). 3 truck drivers collapsed due to heat stroke, but one is also showing signs of persistent vomiting. Possible viral infection or just extreme heat?\n5                                                    Arba Minch: Banana plantation workers reporting unusual insect bites followed by joint pain. 15 cases so far. No deaths, but high morbidity. Is this Chikungunya or something similar?"
+    },
+    {
+        "session_id": "a679b14f-71b3-45f2-badf-cedbb1423f34",
+        "extracted_data": {
+            "location": "Addis Ababa, Mercato area",
+            "symptoms": [
+                "respiratory issues",
+                "dry cough",
+                "shortness of breath"
+            ],
+            "cases": 45,
+            "date": "last 48 hours",
+            "additional_info": {
+                "environmental_factors": "poor air quality"
+            }
+        },
+        "risk_analysis": {
+            "risk_level": "HIGH",
+            "confidence": "90%",
+            "possible_disease": "Viral Pneumonia (e.g., COVID-19 or Influenza variant)",
+            "reason": "The clinical presentation of dry cough and shortness of breath indicates severe lower respiratory tract involvement. A cluster of 45 cases presenting with respiratory distress within a 48-hour window in a high-density commercial hub like Mercato suggests a highly transmissible pathogen with significant morbidity potential."
+        },
+        "context_research": {
+            "location": "Addis Ababa, Mercato area",
+            "security_status": "The area is generally stable but characterized by high-density crowds, leading to a high risk of petty crimes such as pickpocketing. No active armed conflict is reported within the city limits of Addis Ababa.",
+            "water_quality": "The Mercato district experiences significant water accessibility issues and intermittent supply due to aging infrastructure and high demand in the commercial hub.",
+            "temperature": "Typical temperatures range from 12\u00b0C (54\u00b0F) to 25\u00b0C (77\u00b0F) given Addis Ababa's subtropical highland climate.",
+            "conflict_zone": false,
+            "nearby_facilities": [
+                "St. Paul's Hospital Millennium Medical College",
+                "Addis Ketema Health Center",
+                "Mercato Fire and Emergency Services Station"
+            ],
+            "recent_news": [
+                "Ongoing urban renewal and modernization projects in the Addis Ketema district.",
+                "City administration efforts to regulate commodity prices and illegal trading within the market.",
+                "Infrastructure improvements aimed at alleviating traffic congestion in the Mercato area."
+            ],
+            "last_updated": "2026-04-04T04:55:49.544947"
+        },
+        "alert": {
+            "title": "URGENT HEALTH ALERT: Respiratory Outbreak in Mercato, Addis Ababa",
+            "message": "Health officials have identified a high-risk outbreak of respiratory illness in the Mercato area. So far, 45 people have reported symptoms including a dry cough and serious trouble breathing. This appears to be a fast-spreading viral pneumonia, similar to COVID-19 or a strong flu, and it requires immediate attention to keep the community safe.",
+            "recommendations": [
+                "Wear a well-fitting face mask at all times when in public areas or markets.",
+                "If you have a dry cough or find it hard to breathe, go to the nearest health center immediately.",
+                "Avoid crowded places and keep at least two arm-lengths of distance from others.",
+                "Wash your hands with soap and water frequently, especially after touching surfaces in public.",
+                "Stay home if you feel unwell or have any symptoms of a cold or flu."
+            ],
+            "prevention_strategy": "The best way to stay safe is to stop germs from moving between people. Cover your mouth and nose with a mask, keep your hands clean, and avoid close contact with anyone who is coughing or sneezing.",
+            "why_urgent": "This is urgent because 45 cases have appeared very quickly in a short time. Mercato is one of the most crowded areas in the city, which means the sickness can spread to hundreds of people very fast if we do not act now."
+        },
+        "status": "pending",
+        "timestamp": "2026-04-04 05:00:08.262651",
+        "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                raw_content\n0  URGENT: Seeing a spike in respiratory issues in Addis Ababa, specifically around the Mercato area. At least 45 people reported similar symptoms of dry cough and shortness of breath in the last 48 hours. Air quality seems poor today.\n1                             Health report from Hawassa: 12 students at a local school are down with high fever and skin rashes. We suspect the local well might be contaminated after the heavy rains. Need immediate water testing kits.\n2                              Bahir Dar update - Lake Tana area: 8 fishermen showing signs of severe nausea and abdominal pain. They mentioned a strange smell coming from the water near the northern shore. Local clinic is overwhelmed.\n3             Logistics Alert: Jijiga region. Movement of medical supplies is being slowed down by recent roadblocks. Meanwhile, we have 5 cases of suspected measles in the displacement camp. Vaccination status of the group is unknown.\n4                      Semera Port: High temperature recorded at the border today (41C). 3 truck drivers collapsed due to heat stroke, but one is also showing signs of persistent vomiting. Possible viral infection or just extreme heat?\n5                                                    Arba Minch: Banana plantation workers reporting unusual insect bites followed by joint pain. 15 cases so far. No deaths, but high morbidity. Is this Chikungunya or something similar?"
+    },
+    {
+        "session_id": "b32011b5-7838-4b14-9d24-eafb4d206ab4",
+        "extracted_data": {
+            "location": "Addis Ababa, Mercato area",
+            "symptoms": [
+                "dry cough",
+                "shortness of breath",
+                "respiratory issues"
+            ],
+            "cases": 45,
+            "date": "last 48 hours",
+            "additional_info": {
+                "air_quality": "poor",
+                "urgency": "URGENT"
+            }
+        },
+        "risk_analysis": {
+            "risk_level": "HIGH",
+            "confidence": "85%",
+            "possible_disease": "Viral Pneumonia (e.g., COVID-19 or Influenza variant)",
+            "reason": "The clinical pattern of dry cough and shortness of breath (dyspnea) indicates lower respiratory tract involvement rather than a simple upper respiratory infection. A cluster of 45 cases emerging within only 48 hours in a high-density area like Mercato suggests a highly transmissible airborne or droplet-borne pathogen. The rapid onset and severity of symptoms (shortness of breath) warrant a high risk classification due to the potential for rapid escalation and healthcare system strain."
+        },
+        "context_research": {
+            "location": "Addis Ababa, Mercato area",
+            "security_status": "The provided research data contains search queries for security status but does not include actual status reports or incident summaries.",
+            "water_quality": "The provided data contains search queries regarding water supply and quality in the Mercato district, but no specific quality reports or findings are present in the text.",
+            "temperature": "Not mentioned in the provided data.",
+            "conflict_zone": false,
+            "nearby_facilities": [],
+            "recent_news": [],
+            "last_updated": "2026-04-04 04:34:15.878912"
+        },
+        "alert": {
+            "title": "URGENT HEALTH ALERT: Respiratory Illness Outbreak in Mercato",
+            "message": "A high-risk health alert has been issued for the Mercato area of Addis Ababa. In the last 48 hours, 45 people have fallen ill with severe respiratory symptoms, including dry coughs and difficulty breathing. Health experts believe this is a highly contagious viral pneumonia, similar to COVID-19 or a strong flu variant, that is spreading quickly through the community.",
+            "recommendations": [
+                "Seek medical attention immediately if you have a persistent dry cough or trouble breathing.",
+                "Wear a face mask at all times when in public, especially in crowded market areas.",
+                "Avoid the Mercato area for the next few days unless it is absolutely necessary.",
+                "Wash your hands with soap and water frequently or use hand sanitizer.",
+                "If you feel sick, stay home and keep away from family members to stop the spread."
+            ],
+            "prevention_strategy": "To stay safe, keep a distance of at least two meters from others, wear a mask over your nose and mouth, and avoid touching your face. Keeping your hands clean and staying away from crowded spots are the best ways to protect yourself and your family.",
+            "why_urgent": "This alert was generated because 45 people got sick in a very short time in one of the most crowded areas of the city. Because so many people visit Mercato every day, there is a high risk that this illness could spread across all of Addis Ababa very quickly if we do not act now."
+        },
+        "status": "pending",
+        "timestamp": "2026-04-04 04:34:34.378230"
     }
 ]

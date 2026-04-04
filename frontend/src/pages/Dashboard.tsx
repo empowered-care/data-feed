@@ -73,7 +73,7 @@ export default function Dashboard() {
     cases: r.extracted_data?.cases || 0 
   })).reverse();
       
-  const displayReports = reports.slice(0, 8);
+  const displayReports = reports.slice(0, 15);
 
   const [showRaw, setShowRaw] = useState(false);
 
@@ -301,7 +301,8 @@ export default function Dashboard() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/50 text-left text-muted-foreground bg-muted/20">
-                  <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Location</th>
+                  <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Location Hub</th>
+                  <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Pathology</th>
                   <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Case Count</th>
                   <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Risk Profile</th>
                   <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Validation Status</th>
@@ -315,11 +316,17 @@ export default function Dashboard() {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.05 }}
-                    className="hover:bg-primary/5 transition-colors group"
+                    className="hover:bg-primary/5 transition-colors group cursor-pointer"
+                    onClick={() => window.location.href = `/vault`}
                   >
                     <td className="px-6 py-4">
                       <div className="font-bold text-foreground group-hover:text-primary transition-colors">{r.extracted_data.location}</div>
-                      <div className="text-[10px] text-muted-foreground">{r.timestamp ? new Date(r.timestamp).toLocaleTimeString() : 'Recently'} • {r.extracted_data.disease || 'General'}</div>
+                      <div className="text-[10px] text-muted-foreground">{r.timestamp ? new Date(r.timestamp).toLocaleTimeString() : 'Recently'}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Badge variant="secondary" className="font-bold text-[10px] uppercase tracking-tighter bg-muted/50">
+                        {r.risk_analysis?.possible_disease || 'Unidentified'}
+                      </Badge>
                     </td>
                     <td className="px-6 py-4 font-mono font-bold text-lg">{r.extracted_data.cases}</td>
                     <td className="px-6 py-4"><RiskBadge level={r.risk_analysis.risk_level} /></td>

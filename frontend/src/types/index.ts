@@ -97,6 +97,7 @@ export interface AgentPipelineState {
   completedSteps: AgentStep[];
   isProcessing: boolean;
   result: OutbreakReport | null;
+  pipelineResults: OutbreakReport[];
   error: string | null;
 }
 

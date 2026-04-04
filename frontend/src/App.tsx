@@ -16,6 +16,7 @@ import SummaryPage from "@/pages/SummaryPage";
 import SettingsPage from "@/pages/SettingsPage";
 import AdminPage from "@/pages/AdminPage";
 import ProfilePage from "@/pages/ProfilePage";
+import DataVault from "@/pages/DataVault";
 import NotFound from "@/pages/NotFound";
 import DataEntryPage from "@/pages/DataEntryPage";
 import { useEffect, useState } from "react";
@@ -91,6 +92,7 @@ const App = () => {
                     <Route path="/summary" element={<SummaryPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/vault" element={<DataVault />} />
                     <Route path="/admin" element={<AdminPage />} />
                   </Route>
 
