@@ -229,3 +229,4 @@ pip-delete-this-directory.txt
 
 doclayout_yolo_ft.pt
 .env
+node_modules
