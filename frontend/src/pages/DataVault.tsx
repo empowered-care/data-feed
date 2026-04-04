@@ -49,10 +49,14 @@ export default function DataVault() {
   });
 
   const exportData = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(reports, null, 2));
+    if (filteredReports.length === 0) {
+      alert("No data available to export with current filters");
+      return;
+    }
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(filteredReports, null, 2));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "epidemiological_archive.json");
+    downloadAnchorNode.setAttribute("download", `epidemiological_archive_${new Date().getTime()}.json`);
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
@@ -86,13 +90,13 @@ export default function DataVault() {
           />
         </div>
         <div className="flex items-center gap-2">
-           {['HIGH', 'MEDIUM', 'LOW'].map(level => (
+           {['ALL', 'HIGH', 'MEDIUM', 'LOW'].map(level => (
              <button
                 key={level}
-                onClick={() => setFilterRisk(filterRisk === level ? null : level)}
+                onClick={() => setFilterRisk(level === 'ALL' ? null : (filterRisk === level ? null : level))}
                 className={cn(
                   "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all",
-                  filterRisk === level 
+                  (level === 'ALL' && !filterRisk) || (filterRisk === level)
                     ? "bg-primary border-primary text-white shadow-lg shadow-primary/20" 
                     : "bg-background border-border/50 text-muted-foreground hover:border-primary/30"
                 )}
@@ -128,7 +132,7 @@ export default function DataVault() {
                   onClick={() => setSelectedReport(selectedReport === r.session_id ? null : r.session_id)}
                 >
                   <td className="px-6 py-5 whitespace-nowrap font-mono text-[11px] text-muted-foreground font-bold">
-                    {r.timestamp ? new Date(r.timestamp).toLocaleDateString() : 'N/A'}
+                    {r.created_at ? new Date(r.created_at).toLocaleDateString() : 'N/A'}
                   </td>
                   <td className="px-6 py-5">
                     <div className="font-black text-foreground group-hover:text-primary transition-colors uppercase tracking-tight">{r.extracted_data.location}</div>
