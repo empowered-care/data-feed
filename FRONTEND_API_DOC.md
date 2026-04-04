@@ -1,6 +1,6 @@
-# Aegis Lite - Frontend API Documentation
+# Empowered Care - Frontend API Documentation
 
-This document provides the API specifications and JSON response examples for the frontend team to integrate with the Aegis Lite Multi-Agent Disease Outbreak Detection System.
+This document provides the API specifications and JSON response examples for the frontend team to integrate with the Empowered Care Multi-Agent Disease Outbreak Detection System.
 
 ## 🚀 Base URL
 `http://localhost:8000`

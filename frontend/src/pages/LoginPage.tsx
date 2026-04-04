@@ -24,16 +24,20 @@ export default function LoginPage() {
 
     try {
       const tokenData = await api.login(email, password);
-      // Fetch full user profile
       const authStore = useAuthStore.getState();
       authStore.setAuth(tokenData.access_token, {
         email,
         full_name: tokenData.full_name,
-        role: tokenData.role as 'admin' | 'vw',
+        role: tokenData.role as 'admin' | 'vw' | 'data_entry',
         created_at: new Date().toISOString(),
       });
       toast.success('Welcome back!');
-      navigate('/dashboard');
+      // Route by role
+      if (tokenData.role === 'data_entry') {
+        navigate('/data-entry');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err: any) {
       const msg = err.response?.data?.detail || 'Login failed. Please check your credentials.';
       toast.error(msg);

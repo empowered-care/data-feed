@@ -35,11 +35,23 @@ export interface AlertMessage {
   why_urgent?: string;
 }
 
+export interface ContextData {
+  location: string;
+  security_status?: string;
+  water_quality?: string;
+  temperature?: string;
+  conflict_zone: boolean;
+  nearby_facilities: string[];
+  recent_news: string[];
+  last_updated: string;
+}
+
 export interface OutbreakProcessResponse {
   extracted_data: OutbreakReportPayload;
   validation: ValidationResult;
   risk_analysis: RiskAnalysis;
   consensus?: ConsensusResult;
+  context_research?: ContextData;
   alert: AlertMessage;
   session_id: string;
   metadata: Record<string, any>;
@@ -85,6 +97,7 @@ export interface AgentPipelineState {
   completedSteps: AgentStep[];
   isProcessing: boolean;
   result: OutbreakReport | null;
+  pipelineResults: OutbreakReport[];
   error: string | null;
 }
 

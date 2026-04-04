@@ -10,12 +10,16 @@ const steps: { key: AgentStep; label: string; description: string }[] = [
 ];
 
 interface Props {
-  currentStep: AgentStep | null;
-  completedSteps: AgentStep[];
-  isProcessing: boolean;
+  currentStep?: AgentStep | null;
+  completedSteps?: AgentStep[];
+  isProcessing?: boolean;
 }
 
-export function AgentPipeline({ currentStep, completedSteps, isProcessing }: Props) {
+export function AgentPipeline({ 
+  currentStep = null, 
+  completedSteps = [], 
+  isProcessing = false 
+}: Props) {
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">

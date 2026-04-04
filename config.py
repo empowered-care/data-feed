@@ -3,7 +3,7 @@ from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 # Application Paths
 BASE_DIR = Path(__file__).parent
@@ -21,7 +21,7 @@ def get_session_dir(session_id: str):
 # API Settings
 API_HOST = "0.0.0.0"
 API_PORT = 8000
-API_TITLE = "Aegis Lite - Multi-Agent Disease Outbreak Detection System"
+API_TITLE = "Empowered Care - Multi-Agent Disease Outbreak Detection System"
 API_VERSION = "1.0.0"
 
 # Security Settings
@@ -40,7 +40,7 @@ SMTP_FROM = os.getenv("SMTP_FROM")
 SMTP_USE_TLS = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
 
 # Frontend URL (for invitation/reset links)
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:8080")
 
 # Logging
 LOG_LEVEL = "INFO"

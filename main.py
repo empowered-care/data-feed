@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-Aegis Lite - Unified Multi-Agent Disease Outbreak Detection & Document Processing System
+Empowered Care - Unified Multi-Agent Disease Outbreak Detection & Document Processing System
 """
 
 import logging
 import uuid
 import io
+import json
 import cv2
 import numpy as np
 import pandas as pd
@@ -19,12 +20,14 @@ from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI, HTTPException, UploadFile, File, Depends, status, Security
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.responses import FileResponse
 
 from models.schemas import (
     OutbreakProcessResponse, QueryResponse, ChatRequest, ChatResponse,
-    UserRole, UserInvite, UserAcceptInvite, PasswordResetRequest, 
+    UserRole, UserInvite, UserAcceptInvite, PasswordResetRequest,
     PasswordResetConfirm, ChangePassword, Token, User, UserBase,
-    ProcessResponse, Detection
+    ProcessResponse, Detection,
+    PatientRecord, PatientRecordResponse, VitalSigns
 )
 from services.gemini_service import GeminiService
 from services.agents import (
@@ -53,7 +56,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-logger.info("🚀 Starting Aegis Lite Unified System...")
+logger.info("🚀 Starting Empowered Care Unified System...")
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -184,7 +187,7 @@ def get_layout_detector():
         layout_detector = LayoutDetector()
     return layout_detector
 
-logger.info("✅ Aegis Lite initialization complete!")
+logger.info("✅ Empowered Care initialization complete!")
 
 # --- ADMIN ANALYSIS & SCHEDULING ENDPOINTS ---
 
@@ -256,7 +259,7 @@ async def get_analysis_status(user: dict = Depends(get_current_user)):
 async def root():
     """Health check endpoint."""
     return {
-        "message": "Aegis Lite - Unified Multi-Agent System",
+        "message": "Empowered Care - Unified Multi-Agent System",
         "status": "running",
         "version": API_VERSION
     }
@@ -311,6 +314,22 @@ async def invite_user(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@app.get("/admin/users")
+async def get_users(admin: dict = Depends(get_current_admin)):
+    """Return a list of all current users."""
+    try:
+        return await auth_service.get_all_users()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.delete("/admin/users/{user_id}")
+async def delete_user(user_id: str, admin: dict = Depends(get_current_admin)):
+    """Delete a user account."""
+    try:
+        return await auth_service.delete_user(user_id, admin)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @app.post("/auth/register")
 async def register_user(accept_data: UserAcceptInvite):
     """Register a new user using the invitation token from email."""
@@ -323,7 +342,7 @@ async def register_user(accept_data: UserAcceptInvite):
 async def forgot_password(request: PasswordResetRequest):
     """Request a password reset link to be sent via email."""
     try:
-        return await auth_service.request_password_reset(request.email)
+        return await auth_service.request_password_reset(request.email, request.frontend_url)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -467,12 +486,12 @@ async def process_document(
 
 # --- OUTBREAK DETECTION ENDPOINTS ---
 
-@app.post("/outbreak/process", response_model=OutbreakProcessResponse)
+@app.post("/outbreak/process", response_model=List[OutbreakProcessResponse])
 async def process_outbreak_report(
     request: dict,
     user: dict = Depends(get_current_user)
 ):
-    """Process an outbreak report through the dynamic multi-agent pipeline."""
+    """Process one or more outbreak reports through the dynamic multi-agent pipeline."""
     text = request.get("text", "").strip()
     if not text:
         raise HTTPException(status_code=400, detail="Text field is required and cannot be empty")
@@ -480,51 +499,63 @@ async def process_outbreak_report(
     if len(text) > MAX_TEXT_LENGTH:
         raise HTTPException(status_code=400, detail=f"Text input too long (max {MAX_TEXT_LENGTH} characters)")
 
-    session_id = str(uuid.uuid4())
     start_time = datetime.now()
-
-    logger.info(f"--- 🚨 Outbreak Report Processing (Dynamic): {session_id} ---")
+    logger.info(f"--- 🚨 Outbreak Report Processing (Dynamic Multi-Record) ---")
     
     try:
-        # Using SuperAgent to orchestrate everything
-        result = await super_agent.process_outbreak_parallel(text)
+        # Get historical context for AI comparison
+        history = data_assistant.get_historical_context()
         
-        # Store in data assistant
-        data_assistant.add_report(result["extracted_data"])
+        # SuperAgent now returns a LIST of results
+        batch_results = await super_agent.process_outbreak_parallel(text, history)
+        
+        response_list = []
+        for result in batch_results:
+            session_id = str(uuid.uuid4())
+            # Store in data assistant with full context
+            data_assistant.add_report(
+                result["extracted_data"],
+                session_id=session_id,
+                risk_analysis=result["risk_analysis"].model_dump(mode='json') if hasattr(result["risk_analysis"], "model_dump") else result["risk_analysis"],
+                alert=result["alert"].model_dump(mode='json') if hasattr(result["alert"], "model_dump") else result["alert"],
+                context_research=result["context_research"].model_dump(mode='json') if result.get("context_research") and hasattr(result["context_research"], "model_dump") else result.get("context_research"),
+                raw_report=text
+            )
+
+            response_list.append(OutbreakProcessResponse(
+                extracted_data=result["extracted_data"],
+                validation=result["validation"],
+                risk_analysis=result["risk_analysis"],
+                consensus=result["consensus"],
+                context_research=result["context_research"],
+                alert=result["alert"],
+                session_id=session_id,
+                metadata={
+                    "processed_at": str(datetime.now()),
+                    "orchestrator": "SuperAgent",
+                    "consensus_reached": result["consensus"].consensus_reached
+                },
+                message="🚨 Signal processed.",
+                human_validation_required=result["consensus"].final_risk_level in ["HIGH", "MEDIUM"]
+            ))
 
         processing_time = (datetime.now() - start_time).total_seconds()
-        logger.info(f"--- ✅ Outbreak Processing Complete: {session_id} ({processing_time:.2f}s) ---")
+        logger.info(f"--- ✅ Outbreak Processing Complete: {len(response_list)} records ({processing_time:.2f}s) ---")
 
-        return OutbreakProcessResponse(
-            extracted_data=result["extracted_data"],
-            validation=result["validation"],
-            risk_analysis=result["risk_analysis"],
-            consensus=result["consensus"],
-            alert=result["alert"],
-            session_id=session_id,
-            metadata={
-                "processed_at": str(datetime.now()),
-                "processing_time_seconds": processing_time,
-                "orchestrator": "SuperAgent",
-                "consensus_reached": result["consensus"].consensus_reached
-            },
-            message="🚨 Outbreak report processed through dynamic multi-agent pipeline.",
-            human_validation_required=result["consensus"].final_risk_level in ["HIGH", "MEDIUM"]
-        )
+        return response_list
     except Exception as e:
-        logger.error(f"❌ Processing error for session {session_id}: {e}")
+        logger.error(f"❌ Processing error: {e}")
         raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
 
-@app.post("/outbreak/upload", response_model=OutbreakProcessResponse)
+@app.post("/outbreak/upload", response_model=List[OutbreakProcessResponse])
 async def upload_outbreak_file(
     file: UploadFile = File(...),
     user: dict = Depends(get_current_user)
 ):
     """Upload and process an outbreak report file (PDF, CSV, or Image)."""
-    session_id = str(uuid.uuid4())
     start_time = datetime.now()
     
-    logger.info(f"--- 📂 Processing Uploaded File: {file.filename} ({session_id}) ---")
+    logger.info(f"--- 📂 Processing Uploaded File: {file.filename} ---")
     
     content = await file.read()
     extracted_text = ""
@@ -556,28 +587,47 @@ async def upload_outbreak_file(
         if not extracted_text.strip():
             raise HTTPException(status_code=400, detail="Could not extract any text from the provided file.")
 
-        # Feed extracted text to SuperAgent
-        result = await super_agent.process_outbreak_parallel(extracted_text)
-        
-        # Store and return
-        data_assistant.add_report(result["extracted_data"])
-        processing_time = (datetime.now() - start_time).total_seconds()
+        # Get historical context
+        history = data_assistant.get_historical_context()
 
-        return OutbreakProcessResponse(
-            extracted_data=result["extracted_data"],
-            validation=result["validation"],
-            risk_analysis=result["risk_analysis"],
-            consensus=result["consensus"],
-            alert=result["alert"],
-            session_id=session_id,
-            metadata={
-                "processed_at": str(datetime.now()),
-                "processing_time_seconds": processing_time,
-                "file_name": file.filename
-            },
-            message=f"🚨 File '{file.filename}' processed via Dynamic Multi-Agent Pipeline.",
-            human_validation_required=result["consensus"].final_risk_level in ["HIGH", "MEDIUM"]
-        )
+        # Feed extracted text to SuperAgent
+        batch_results = await super_agent.process_outbreak_parallel(extracted_text, history)
+        
+        response_list = []
+        for result in batch_results:
+            session_id = str(uuid.uuid4())
+            # Store in data assistant with full context
+            data_assistant.add_report(
+                result["extracted_data"],
+                session_id=session_id,
+                risk_analysis=result["risk_analysis"].model_dump(mode='json') if hasattr(result["risk_analysis"], "model_dump") else result["risk_analysis"],
+                alert=result["alert"].model_dump(mode='json') if hasattr(result["alert"], "model_dump") else result["alert"],
+                context_research=result["context_research"].model_dump(mode='json') if result.get("context_research") and hasattr(result["context_research"], "model_dump") else result.get("context_research"),
+                raw_report=extracted_text
+            )
+
+            response_list.append(OutbreakProcessResponse(
+                extracted_data=result["extracted_data"],
+                validation=result["validation"],
+                risk_analysis=result["risk_analysis"],
+                consensus=result["consensus"],
+                context_research=result["context_research"],
+                alert=result["alert"],
+                session_id=session_id,
+                metadata={
+                    "processed_at": str(datetime.now()),
+                    "file_name": file.filename
+                },
+                message=f"🚨 Record extracted.",
+                human_validation_required=result["consensus"].final_risk_level in ["HIGH", "MEDIUM"]
+            ))
+
+        processing_time = (datetime.now() - start_time).total_seconds()
+        return response_list
+
+    except Exception as e:
+        logger.error(f"❌ File processing failed: {e}")
+        raise HTTPException(status_code=500, detail=f"File processing failed: {str(e)}")
 
     except Exception as e:
         logger.error(f"❌ File processing failed: {e}")
@@ -591,12 +641,20 @@ async def approve_alert(
 ):
     """Human validation endpoint for alerts (Admin Only)."""
     approved = request.get("approved", True) if request else True
-    logger.info(f"Alert {'approved' if approved else 'rejected'} for session {session_id}")
+    status = "approved" if approved else "rejected"
+    
+    logger.info(f"Alert {status} for session {session_id}")
+    
+    # Update status in persistent store
+    success = data_assistant.update_report_status(session_id, status)
+    
+    if not success:
+        raise HTTPException(status_code=404, detail="Report session not found")
 
     return {
         "session_id": session_id,
         "approved": approved,
-        "message": "Alert approved and sent to notification system." if approved else "Alert rejected.",
+        "message": f"Alert {status} and updated in intelligence vault.",
         "timestamp": str(datetime.now())
     }
 
@@ -623,8 +681,8 @@ async def get_outbreak_summary(user: dict = Depends(get_current_user)):
     """Get a summary of all outbreak reports."""
     try:
         total_reports = len(data_assistant.data_store)
-        locations = list(set(r["location"] for r in data_assistant.data_store if r["location"] != "Unknown"))
-        total_cases = sum(r.get("cases", 0) for r in data_assistant.data_store)
+        locations = list(set(r["extracted_data"]["location"] for r in data_assistant.data_store if r["extracted_data"]["location"] != "Unknown"))
+        total_cases = sum(r["extracted_data"].get("cases", 0) for r in data_assistant.data_store)
 
         return {
             "total_reports": total_reports,
@@ -636,6 +694,11 @@ async def get_outbreak_summary(user: dict = Depends(get_current_user)):
     except Exception as e:
         logger.error(f"❌ Summary error: {e}")
         raise HTTPException(status_code=500, detail=f"Summary failed: {str(e)}")
+
+@app.get("/outbreak/reports")
+async def get_all_reports(user: dict = Depends(get_current_user)):
+    """Get all processed reports from the data store."""
+    return data_assistant.data_store
 
 # --- CHATBOT ENDPOINTS ---
 
@@ -659,6 +722,94 @@ async def clear_chat_session(session_id: str, user: dict = Depends(get_current_u
         return {"message": f"Session {session_id} cleared successfully"}
     else:
         return {"message": f"Session {session_id} not found or already empty"}
+
+# --- GET /outbreak/reports  (dashboard already calls this) ---
+
+@app.get("/outbreak/reports")
+async def get_all_outbreak_reports(user: dict = Depends(get_current_user)):
+    """Get all processed outbreak reports stored by DataAssistantAgent."""
+    return data_assistant.data_store
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PATIENT RECORD ENDPOINTS  (manual form entry → data/patient_records.json)
+# ─────────────────────────────────────────────────────────────────────────────
+
+PATIENT_RECORDS_FILE = Path("data") / "patient_records.json"
+PATIENT_RECORDS_FILE.parent.mkdir(exist_ok=True)
+
+
+def _load_patient_records() -> List[dict]:
+    if PATIENT_RECORDS_FILE.exists():
+        try:
+            with open(PATIENT_RECORDS_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return []
+
+
+def _save_patient_records(records: List[dict]):
+    with open(PATIENT_RECORDS_FILE, "w") as f:
+        json.dump(records, f, indent=2, ensure_ascii=False)
+
+
+@app.post("/patient/record", response_model=PatientRecordResponse)
+async def save_patient_record(
+    record: PatientRecord,
+    user: dict = Depends(get_current_user)
+):
+    """Save a manually entered patient record (form submission)."""
+    records = _load_patient_records()
+    record_id = str(uuid.uuid4())
+    saved_at = datetime.now().isoformat()
+
+    entry = {
+        "id": record_id,
+        "saved_at": saved_at,
+        "saved_by": user["email"],
+        **record.model_dump()
+    }
+    records.append(entry)
+    _save_patient_records(records)
+
+    logger.info(
+        f"📋 Patient record saved: {record.patient_name} "
+        f"(ID: {record_id}) by {user['email']}"
+    )
+    return PatientRecordResponse(
+        id=record_id,
+        message="✅ Patient record saved successfully.",
+        patient_name=record.patient_name,
+        mrn=record.mrn,
+        saved_at=saved_at
+    )
+
+
+@app.get("/patient/records")
+async def get_patient_records(user: dict = Depends(get_current_user)):
+    """Return patient records.
+    
+    - admin: all records
+    - data_entry: only records saved by this user
+    """
+    records = _load_patient_records()
+    if user["role"] == "data_entry":
+        records = [r for r in records if r.get("saved_by") == user["email"]]
+    return {"total": len(records), "records": records}
+
+
+@app.get("/patient/record/{record_id}")
+async def get_patient_record(
+    record_id: str,
+    user: dict = Depends(get_current_user)
+):
+    """Return a single patient record by ID."""
+    for r in _load_patient_records():
+        if r["id"] == record_id:
+            return r
+    raise HTTPException(status_code=404, detail="Record not found")
+
 
 if __name__ == "__main__":
     import uvicorn

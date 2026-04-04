@@ -1,6 +1,7 @@
 import aiosmtplib
 from email.message import EmailMessage
 from config import SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM, SMTP_USE_TLS, FRONTEND_URL
+from typing import Optional
 import logging
 
 logger = logging.getLogger(__name__)
@@ -12,6 +13,14 @@ async def send_email(to: str, subject: str, content: str):
     message["To"] = to
     message["Subject"] = subject
     message.set_content(content)
+
+    if not SMTP_USER or not SMTP_PASSWORD:
+        logger.info("\n" + "="*50)
+        logger.info(f"📧 [DEV EMAIL SIMULATION] To: {to}")
+        logger.info(f"Subject: {subject}")
+        logger.info(f"Content:\n{content}")
+        logger.info("="*50 + "\n")
+        return True
 
     try:
         if SMTP_USE_TLS:
@@ -37,15 +46,23 @@ async def send_email(to: str, subject: str, content: str):
         return True
     except Exception as e:
         logger.error(f"❌ Failed to send email to {to}: {e}")
-        return False
+        logger.info("⚠️ System continuing despite email failure (Development fallback).")
+        # Log the invite link since it failed to send
+        logger.info("\n" + "="*50)
+        logger.info(f"📧 [DEV EMAIL SIMULATION] To: {to}")
+        logger.info(f"Subject: {subject}")
+        logger.info(f"Content:\n{content}")
+        logger.info("="*50 + "\n")
+        return True
 
-async def send_invitation_email(email: str, token: str):
+async def send_invitation_email(email: str, token: str, frontend_url: Optional[str] = None):
     """Send an invitation email to a new employee."""
-    invite_link = f"{FRONTEND_URL}/register?token={token}"
-    subject = "Invitation to Join Aegis Lite"
-    content = f"""Welcome to Aegis Lite!
+    base_url = frontend_url or FRONTEND_URL
+    invite_link = f"{base_url}/register?token={token}"
+    subject = "Invitation to Join Empowered Care"
+    content = f"""Welcome to Empowered Care!
 
-An administrator has invited you to join the Aegis Lite system.
+An administrator has invited you to join the Empowered Care system.
 Please click the link below to complete your registration and set your password:
 
 {invite_link}
@@ -56,9 +73,10 @@ If you were not expecting this invitation, please ignore this email."""
     
     return await send_email(email, subject, content)
 
-async def send_reset_password_email(email: str, token: str):
+async def send_reset_password_email(email: str, token: str, frontend_url: Optional[str] = None):
     """Send a password reset email."""
-    reset_link = f"{FRONTEND_URL}/reset-password?token={token}"
+    base_url = frontend_url or FRONTEND_URL
+    reset_link = f"{base_url}/reset-password?token={token}"
     subject = "Reset Your Password - Aegis Lite"
     content = f"""Hello,
 

@@ -2,181 +2,187 @@ import json
 import logging
 import asyncio
 import uuid
+from datetime import datetime
 from typing import Dict, Any, List, Optional, Union
-from models.schemas import OutbreakReport, ValidationResult, RiskAnalysis, AlertMessage, ConsensusResult
+from models.schemas import OutbreakReport, ValidationResult, RiskAnalysis, AlertMessage, ConsensusResult, ContextData
 from services.gemini_service import GeminiService
-from config import VALID_SYMPTOMS, MAX_STORED_REPORTS
+from services.research_agent import ContextResearchAgent
+from config import VALID_SYMPTOMS, MAX_STORED_REPORTS, BASE_DIR
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Define absolute storage path
+DATA_STORE_PATH = BASE_DIR / "models" / "outbreak_data.json"
+
 class ExtractionAgent:
     def __init__(self, gemini_service: GeminiService):
         self.gemini = gemini_service
 
-    async def extract(self, text: str) -> OutbreakReport:
-        """Extract structured data from raw outbreak report text."""
+    async def extract(self, text: str) -> List[OutbreakReport]:
+        """Extract multiple structured data records from raw outbreak report text."""
         if not text or not text.strip():
             logger.warning("Empty text provided to extraction agent")
-            return OutbreakReport(
+            return [OutbreakReport(
                 location="Unknown",
                 symptoms=[],
                 cases=0,
                 additional_info={"error": "Empty input text"}
-            )
+            )]
 
         prompt = f"""
         You are an Extraction Agent for disease outbreak detection.
-        Convert the following messy text report into structured JSON data.
+        Convert the following messy text report into a list of structured JSON data.
+        
+        CRITICAL: The text often contains multiple reports for different locations or different diseases.
+        Do NOT group them into one. Create a separate JSON object for EACH unique location and EACH unique disease outbreak mentioned.
+        If 5 different cities are mentioned with 5 different issues, you MUST return a list of 5 objects.
 
         Input text: "{text.strip()}"
 
-        Extract:
-        - location: The place mentioned (city, region, etc.)
-        - symptoms: List of symptoms mentioned
-        - cases: Number of affected people (if mentioned, otherwise 1)
-        - date: Any date mentioned (optional)
-        - additional_info: Any other relevant information
+        Extract a list of:
+        - location: The city, town, or region mentioned.
+        - symptoms: List of clinical signs (e.g. fever, cough).
+        - cases: Integer number of affected individuals.
+        - date: The specific date mentioned for this event.
+        - additional_info: Any other relevant clinical or environmental details.
 
-        Return ONLY valid JSON:
-        {{
-          "location": "string",
-          "symptoms": ["symptom1", "symptom2"],
-          "cases": number,
-          "date": "string or null",
-          "additional_info": {{}}
-        }}
+        Return ONLY a JSON list of objects:
+        [
+          {{
+            "location": "string",
+            "symptoms": ["symptom1", "symptom2"],
+            "cases": number,
+            "date": "string or null",
+            "additional_info": {{}}
+          }}
+        ]
         """
 
         try:
             logger.info(f"Extracting data from text: {text[:50]}...")
-            # Using loop.run_in_executor to run synchronous Gemini call in a thread
             loop = asyncio.get_event_loop()
             response = await loop.run_in_executor(None, self.gemini.generate_text, prompt)
-            data = json.loads(response)
+            
+            # Basic cleanup of response
+            if "```json" in response:
+                response = response.split("```json")[1].split("```")[0].strip()
+            elif "```" in response:
+                response = response.split("```")[1].split("```")[0].strip()
 
-            # Handle case where Gemini returns a list instead of an object
-            if isinstance(data, list):
-                if len(data) > 0:
-                    data = data[0]
-                else:
-                    data = {}
+            raw_data = json.loads(response)
+            
+            # Ensure it's a list
+            if isinstance(raw_data, dict):
+                raw_data = [raw_data]
+            
+            reports = []
+            for data in raw_data:
+                # Validate required fields
+                if not data.get("location"):
+                    data["location"] = "Unknown"
+                if not data.get("symptoms"):
+                    data["symptoms"] = []
+                if not isinstance(data.get("cases"), int):
+                    try:
+                        data["cases"] = int(data.get("cases", 1))
+                    except:
+                        data["cases"] = 1
+                
+                # Ensure additional_info is a dictionary
+                if not isinstance(data.get("additional_info"), dict):
+                    val = data.get("additional_info")
+                    data["additional_info"] = {"raw_value": val} if val else {}
 
-            # Validate required fields
-            if not data.get("location"):
-                data["location"] = "Unknown"
-            if not data.get("symptoms"):
-                data["symptoms"] = []
-            if not isinstance(data.get("cases"), int):
-                try:
-                    data["cases"] = int(data.get("cases", 1))
-                except:
-                    data["cases"] = 1
+                reports.append(OutbreakReport(**data))
+            
+            logger.info(f"Successfully extracted {len(reports)} records")
+            return reports
 
-            report = OutbreakReport(**data)
-            logger.info(f"Successfully extracted: {report.location}, {report.cases} cases")
-            return report
-
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON parsing failed: {e}")
-            return OutbreakReport(
-                location="Unknown",
-                symptoms=["Unknown"],
-                cases=1,
-                additional_info={"raw_text": text, "error": f"JSON parsing failed: {str(e)}"}
-            )
         except Exception as e:
             logger.error(f"Extraction failed: {e}")
-            return OutbreakReport(
+            return [OutbreakReport(
                 location="Unknown",
                 symptoms=["Unknown"],
                 cases=1,
                 additional_info={"raw_text": text, "error": str(e)}
-            )
+            )]
 
 class ValidationAgent:
     def __init__(self, gemini_service: GeminiService):
         self.gemini = gemini_service
 
     async def validate(self, report: OutbreakReport) -> ValidationResult:
-        """Validate outbreak report for reasonableness."""
+        """Validate outbreak report using LLM reasoning."""
         logger.info(f"Validating report for {report.location}")
 
-        # Rule-based validation
-        issues = []
-
-        if not report.location or report.location == "Unknown":
-            issues.append("Missing or unknown location")
-
-        if not report.symptoms or len(report.symptoms) == 0:
-            issues.append("No symptoms reported")
-        else:
-            # Check for valid symptoms
-            invalid_symptoms = [s for s in report.symptoms if s.lower() not in [vs.lower() for vs in VALID_SYMPTOMS]]
-            if invalid_symptoms:
-                issues.append(f"Unusual symptoms detected: {', '.join(invalid_symptoms)}")
-
-        if report.cases <= 0:
-            issues.append("Invalid number of cases (must be positive)")
-        elif report.cases > 1000:
-            issues.append("Unrealistically high number of cases")
-
-        # AI validation for reasonableness
+        # Move all logic to LLM for non-hardcoded evaluation
         prompt = f"""
-        Validate this outbreak report for reasonableness:
+        You are an Epidemiological Validation Expert. 
+        Analyze the plausibility of this outbreak report:
 
         Location: {report.location}
         Symptoms: {', '.join(report.symptoms)}
         Cases: {report.cases}
+        Date: {report.date or 'Not specified'}
+        Additional: {json.dumps(report.additional_info)}
 
-        Check for:
-        - Unrealistic numbers
-        - Impossible symptom combinations
-        - Missing critical information
-        - Geographic plausibility
+        Instructions:
+        - Check for statistical outliers or impossible case counts.
+        - Evaluate clinical plausibility of symptoms for the location.
+        - Detect missing critical data points.
+        - Be critical but fair: unusual is not always invalid.
 
-        Return JSON:
+        Return valid JSON ONLY:
         {{
           "valid": true/false,
           "confidence": 0.0-1.0,
-          "issues": ["issue1", "issue2"]
+          "issues": ["list of reasons or improvement suggestions"]
         }}
         """
 
         try:
             loop = asyncio.get_event_loop()
             response = await loop.run_in_executor(None, self.gemini.generate_text, prompt)
-            validation_data = json.loads(response)
-
-            # Merge with rule-based issues
-            all_issues = issues + validation_data.get("issues", [])
-            confidence = min(validation_data.get("confidence", 0.5), 0.9)  # Cap at 0.9
-
-            result = ValidationResult(
-                valid=validation_data.get("valid", len(all_issues) == 0),
-                confidence=confidence,
-                issues=all_issues
+            
+            if "```json" in response:
+                response = response.split("```json")[1].split("```")[0].strip()
+            elif "```" in response:
+                response = response.split("```")[1].split("```")[0].strip()
+                
+            data = json.loads(response)
+            return ValidationResult(
+                valid=data.get("valid", True),
+                confidence=data.get("confidence", 0.7),
+                issues=data.get("issues", [])
             )
-
-            logger.info(f"Validation complete: valid={result.valid}, confidence={result.confidence}")
-            return result
-
         except Exception as e:
             logger.error(f"AI validation failed: {e}")
-            return ValidationResult(
-                valid=len(issues) == 0,
-                confidence=0.3,
-                issues=issues + [f"AI validation failed: {str(e)}"]
-            )
+            return ValidationResult(valid=True, confidence=0.5, issues=["Validation engine failure, defaulting to valid"])
 
 class RiskAnalysisAgent:
     def __init__(self, gemini_service: GeminiService):
         self.gemini = gemini_service
 
-    async def analyze_risk(self, report: OutbreakReport, perspective: str = "general") -> RiskAnalysis:
+    async def analyze_risk(self, report: OutbreakReport, perspective: str = "general", context: ContextData = None, historical_context: str = "") -> RiskAnalysis:
         """Analyze outbreak risk level from a specific perspective."""
         logger.info(f"Analyzing risk for {report.location} from perspective: {perspective}")
+
+        context_info = ""
+        if context:
+            context_info = f"""
+            Additional Context from Web Research:
+            - Security Status: {context.security_status}
+            - Water Quality: {context.water_quality}
+            - Environmental (Temp): {context.temperature}
+            - Conflict Zone: {"Yes" if context.conflict_zone else "No"}
+            - Recent News: {', '.join(context.recent_news)}
+            """
+        
+        history_info = ""
+        if historical_context:
+            history_info = f"\nHistorical Data Summary for Comparison:\n{historical_context}"
 
         prompt = f"""
         You are a Risk Analysis Sub-Agent specializing in {perspective}.
@@ -186,11 +192,14 @@ class RiskAnalysisAgent:
         Symptoms: {', '.join(report.symptoms)}
         Cases: {report.cases}
         Date: {report.date or 'Not specified'}
+        {context_info}
+        {history_info}
 
         Perspective Specific Instructions:
         - If perspective is 'symptoms': Focus on clinical patterns and disease matches.
-        - If perspective is 'statistical': Focus on case count growth and population density.
-        - If perspective is 'historical': Focus on seasonal trends and known regional hotspots.
+        - If perspective is 'statistical': Focus on case count growth and population density. Compare with historical baseline for THIS location if provided.
+        - If perspective is 'historical': Focus on seasonal trends and known regional hotspots. Analyze if this follows past patterns for THIS location.
+        - If perspective is 'environmental': Focus on how water, security, and conflict impact transmission.
         - Otherwise: Provide a general epidemiological risk assessment.
 
         Risk levels: HIGH, MEDIUM, LOW
@@ -305,48 +314,50 @@ class SuperAgent:
         self.validator = ValidationAgent(gemini_service)
         self.risk_agent = RiskAnalysisAgent(gemini_service)
         self.alert_agent = AlertGenerationAgent(gemini_service)
+        self.research_agent = ContextResearchAgent(gemini_service)
 
-    async def process_outbreak_parallel(self, text: str) -> Dict[str, Any]:
-        """Dynamic hierarchical processing of outbreak reports."""
+    async def process_outbreak_parallel(self, text: str, historical_context: str = "") -> List[Dict[str, Any]]:
+        """Dynamic hierarchical processing of outbreak reports (Supports multiple records)."""
         logger.info(f"🧠 SuperAgent: Initializing dynamic pipeline for: {text[:50]}...")
         
         # 1. Dynamic Extraction Scaling
-        # Split text if it's too large (for sub-agents to process chunks)
-        if len(text) > 1000:
-            logger.info("🧠 SuperAgent: Input large, spawning extraction sub-agents...")
-            # Split by sentences or chunks (simple implementation)
-            chunks = [text[i:i+800] for i in range(0, len(text), 800)]
-            extraction_tasks = [self.extractor.extract(c) for c in chunks]
-            reports = await asyncio.gather(*extraction_tasks)
-            # Merge reports (take first valid one or merge cases)
-            report = reports[0] if reports else await self.extractor.extract(text)
-        else:
-            report = await self.extractor.extract(text)
+        all_extracted_reports = await self.extractor.extract(text)
         
-        # 2. Dynamic Validation Sub-Agents
-        # We use one primary validator but it could be expanded to cross-check sub-agents
-        validation_result = await self.validator.validate(report)
-        
-        # 3. Dynamic Risk Sub-Agents (PERSPECTIVE-BASED)
-        perspectives = ["symptoms", "statistical", "historical"]
-        logger.info(f"🧠 SuperAgent: Spawning {len(perspectives)} Risk Sub-Agents...")
-        
-        risk_tasks = [self.risk_agent.analyze_risk(report, p) for p in perspectives]
-        risk_opinions = await asyncio.gather(*risk_tasks)
-        
-        # 4. Merge Layer / Consensus
-        consensus = self._reach_consensus(risk_opinions)
-        
-        # 5. Alert Generation
-        alert = await self.alert_agent.generate_alert(report, consensus)
-        
-        return {
-            "extracted_data": report,
-            "validation": validation_result,
-            "risk_analysis": risk_opinions[0], # Maintain compatibility
-            "consensus": consensus,
-            "alert": alert
-        }
+        results = []
+        for report in all_extracted_reports:
+            # 2. Dynamic Research Agent (per location)
+            context_data = None
+            if report.location and report.location != "Unknown":
+                logger.info(f"🧠 SuperAgent: Spawning Research Agent for {report.location}...")
+                context_data = await self.research_agent.research(report.location)
+
+            # 3. Dynamic Validation
+            validation_result = await self.validator.validate(report)
+            
+            # 4. Dynamic Risk Sub-Agents (PERSPECTIVE-BASED)
+            # Use research data AND historical context if available
+            perspectives = ["symptoms", "statistical", "historical", "environmental"]
+            logger.info(f"🧠 SuperAgent: Spawning {len(perspectives)} Risk Sub-Agents for {report.location}...")
+            
+            risk_tasks = [self.risk_agent.analyze_risk(report, p, context_data, historical_context) for p in perspectives]
+            risk_opinions = await asyncio.gather(*risk_tasks)
+            
+            # 5. Merge Layer / Consensus
+            consensus = self._reach_consensus(risk_opinions)
+            
+            # 6. Alert Generation
+            alert = await self.alert_agent.generate_alert(report, consensus)
+            
+            results.append({
+                "extracted_data": report,
+                "validation": validation_result,
+                "risk_analysis": risk_opinions[0],
+                "consensus": consensus,
+                "context_research": context_data,
+                "alert": alert
+            })
+            
+        return results
 
     def _reach_consensus(self, opinions: List[RiskAnalysis]) -> ConsensusResult:
         """Consensus logic: Voting + Confidence Averaging."""
@@ -386,22 +397,80 @@ class DataAssistantAgent:
     def __init__(self, gemini_service: GeminiService):
         self.gemini = gemini_service
         self.data_store = []
-        logger.info("Data Assistant initialized")
+        self.storage_path = DATA_STORE_PATH
+        self._load_data()
+        logger.info(f"Data Assistant initialized with {len(self.data_store)} reports at {self.storage_path}")
 
-    def add_report(self, report: OutbreakReport):
-        """Add a report to the data store."""
-        self.data_store.append(report.dict())
+    def _load_data(self):
+        """Load data from local storage."""
+        try:
+            import os
+            import json
+            if os.path.exists(self.storage_path):
+                with open(self.storage_path, "r") as f:
+                    self.data_store = json.load(f)
+                logger.info(f"Successfully loaded {len(self.data_store)} reports from {self.storage_path}")
+        except Exception as e:
+            logger.error(f"❌ Failed to load data store from {self.storage_path}: {e}")
+            self.data_store = []
+
+    def _save_data(self):
+        """Save data to local storage."""
+        try:
+            import json
+            import os
+            os.makedirs(os.path.dirname(self.storage_path), exist_ok=True)
+            with open(self.storage_path, "w") as f:
+                # Use default=str to handle datetime objects
+                json.dump(self.data_store, f, indent=4, default=str)
+            logger.info(f"Successfully saved {len(self.data_store)} reports to {self.storage_path}")
+        except Exception as e:
+            logger.error(f"❌ Failed to save data store to {self.storage_path}: {e}")
+
+    def add_report(self, report: Union[OutbreakReport, Dict[str, Any]], session_id: str = None, risk_analysis: Dict[str, Any] = None, alert: Dict[str, Any] = None, context_research: Dict[str, Any] = None, raw_report: str = ""):
+        """Add a report to the data store with full context."""
+        report_dict = report.dict() if hasattr(report, "dict") else report
+        
+        # Add metadata for dashboard
+        entry = {
+            "session_id": session_id or str(uuid.uuid4()),
+            "extracted_data": report_dict,
+            "risk_analysis": risk_analysis or {"risk_level": "LOW"},
+            "context_research": context_research,
+            "alert": alert or {"title": "New Report"},
+            "status": "pending",
+            "timestamp": str(datetime.now()),
+            "raw_report": raw_report
+        }
+        
+        self.data_store.insert(0, entry) # Newest first
         if len(self.data_store) > MAX_STORED_REPORTS:
-            self.data_store = self.data_store[-MAX_STORED_REPORTS:]
+            self.data_store = self.data_store[:MAX_STORED_REPORTS]
+        
+        self._save_data()
         logger.info(f"Added report to data store. Total reports: {len(self.data_store)}")
+
+    def update_report_status(self, session_id: str, status: str):
+        """Update the approval status of a report."""
+        found = False
+        for r in self.data_store:
+            if r["session_id"] == session_id:
+                r["status"] = status
+                found = True
+                break
+        
+        if found:
+            self._save_data()
+            logger.info(f"Updated status for session {session_id} to {status}")
+        return found
 
     async def query(self, query_text: str) -> Dict[str, Any]:
         """Answer queries about outbreak data."""
         logger.info(f"Processing query: {query_text}")
 
         total_reports = len(self.data_store)
-        locations = list(set(r["location"] for r in self.data_store if r["location"] != "Unknown"))
-        total_cases = sum(r.get("cases", 0) for r in self.data_store)
+        locations = list(set(r["extracted_data"]["location"] for r in self.data_store if r["extracted_data"]["location"] != "Unknown"))
+        total_cases = sum(r["extracted_data"].get("cases", 0) for r in self.data_store)
 
         data_summary = {
             "total_reports": total_reports,
@@ -410,9 +479,23 @@ class DataAssistantAgent:
         }
 
         prompt = f"""
-        Answer this query about outbreak data: "{query_text}"
-        Summary: {json.dumps(data_summary)}
-        Recent: {json.dumps(self.data_store[-5:] if self.data_store else [])}
+        You are a Senior Data Analyst for Empowered Care, a high-performance multi-agent disease outbreak monitoring system. 
+        Your goal is to provide intelligent, professional insights about epidemiological data.
+
+        USER QUERY: "{query_text}"
+        
+        AGGREGATE DATA SUMMARY:
+        {json.dumps(data_summary, indent=2)}
+        
+        DETAILED ENTRIES (Most Recent):
+        {json.dumps([r["extracted_data"] for r in self.data_store[-10:]] if self.data_store else [], indent=2)}
+        
+        INSTRUCTIONS:
+        1. IDENTITY: You are part of Empowered Care. 
+        2. PROFESSIONAL ANALYSIS: Interpret the data in the context of public health safety.
+        3. NATURAL LANGUAGE: Respond in a fluid, authoritative, and helpful manner.
+        4. ACCURACY: Base your answer strictly on the provided data. 
+        5. NO DATA SCENARIO: If there is zero data in the context above, acknowledge it professionally and explain that Empowered Care is currently in monitoring mode, awaiting data ingestion from field reports.
         """
 
         try:
@@ -431,6 +514,29 @@ class DataAssistantAgent:
                 "data_summary": data_summary
             }
 
+    def get_historical_context(self, location: str = None) -> str:
+        """Get a summarized text of historical data for AI comparison."""
+        if not self.data_store:
+            return "No historical data available."
+        
+        # Filter by location if specified
+        relevant_data = self.data_store
+        if location:
+            relevant_data = [r for r in self.data_store if r["extracted_data"]["location"] == location]
+        
+        # Limit to last 20 relevant records to provide more depth
+        summary_data = []
+        for r in relevant_data[:20]:
+            summary_data.append({
+                "date": r["extracted_data"].get("date") or r.get("timestamp"),
+                "cases": r["extracted_data"].get("cases"),
+                "symptoms": r["extracted_data"].get("symptoms"),
+                "risk": r["risk_analysis"].get("risk_level"),
+                "disease": r["risk_analysis"].get("possible_disease")
+            })
+        
+        return json.dumps(summary_data)
+
     async def perform_full_analysis(self) -> Dict[str, Any]:
         """Perform a deep analysis comparing new data with historical trends."""
         logger.info("Performing full system analysis and comparison...")
@@ -442,15 +548,15 @@ class DataAssistantAgent:
                 "timestamp": str(datetime.now())
             }
 
-        # Split data into "new" (last 5 reports) and "old" (everything else)
-        new_data = self.data_store[-5:]
-        old_data = self.data_store[:-5] if len(self.data_store) > 5 else []
+        # Newest are at the beginning (index 0)
+        new_data = [r["extracted_data"] for r in self.data_store[:5]]
+        old_data = [r["extracted_data"] for r in self.data_store[5:25]] # Compare with next 20
 
         prompt = f"""
         You are a Senior Epidemiological Analyst. Perform a full system analysis.
         
         HISTORICAL DATA (Summarized):
-        {json.dumps(old_data[:20]) if old_data else "No historical data."}
+        {json.dumps(old_data) if old_data else "No historical data."}
         
         NEW RECENT DATA (Last 5 reports):
         {json.dumps(new_data)}
@@ -473,7 +579,6 @@ class DataAssistantAgent:
 
         try:
             loop = asyncio.get_event_loop()
-            from datetime import datetime
             response = await loop.run_in_executor(None, self.gemini.generate_text, prompt)
             analysis_result = json.loads(response)
             analysis_result["timestamp"] = str(datetime.now())
@@ -499,22 +604,23 @@ class ChatSpecialistAgent:
         history_str = "\n".join([f"{m['role']}: {m['content']}" for m in history])
         
         prompt = f"""
-        You are the {self.role} for Aegis Lite. Your expertise is {self.expertise}.
-        
-        DATA CONTEXT FROM SYSTEM:
+        You are the {self.role} for Empowered Care. 
+        Your expertise is {self.expertise}.
+
+        CONVERSATION GUIDELINES:
+        1. CASUAL CHAT: If the user says "hi", "bye", "how are you", or other casual greetings, respond naturally and briefly as a human-like assistant. DO NOT explain your system architecture or list data unless specifically asked.
+        2. DATA TASKS: If the user asks for reports, trends, or insights, extract the highest quality patterns from the provided DATA CONTEXT. Be precise.
+        3. IDENTITY: You are Empowered Care Assistant.
+        4. HISTORICAL AWARENESS: Consider past reports in the context to identify emerging trends or anomalies.
+
+        DATA CONTEXT:
         {data_context}
         
         CONVERSATION HISTORY:
         {history_str}
         
-        USER QUESTION:
-        {message}
-        
-        INSTRUCTIONS:
-        1. Answer based ON THE DATA provided above.
-        2. If the data doesn't contain the answer, say so clearly.
-        3. Be professional and epidemiological in your tone.
-        4. Keep your answer concise but complete.
+        USER REQUEST:
+        "{message}"
         """
         
         loop = asyncio.get_event_loop()
@@ -545,15 +651,18 @@ class ChatSupervisor:
         
         # 1. Route the query to the correct agent
         route_prompt = f"""
-        Analyze this user message and route it to the best specialist:
-        - "location": If they ask WHERE, hotspots, or about specific cities.
-        - "infection": If they ask about symptoms, WHAT disease, or risk levels.
-        - "history": If they ask WHEN, dates, or trends over time.
-        - "general": For greetings or overall summaries.
+        You are the Routing Logic for Empowered Care, a sophisticated multi-agent system.
+        Analyze the USER MESSAGE and route it to the best specialist agent.
         
         MESSAGE: "{message}"
         
-        Return ONLY the word: location, infection, history, or general.
+        AVAILABLE SPECIALISTS:
+        - "location": Geospatial surveillance and hotspots.
+        - "infection": Symptoms, clinical details, and risk levels.
+        - "history": Timelines, dates, and historical comparison.
+        - "general": Greetings, overall system summaries, or broad requests.
+        
+        Return ONLY the single word (lower case): location, infection, history, or general.
         """
         
         loop = asyncio.get_event_loop()
@@ -562,10 +671,16 @@ class ChatSupervisor:
         if agent_key not in self.specialists:
             agent_key = "general"
             
-        # 2. Prepare data context
+        # 2. Prepare data context (Enhanced with a more complete summary)
+        total_reports = len(self.data_assistant.data_store)
+        locations = list(set(r["extracted_data"]["location"] for r in self.data_assistant.data_store if r["extracted_data"]["location"] != "Unknown"))
+        total_cases = sum(r["extracted_data"].get("cases", 0) for r in self.data_assistant.data_store)
+        
         data_summary = {
-            "total": len(self.data_assistant.data_store),
-            "recent_reports": self.data_assistant.data_store[-10:]
+            "total_system_reports": total_reports,
+            "aggregate_cases": total_cases,
+            "monitored_locations": locations,
+            "most_recent_entries": [r["extracted_data"] for r in self.data_assistant.data_store[-15:]] if self.data_assistant.data_store else []
         }
         data_context = json.dumps(data_summary, indent=2)
         

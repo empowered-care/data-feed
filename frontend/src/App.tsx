@@ -16,7 +16,9 @@ import SummaryPage from "@/pages/SummaryPage";
 import SettingsPage from "@/pages/SettingsPage";
 import AdminPage from "@/pages/AdminPage";
 import ProfilePage from "@/pages/ProfilePage";
+import DataVault from "@/pages/DataVault";
 import NotFound from "@/pages/NotFound";
+import DataEntryPage from "@/pages/DataEntryPage";
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/store/appStore";
 import SplashScreen from "@/components/SplashScreen";
@@ -69,7 +71,7 @@ const App = () => {
             <TooltipProvider>
               <DarkModeInit />
               <Sonner />
-              <BrowserRouter>
+              <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
                 <Routes>
                   {/* Public routes */}
                   <Route path="/" element={<Landing />} />
@@ -90,8 +92,16 @@ const App = () => {
                     <Route path="/summary" element={<SummaryPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/vault" element={<DataVault />} />
                     <Route path="/admin" element={<AdminPage />} />
                   </Route>
+
+                  {/* Data Entry Portal – restricted to data_entry and admin roles */}
+                  <Route path="/data-entry" element={
+                    <ProtectedRoute allowedRoles={['data_entry', 'admin']}>
+                      <DataEntryPage />
+                    </ProtectedRoute>
+                  } />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>

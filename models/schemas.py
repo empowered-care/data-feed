@@ -5,7 +5,8 @@ from enum import Enum
 
 class UserRole(str, Enum):
     ADMIN = "admin"
-    VW = "vw"  # Viewer/Worker
+    VW = "vw"           # Viewer / Worker
+    DATA_ENTRY = "data_entry"  # Clinical data entry operator
 
 class UserBase(BaseModel):
     email: EmailStr
@@ -18,6 +19,7 @@ class UserCreate(UserBase):
 class UserInvite(BaseModel):
     email: EmailStr
     role: UserRole = UserRole.VW
+    frontend_url: Optional[str] = None
 
 class UserAcceptInvite(BaseModel):
     token: str
@@ -26,6 +28,7 @@ class UserAcceptInvite(BaseModel):
 
 class PasswordResetRequest(BaseModel):
     email: EmailStr
+    frontend_url: Optional[str] = None
 
 class PasswordResetConfirm(BaseModel):
     token: str
@@ -96,6 +99,16 @@ class OutbreakReport(BaseModel):
     date: Optional[str] = None
     additional_info: Dict[str, Any] = Field(default_factory=dict)
 
+class ContextData(BaseModel):
+    location: str
+    security_status: Optional[str] = None
+    water_quality: Optional[str] = None
+    temperature: Optional[str] = None
+    conflict_zone: bool = False
+    nearby_facilities: List[str] = Field(default_factory=list)
+    recent_news: List[str] = Field(default_factory=list)
+    last_updated: datetime = Field(default_factory=datetime.now)
+
 class ValidationResult(BaseModel):
     valid: bool
     confidence: float
@@ -126,6 +139,7 @@ class OutbreakProcessResponse(BaseModel):
     validation: ValidationResult
     risk_analysis: RiskAnalysis
     consensus: Optional[ConsensusResult] = None
+    context_research: Optional[ContextData] = None
     alert: AlertMessage
     session_id: str
     metadata: dict = Field(default_factory=dict)
@@ -156,3 +170,45 @@ class ChatResponse(BaseModel):
     session_id: str
     agent_used: str
     history_count: int
+
+
+# --- Patient Manual Form Entry ---
+
+class VitalSigns(BaseModel):
+    blood_pressure: Optional[str] = None
+    pulse: Optional[str] = None
+    temperature: Optional[str] = None
+    respiratory_rate: Optional[str] = None
+    oxygen_saturation: Optional[str] = None
+    weight: Optional[str] = None
+    height: Optional[str] = None
+
+
+class PatientRecord(BaseModel):
+    # Demographics
+    patient_name: str
+    sex: Optional[str] = None
+    age: Optional[str] = None
+    city: Optional[str] = None
+    subcity: Optional[str] = None
+    woreda: Optional[str] = None
+    mrn: Optional[str] = None           # Medical Record Number
+    occupation: Optional[str] = None
+    date: Optional[str] = None
+
+    # Clinical
+    chief_complaint: Optional[str] = None
+    history: Optional[str] = None
+    physical_exam: Optional[str] = None
+    vital_signs: Optional[VitalSigns] = None
+    assessment: Optional[str] = None
+    past_medical_history: Optional[str] = None
+    plan: Optional[str] = None
+
+
+class PatientRecordResponse(BaseModel):
+    id: str
+    message: str
+    patient_name: str
+    mrn: Optional[str] = None
+    saved_at: str

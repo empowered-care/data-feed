@@ -1,8 +1,8 @@
-# Aegis Lite - System Design & Codebase Review
+# Empowered Care - System Design & Codebase Review
 
 ## 🏗️ Architecture Overview
 
-Aegis Lite is an AI-native epidemiological intelligence system designed for rapid disease outbreak detection. It leverages a **Dynamic Hierarchical Multi-Agent System** to process unstructured data from multiple sources (Text, CSV, PDF, Images).
+Empowered Care is an AI-native epidemiological intelligence system designed for rapid disease outbreak detection. It leverages a **Dynamic Hierarchical Multi-Agent System** to process unstructured data from multiple sources (Text, CSV, PDF, Images).
 
 ### 1. Orchestration Layer (`SuperAgent`)
 The system follows a "Supervisor-Worker" pattern. The `SuperAgent` is the central brain that:

@@ -1,6 +1,6 @@
-# Aegis Lite - API Specification & JSON Examples
+# Empowered Care - API Specification & JSON Examples
 
-This document serves as the definitive guide for integrating with the Aegis Lite API.
+This document serves as the definitive guide for integrating with the Empowered Care API.
 
 ## 🚀 Base URL
 `http://127.0.0.1:8000`

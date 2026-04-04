@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, RotateCcw, CheckCircle2, XCircle, Upload, FileText, Loader2 } from 'lucide-react';
+import { Send, RotateCcw, CheckCircle2, XCircle, Upload, FileText, Loader2, AlertTriangle, Zap, Shield, Droplets, Thermometer, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AgentPipeline } from '@/components/AgentPipeline';
@@ -17,7 +18,7 @@ export default function ProcessReport() {
   const [input, setInput] = useState('Fever, vomiting, 4 people affected in Jimma zone. Started 2 days ago near local water source.');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { pipeline, setPipelineStep, completePipelineStep, setPipelineProcessing, setPipelineResult, setPipelineError, resetPipeline, addReport, addNotification } = useAppStore();
+  const { pipeline, setPipelineStep, completePipelineStep, setPipelineProcessing, setPipelineResult, setPipelineResults, setPipelineError, resetPipeline, addReport, addReports, addNotification } = useAppStore();
 
   const processText = async () => {
     if (!input.trim()) return;
@@ -29,17 +30,20 @@ export default function ProcessReport() {
 
       for (const step of STEPS) {
         setPipelineStep(step);
-        await new Promise((r) => setTimeout(r, 50));
+        await new Promise((r) => setTimeout(r, 100)); // Slightly longer for dramatic effect
         completePipelineStep(step);
       }
 
-      const result = await apiPromise;
-      setPipelineResult(result);
-      addReport(result);
-      addNotification(`New report processed: ${result.extracted_data.location}`);
-      toast.success('Report processed successfully');
+      const results = await apiPromise;
+      if (results && results.length > 0) {
+        setPipelineResult(results[0]);
+        setPipelineResults(results);
+        addReports(results);
+        addNotification(`New intelligence ingested: ${results.length} records`);
+      }
+      toast.success('Cognitive extraction complete');
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Processing failed';
+      const msg = e instanceof Error ? e.message : 'Uplink failed';
       setPipelineError(msg);
       toast.error(msg);
     } finally {
@@ -57,17 +61,20 @@ export default function ProcessReport() {
 
       for (const step of STEPS) {
         setPipelineStep(step);
-        await new Promise((r) => setTimeout(r, 50));
+        await new Promise((r) => setTimeout(r, 100));
         completePipelineStep(step);
       }
 
-      const result = await apiPromise;
-      setPipelineResult(result);
-      addReport(result);
-      addNotification(`File processed: ${selectedFile.name}`);
-      toast.success('File processed successfully');
+      const results = await apiPromise;
+      if (results && results.length > 0) {
+        setPipelineResult(results[0]);
+        setPipelineResults(results);
+        addReports(results);
+        addNotification(`Archive ingested: ${results.length} records`);
+      }
+      toast.success('Visual extraction complete');
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'File processing failed';
+      const msg = e instanceof Error ? e.message : 'Inversion failed';
       setPipelineError(msg);
       toast.error(msg);
     } finally {
@@ -83,229 +90,264 @@ export default function ProcessReport() {
 
   const handleApproval = async (approved: boolean) => {
     if (!pipeline.result) return;
+    const status = approved ? 'approved' : 'rejected';
     try {
       await api.approveReport(pipeline.result.session_id, approved);
+      updateReportStatus(pipeline.result.session_id, status);
     } catch {}
-    toast.success(approved ? 'Report approved' : 'Report rejected');
-    setPipelineResult({ ...pipeline.result, status: approved ? 'approved' : 'rejected', human_validation_required: false });
+    toast.success(approved ? 'Report Verified' : 'Report Rejected');
+    setPipelineResult({ ...pipeline.result, status, human_validation_required: false });
   };
 
   const result = pipeline.result;
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Process Outbreak Report</h2>
-        <p className="text-sm text-muted-foreground">Submit a raw report or upload a file for multi-agent AI analysis</p>
-      </div>
-
-      <div className="glass-card rounded-xl p-5">
-        <Tabs defaultValue="text" className="w-full">
-          <TabsList className="w-full grid grid-cols-2 mb-4">
-            <TabsTrigger value="text" className="gap-2">
-              <FileText className="h-4 w-4" /> Text Report
-            </TabsTrigger>
-            <TabsTrigger value="file" className="gap-2">
-              <Upload className="h-4 w-4" /> File Upload
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="text" className="space-y-4">
-            <Textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Paste or type a raw outbreak report (symptoms, location, case counts, etc.)..."
-              rows={5}
-              className="resize-none"
-            />
-            <div className="flex gap-2">
-              <Button onClick={processText} disabled={pipeline.isProcessing || !input.trim()} className="gap-2">
-                {pipeline.isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                Process with AI Agents
-              </Button>
-              <Button variant="outline" onClick={() => { resetPipeline(); setInput(''); }}>
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="file" className="space-y-4">
-            <div
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleFileDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all duration-200"
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.csv,.jpg,.jpeg,.png,.txt"
-                className="hidden"
-                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-              />
-              <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-              {selectedFile ? (
-                <div className="space-y-1">
-                  <p className="font-medium text-sm">{selectedFile.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {(selectedFile.size / 1024).toFixed(1)} KB • Click to change
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Drop a file here or click to browse</p>
-                  <p className="text-xs text-muted-foreground">Supports PDF, CSV, JPG, PNG, TXT</p>
-                </div>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={processFile} disabled={pipeline.isProcessing || !selectedFile} className="gap-2">
-                {pipeline.isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                Upload & Process
-              </Button>
-              <Button variant="outline" onClick={() => { resetPipeline(); setSelectedFile(null); }}>
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-
-      {(pipeline.isProcessing || pipeline.completedSteps.length > 0) && (
-        <div className="glass-card rounded-xl p-5">
-          <AgentPipeline
-            currentStep={pipeline.currentStep}
-            completedSteps={pipeline.completedSteps}
-            isProcessing={pipeline.isProcessing}
-          />
+    <div className="space-y-8 pb-12 max-w-5xl mx-auto">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h2 className="text-4xl font-black tracking-tighter flex items-center gap-3">
+            <Zap className="h-8 w-8 text-primary" />
+            Intelligence Intake
+          </h2>
+          <p className="text-muted-foreground font-medium mt-1">
+            Initialize multi-agent extraction from raw signal or archived files
+          </p>
         </div>
-      )}
+      </div>
 
-      {pipeline.error && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl p-5 border-2 border-risk-high/30 bg-risk-high/5"
-        >
-          <div className="flex items-center gap-2">
-            <XCircle className="h-5 w-5 text-risk-high" />
-            <p className="font-semibold text-risk-high">Processing Failed</p>
-          </div>
-          <p className="text-sm text-muted-foreground mt-1">{pipeline.error}</p>
-        </motion.div>
-      )}
+      <div className="grid lg:grid-cols-12 gap-8">
+        <div className="lg:col-span-7 space-y-6">
+          <div className="glass-card rounded-[2rem] overflow-hidden border-border/40 shadow-2xl">
+            <Tabs defaultValue="text" className="w-full">
+              <div className="px-8 pt-8">
+                <TabsList className="grid grid-cols-2 bg-muted/30 p-1.5 rounded-2xl border border-border/50 h-auto">
+                  <TabsTrigger 
+                    value="text" 
+                    className="gap-2 py-3 rounded-xl data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm font-black uppercase tracking-widest text-[10px]"
+                  >
+                    <FileText className="h-4 w-4" /> Signal Stream
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="file" 
+                    className="gap-2 py-3 rounded-xl data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm font-black uppercase tracking-widest text-[10px]"
+                  >
+                    <Upload className="h-4 w-4" /> Binary Archive
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
-      <AnimatePresence>
-        {result && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="space-y-4"
-          >
-            {/* Extracted Data */}
-            <div className="glass-card rounded-xl p-5 space-y-3">
-              <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Extracted Data</h3>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {[
-                  ['Location', result.extracted_data.location],
-                  ['Cases', result.extracted_data.cases],
-                  ['Date', result.extracted_data.date || 'N/A'],
-                  ['Symptoms', result.extracted_data.symptoms.join(', ') || 'None detected'],
-                ].map(([k, v]) => (
-                  <div key={k as string} className="p-3 rounded-lg bg-muted/50 border border-border">
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{k}</p>
-                    <p className="font-medium text-sm mt-0.5">{v}</p>
+              <div className="p-8">
+                <TabsContent value="text" className="space-y-6 mt-0">
+                  <div className="relative group">
+                    <Textarea
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      placeholder="Input raw transmission data (symptoms, location, metrics)..."
+                      rows={6}
+                      className="resize-none bg-muted/20 border-2 border-border/50 rounded-2xl p-6 text-sm font-bold focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/30 placeholder:font-normal"
+                    />
+                    <div className="absolute right-4 bottom-4 opacity-20 group-hover:opacity-100 transition-opacity">
+                      <FileText className="h-12 w-12 text-primary" />
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
+                  
+                  <div className="flex gap-3">
+                    <Button 
+                      onClick={processText} 
+                      disabled={pipeline.isProcessing || !input.trim()} 
+                      className="h-14 px-8 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black shadow-xl shadow-primary/20 flex-1 gap-3 uppercase tracking-widest text-xs"
+                    >
+                      {pipeline.isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                      Initialize Cognitive Scan
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => { resetPipeline(); setInput(''); }}
+                      className="h-14 w-14 rounded-2xl border-2 hover:bg-muted/50 transition-all"
+                    >
+                      <RotateCcw className="h-5 w-5" />
+                    </Button>
+                  </div>
+                </TabsContent>
 
-            {/* Validation */}
-            <div className="glass-card rounded-xl p-5 space-y-3">
-              <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Validation</h3>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
-                  {result.validation.valid ? <CheckCircle2 className="h-4 w-4 text-health" /> : <XCircle className="h-4 w-4 text-risk-high" />}
-                  <span className="text-sm font-medium">{result.validation.valid ? 'Valid' : 'Invalid'}</span>
-                </div>
-                <div className="h-2.5 flex-1 bg-muted rounded-full overflow-hidden max-w-xs">
-                  <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${result.validation.confidence * 100}%` }} />
-                </div>
-                <span className="text-sm font-semibold tabular-nums">{(result.validation.confidence * 100).toFixed(0)}%</span>
+                <TabsContent value="file" className="space-y-6 mt-0">
+                  <div
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={handleFileDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="group border-2 border-dashed border-border/60 rounded-[2rem] p-12 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all relative overflow-hidden"
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.csv,.jpg,.jpeg,.png,.txt"
+                      className="hidden"
+                      onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                    />
+                    
+                    <div className="relative z-10">
+                      <div className="h-20 w-20 bg-muted/50 text-muted-foreground rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 group-hover:bg-primary group-hover:text-white transition-all duration-500 shadow-inner">
+                        <Upload className="h-10 w-10" />
+                      </div>
+                      
+                      {selectedFile ? (
+                        <div className="space-y-2">
+                          <p className="font-black text-xl tracking-tight text-primary">{selectedFile.name}</p>
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+                            Ready for spectral analysis
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <p className="font-black text-xl tracking-tight italic">Drag signal carrier here</p>
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+                            PDF, CSV, JPEG, PNG, TXT supported
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    onClick={processFile} 
+                    disabled={pipeline.isProcessing || !selectedFile} 
+                    className="h-14 w-full rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black shadow-xl shadow-primary/20 gap-3 uppercase tracking-widest text-xs"
+                  >
+                    {pipeline.isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
+                    Begin Archive Inversion
+                  </Button>
+                </TabsContent>
               </div>
-              {result.validation.issues.length > 0 && (
-                <ul className="text-xs text-muted-foreground list-disc list-inside space-y-0.5">
-                  {result.validation.issues.map((issue, i) => <li key={i}>{issue}</li>)}
-                </ul>
+            </Tabs>
+          </div>
+        </div>
+
+        <div className="lg:col-span-5">
+           <div className="sticky top-28 space-y-6">
+              <AgentPipeline 
+                currentStep={pipeline.currentStep}
+                completedSteps={pipeline.completedSteps}
+                isProcessing={pipeline.isProcessing}
+              />
+
+              {pipeline.pipelineResults.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                   {pipeline.pipelineResults.map((r, i) => (
+                     <button
+                        key={r.session_id}
+                        onClick={() => setPipelineResult(r)}
+                        className={cn(
+                          "px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border-2 shrink-0 transition-all",
+                          pipeline.result?.session_id === r.session_id
+                            ? "bg-primary border-primary text-white shadow-lg"
+                            : "bg-background border-border/50 text-muted-foreground hover:border-primary/30"
+                        )}
+                     >
+                       Location {i + 1}: {r.extracted_data.location}
+                     </button>
+                   ))}
+                </div>
               )}
-            </div>
+              
+              <AnimatePresence>
+                {result && !pipeline.isProcessing && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    className="glass-card rounded-[2rem] p-8 border-primary/20 shadow-2xl bg-gradient-to-br from-background to-primary/5"
+                  >
+                    <div className="flex items-center justify-between mb-8">
+                       <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary bg-primary/10 px-3 py-1.5 rounded-full">
+                         Scan Result
+                       </span>
+                       <RiskBadge level={result.risk_analysis?.risk_level} />
+                    </div>
 
-            {/* Risk Analysis */}
-            <div className="glass-card rounded-xl p-5 space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Risk Analysis</h3>
-                <RiskBadge level={result.risk_analysis.risk_level} />
-              </div>
-              <div className="h-3 bg-muted rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-700 ${
-                    result.risk_analysis.risk_level === 'HIGH' ? 'bg-risk-high' :
-                    result.risk_analysis.risk_level === 'MEDIUM' ? 'bg-risk-medium' : 'bg-risk-low'
-                  }`}
-                  style={{ width: result.risk_analysis.confidence }}
-                />
-              </div>
-              <p className="text-sm"><span className="text-muted-foreground">Possible disease:</span> <span className="font-medium">{result.risk_analysis.possible_disease}</span></p>
-              <div>
-                <p className="text-xs font-medium text-muted-foreground mb-1.5">Reasoning & Recommendations:</p>
-                <p className="text-sm text-muted-foreground italic mb-2">{result.risk_analysis.reason}</p>
-                {result.alert.recommendations.length > 0 && (
-                  <ul className="text-sm space-y-1.5">
-                    {result.alert.recommendations.map((r, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-health shrink-0 mt-0.5" />
-                        {r}
-                      </li>
-                    ))}
-                  </ul>
+                    <div className="space-y-6">
+                       <div>
+                         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Target Location</p>
+                         <h4 className="text-2xl font-black tracking-tighter text-foreground">{result.extracted_data?.location}</h4>
+                       </div>
+
+                       <div className="grid grid-cols-2 gap-4">
+                          <div className="p-4 bg-muted/30 rounded-2xl border border-border/50">
+                             <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Case Volume</p>
+                             <p className="text-xl font-black">{result.extracted_data?.cases || 0}</p>
+                          </div>
+                          <div className="p-4 bg-muted/30 rounded-2xl border border-border/50">
+                             <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Disease Match</p>
+                             <p className="text-sm font-black truncate uppercase">{result.risk_analysis?.possible_disease || 'Unidentified'}</p>
+                          </div>
+                       </div>
+
+                       {result.context_research && (
+                         <div className="space-y-3 pt-2">
+                           <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Environmental Intelligence</p>
+                           <div className="grid grid-cols-3 gap-2">
+                              <div className="p-3 bg-muted/20 rounded-xl border border-border/40 flex flex-col items-center text-center">
+                                <Shield className={cn("h-4 w-4 mb-1", result.context_research.conflict_zone ? "text-risk-high" : "text-health")} />
+                                <p className="text-[8px] font-bold uppercase text-muted-foreground">Security</p>
+                                <p className="text-[10px] font-black truncate w-full">{result.context_research.conflict_zone ? 'Conflict' : 'Stable'}</p>
+                              </div>
+                              <div className="p-3 bg-muted/20 rounded-xl border border-border/40 flex flex-col items-center text-center">
+                                <Droplets className="h-4 w-4 mb-1 text-primary" />
+                                <p className="text-[8px] font-bold uppercase text-muted-foreground">Water</p>
+                                <p className="text-[10px] font-black truncate w-full">{result.context_research.water_quality || 'Unknown'}</p>
+                              </div>
+                              <div className="p-3 bg-muted/20 rounded-xl border border-border/40 flex flex-col items-center text-center">
+                                <Thermometer className="h-4 w-4 mb-1 text-orange-500" />
+                                <p className="text-[8px] font-bold uppercase text-muted-foreground">Temp</p>
+                                <p className="text-[10px] font-black truncate w-full">{result.context_research.temperature || 'N/A'}</p>
+                              </div>
+                           </div>
+                           <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10">
+                              <p className="text-[10px] font-bold text-primary uppercase tracking-tight flex items-center gap-1.5 mb-1">
+                                <Info className="h-3 w-3" /> Recent Context
+                              </p>
+                              <p className="text-[11px] font-medium leading-relaxed italic text-muted-foreground">
+                                {result.context_research.security_status}
+                              </p>
+                           </div>
+                         </div>
+                       )}
+
+                       {result.human_validation_required ? (
+                         <div className="pt-4 space-y-3">
+                           <div className="p-4 bg-risk-high/5 border border-risk-high/20 rounded-2xl">
+                             <p className="text-[10px] font-black text-risk-high uppercase tracking-widest mb-2 flex items-center gap-2">
+                               <AlertTriangle className="h-3 w-3" /> Manual Override Required
+                             </p>
+                             <p className="text-xs font-medium text-risk-high/80 leading-relaxed italic">
+                               Neural interpretation requires human synchronization for high-severity confirmation.
+                             </p>
+                           </div>
+                           <div className="flex gap-2">
+                             <Button onClick={() => handleApproval(true)} className="flex-1 bg-health hover:bg-health/90 text-white font-black rounded-xl text-[10px] uppercase tracking-widest h-12 shadow-lg shadow-health/20">
+                               Confirm Scan
+                             </Button>
+                             <Button variant="outline" onClick={() => handleApproval(false)} className="flex-1 border-2 font-black rounded-xl text-[10px] uppercase tracking-widest h-12 hover:bg-risk-high hover:text-white hover:border-risk-high transition-all">
+                               Invalidate
+                             </Button>
+                           </div>
+                         </div>
+                       ) : (
+                         <div className="pt-4">
+                           <div className={cn(
+                             "p-4 rounded-2xl border flex items-center gap-3",
+                             result.status === 'approved' ? "bg-health/5 border-health/20 text-health" : "bg-muted border-border text-muted-foreground"
+                           )}>
+                             {result.status === 'approved' ? <CheckCircle2 className="h-5 w-5" /> : <XCircle className="h-5 w-5" />}
+                             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Verification {result.status || 'Pending'}</span>
+                           </div>
+                         </div>
+                       )}
+                    </div>
+                  </motion.div>
                 )}
-              </div>
-            </div>
-
-            {/* Alert Banner */}
-            <div className={`rounded-xl p-5 border-2 space-y-2 ${
-              result.risk_analysis.risk_level === 'HIGH' ? 'border-risk-high/30 bg-risk-high/5' :
-              result.risk_analysis.risk_level === 'MEDIUM' ? 'border-risk-medium/30 bg-risk-medium/5' : 'border-risk-low/30 bg-risk-low/5'
-            }`}>
-              <h3 className="font-bold">{result.alert.title}</h3>
-              <p className="text-sm text-muted-foreground">{result.alert.message}</p>
-            </div>
-
-            {/* Human Validation */}
-            {result.human_validation_required && result.status === 'pending' && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="glass-card rounded-xl p-5 flex flex-col sm:flex-row items-center gap-4 border-2 border-risk-medium/40"
-              >
-                <div className="flex-1">
-                  <p className="font-semibold">⚠️ Human Validation Required</p>
-                  <p className="text-sm text-muted-foreground">This report requires expert review before further action.</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button onClick={() => handleApproval(true)} className="gap-2 bg-health hover:bg-health/90 text-health-foreground">
-                    <CheckCircle2 className="h-4 w-4" /> Approve
-                  </Button>
-                  <Button variant="destructive" onClick={() => handleApproval(false)} className="gap-2">
-                    <XCircle className="h-4 w-4" /> Reject
-                  </Button>
-                </div>
-              </motion.div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+              </AnimatePresence>
+           </div>
+        </div>
+      </div>
     </div>
   );
 }
