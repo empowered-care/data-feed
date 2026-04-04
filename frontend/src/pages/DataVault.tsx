@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { 
   Database, 
   Search, 
@@ -21,6 +22,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { 
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
@@ -29,10 +37,12 @@ import {
 import { cn } from '@/lib/utils';
 
 export default function DataVault() {
+  const navigate = useNavigate();
   const { reports, setReports } = useAppStore();
   const [search, setSearch] = useState('');
   const [filterRisk, setFilterRisk] = useState<string | null>(null);
   const [selectedReport, setSelectedReport] = useState<string | null>(null);
+  const [showDetailedTable, setShowDetailedTable] = useState(false);
 
   useEffect(() => {
     api.getReports().then(setReports).catch(() => {});
@@ -73,6 +83,14 @@ export default function DataVault() {
           <p className="text-muted-foreground font-medium">Historical repository of all analyzed epidemiological signals</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button 
+            variant={showDetailedTable ? "secondary" : "outline"} 
+            size="sm" 
+            onClick={() => setShowDetailedTable(!showDetailedTable)} 
+            className="gap-2 font-bold uppercase tracking-widest text-[10px] h-10 shadow-sm"
+          >
+            <Database className="h-4 w-4" /> {showDetailedTable ? "Standard View" : "Deep Analysis Table"}
+          </Button>
           <Button variant="outline" size="sm" onClick={exportData} className="gap-2 font-bold uppercase tracking-widest text-[10px] h-10 shadow-sm">
             <Download className="h-4 w-4" /> Export Archive
           </Button>
@@ -114,10 +132,20 @@ export default function DataVault() {
               <tr className="bg-muted/50 text-left text-muted-foreground border-b border-border/50">
                 <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Transmission Date</th>
                 <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Location Hub</th>
-                <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Pathology</th>
-                <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Case Volume</th>
-                <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Threat Level</th>
-                <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Web Context</th>
+                {showDetailedTable ? (
+                  <>
+                    <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Validation</th>
+                    <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Consensus Reason</th>
+                    <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Symptoms Identified</th>
+                  </>
+                ) : (
+                  <>
+                    <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Pathology</th>
+                    <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Case Volume</th>
+                    <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Threat Level</th>
+                    <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Web Context</th>
+                  </>
+                )}
                 <th className="px-6 py-5 text-right font-black uppercase tracking-widest text-[10px]">Action</th>
               </tr>
             </thead>
@@ -137,32 +165,77 @@ export default function DataVault() {
                   <td className="px-6 py-5">
                     <div className="font-black text-foreground group-hover:text-primary transition-colors uppercase tracking-tight">{r.extracted_data.location}</div>
                   </td>
-                  <td className="px-6 py-5">
-                    <Badge variant="secondary" className="font-bold text-[10px] uppercase tracking-tighter bg-muted/50">
-                      {r.risk_analysis?.possible_disease || 'Unidentified'}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-5 font-black text-lg tabular-nums">
-                    {r.extracted_data.cases}
-                  </td>
-                  <td className="px-6 py-5">
-                    <RiskBadge level={r.risk_analysis?.risk_level} />
-                  </td>
-                  <td className="px-6 py-5">
-                     <div className="flex items-center gap-2">
-                        {r.context_research ? (
-                          <>
-                            <Shield className={cn("h-3.5 w-3.5", r.context_research.conflict_zone ? "text-risk-high" : "text-health")} />
-                            <Droplets className="h-3.5 w-3.5 text-primary" />
-                            <Thermometer className="h-3.5 w-3.5 text-orange-500" />
-                          </>
-                        ) : (
-                          <span className="text-[10px] text-muted-foreground italic font-medium">No Data</span>
-                        )}
-                     </div>
-                  </td>
+                  
+                  {showDetailedTable ? (
+                    <>
+                      <td className="px-6 py-5">
+                        <div className="flex flex-col gap-1">
+                          <Badge variant="outline" className={cn(
+                            "w-fit font-bold uppercase text-[9px]",
+                            r.validation?.valid ? "bg-health/10 text-health border-health/20" : "bg-risk-high/10 text-risk-high border-risk-high/20"
+                          )}>
+                            {r.validation?.valid ? "VALID" : "INVALID"}
+                          </Badge>
+                          <span className="text-[9px] font-bold text-muted-foreground">{Math.round((r.validation?.confidence || 0) * 100)}% Confidence</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5 max-w-xs">
+                         <p className="text-[10px] font-medium leading-tight line-clamp-3 italic text-muted-foreground">
+                            "{r.consensus?.final_reasoning || r.risk_analysis?.reason}"
+                         </p>
+                      </td>
+                      <td className="px-6 py-5">
+                         <div className="flex flex-wrap gap-1 max-w-[200px]">
+                            {r.extracted_data.symptoms.slice(0, 3).map(s => (
+                              <Badge key={s} variant="secondary" className="text-[8px] font-bold px-1.5 py-0 bg-muted/50">
+                                {s}
+                              </Badge>
+                            ))}
+                            {r.extracted_data.symptoms.length > 3 && (
+                              <span className="text-[8px] font-bold text-muted-foreground">+{r.extracted_data.symptoms.length - 3} more</span>
+                            )}
+                         </div>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="px-6 py-5">
+                        <Badge variant="secondary" className="font-bold text-[10px] uppercase tracking-tighter bg-muted/50">
+                          {r.risk_analysis?.possible_disease || 'Unidentified'}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-5 font-black text-lg tabular-nums">
+                        {r.extracted_data.cases}
+                      </td>
+                      <td className="px-6 py-5">
+                        <RiskBadge level={r.risk_analysis?.risk_level} />
+                      </td>
+                      <td className="px-6 py-5">
+                         <div className="flex items-center gap-2">
+                            {r.context_research ? (
+                              <>
+                                <Shield className={cn("h-3.5 w-3.5", r.context_research.conflict_zone ? "text-risk-high" : "text-health")} />
+                                <Droplets className="h-3.5 w-3.5 text-primary" />
+                                <Thermometer className="h-3.5 w-3.5 text-orange-500" />
+                              </>
+                            ) : (
+                              <span className="text-[10px] text-muted-foreground italic font-medium">No Data</span>
+                            )}
+                         </div>
+                      </td>
+                    </>
+                  )}
+                  
                   <td className="px-6 py-5 text-right">
-                    <Button variant="ghost" size="icon" className="rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/vault/details/${r.session_id}`);
+                      }}
+                    >
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </td>
@@ -256,10 +329,25 @@ export default function DataVault() {
                     </ul>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" className="flex-1 text-[9px] font-black uppercase border border-border/50 rounded-xl">
-                      View Full File
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="flex-1 text-[9px] font-black uppercase border border-border/50 rounded-xl"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/vault/details/${report.session_id}`);
+                      }}
+                    >
+                      View Deep Intel Report
                     </Button>
-                    <Button size="sm" className="flex-1 text-[9px] font-black uppercase rounded-xl">
+                    <Button 
+                      size="sm" 
+                      className="flex-1 text-[9px] font-black uppercase rounded-xl"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(report.extracted_data.location)}`, '_blank');
+                      }}
+                    >
                       Open in Maps
                     </Button>
                   </div>

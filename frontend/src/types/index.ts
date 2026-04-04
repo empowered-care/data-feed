@@ -3,6 +3,7 @@ export interface OutbreakReportPayload {
   symptoms: string[];
   cases: number;
   date?: string | null;
+  classification?: 'Suspected' | 'Probable' | 'Confirmed';
   additional_info: Record<string, any>;
 }
 

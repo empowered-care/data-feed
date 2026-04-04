@@ -17,7 +17,9 @@ class GeminiService:
             raise ValueError("❌ GEMINI_API_KEY not found in .env file")
         
         genai.configure(api_key=self.api_key)
-        self.models = GEMINI_MODEL_PREFERENCES
+
+        # Using Gemini 3 Flash Preview as requested
+        self.models = ['gemini-3-flash-preview', 'gemini-2.0-flash', 'gemini-1.5-flash']
 
     def process_medical_record(self, image_path) -> StructuredMedicalRecord:
         img = PIL.Image.open(image_path)

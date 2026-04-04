@@ -34,6 +34,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const RISK_COLORS = { HIGH: '#f43f5e', MEDIUM: '#f59e0b', LOW: '#10b981', UNKNOWN: '#6b7280' };
 
@@ -46,6 +47,10 @@ export default function Dashboard() {
   const [timeFilter, setTimeFilter] = useState<'last24h' | 'all'>('last24h');
   const [riskFilter, setRiskFilter] = useState<'all' | 'HIGH' | 'MEDIUM' | 'LOW'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved'>('all');
+  const [diseaseFilter, setDiseaseFilter] = useState<string>('all');
+  const [classFilter, setClassFilter] = useState<'all' | 'Suspected' | 'Probable' | 'Confirmed'>('all');
+  const [locationFilter, setLocationFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -67,7 +72,7 @@ export default function Dashboard() {
     // 1. Time Filter
     if (timeFilter === 'last24h') {
       const now = new Date();
-      const reportDate = new Date(r.created_at);
+      const reportDate = new Date(r.created_at || r.timestamp || Date.now());
       const hoursDiff = (now.getTime() - reportDate.getTime()) / (1000 * 60 * 60);
       if (hoursDiff > 24) return false;
     }
@@ -78,13 +83,59 @@ export default function Dashboard() {
     // 3. Status Filter
     if (statusFilter !== 'all' && (r.status || 'pending') !== statusFilter) return false;
 
+    // 4. Disease Filter
+    if (diseaseFilter !== 'all' && (r.risk_analysis?.possible_disease || 'Unidentified') !== diseaseFilter) return false;
+
+    // 5. Classification Filter
+    if (classFilter !== 'all' && (r.extracted_data?.classification || 'Suspected') !== classFilter) return false;
+
+    // 6. Location Filter
+    if (locationFilter !== 'all' && r.extracted_data?.location !== locationFilter) return false;
+
+    // 7. Search Term
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      const match = (r.extracted_data?.location || '').toLowerCase().includes(search) ||
+                    (r.extracted_data?.symptoms || []).some(s => s.toLowerCase().includes(search)) ||
+                    (r.risk_analysis?.possible_disease || '').toLowerCase().includes(search);
+      if (!match) return false;
+    }
+
     return true;
   });
 
   // Compute metrics from filtered reports
   const total_reports = filteredReports.length;
-  const total_cases = filteredReports.reduce((acc, r) => acc + (r.extracted_data?.cases || 0), 0);
+  const total_cases = reports.reduce((acc, r) => acc + (r.extracted_data?.cases || 0), 0);
+  const active_cases = filteredReports.reduce((acc, r) => acc + (r.extracted_data?.cases || 0), 0);
   const high_risk_locations = filteredReports.filter(r => r.risk_analysis?.risk_level === 'HIGH').length;
+  
+  const diseases = Array.from(new Set(reports.map(r => r.risk_analysis?.possible_disease || 'Unidentified')));
+  const locations = Array.from(new Set(reports.map(r => r.extracted_data?.location || 'Unknown'))).filter(l => l !== 'Unknown');
+
+  // Significant Increase Logic (Monitoring)
+  const getSignificantAlert = () => {
+    const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000);
+    const locationCounts: Record<string, number> = {};
+    
+    reports.forEach(r => {
+      const date = new Date(r.created_at || r.timestamp || Date.now());
+      if (date >= sixHoursAgo) {
+        const loc = r.extracted_data?.location;
+        if (loc && loc !== 'Unknown') {
+          locationCounts[loc] = (locationCounts[loc] || 0) + (r.extracted_data?.cases || 0);
+        }
+      }
+    });
+    
+    const sorted = Object.entries(locationCounts).sort((a, b) => b[1] - a[1]);
+    if (sorted.length > 0 && sorted[0][1] > 0) {
+      return { location: sorted[0][0], count: sorted[0][1] };
+    }
+    return null;
+  };
+
+  const activeAlert = getSignificantAlert();
   
   const risk_distribution = Object.entries(filteredReports.reduce((acc: any, r) => {
     const level = r.risk_analysis?.risk_level || 'UNKNOWN';
@@ -93,7 +144,7 @@ export default function Dashboard() {
   }, {})).map(([level, count]) => ({ name: level, value: count as number }));
 
   const timeline = filteredReports.map(r => ({ 
-    date: r.extracted_data?.date || (r.created_at ? new Date(r.created_at).toLocaleDateString() : 'Today'), 
+    date: r.extracted_data?.date || (r.created_at || r.timestamp ? new Date(r.created_at || r.timestamp).toLocaleDateString() : 'Today'), 
     cases: r.extracted_data?.cases || 0 
   })).reverse();
       
@@ -116,7 +167,7 @@ export default function Dashboard() {
       r.risk_analysis?.possible_disease || "Unknown",
       r.risk_analysis?.risk_level || "Unknown",
       r.status || "Pending",
-      r.created_at || "N/A"
+      r.created_at || r.timestamp || "N/A"
     ]);
 
     // Construct CSV content
@@ -166,6 +217,17 @@ export default function Dashboard() {
         </div>
         
         <div className="flex items-center gap-2">
+          {/* Search bar */}
+          <div className="relative">
+            <input 
+              type="text"
+              placeholder="Search reports..."
+              className="h-9 w-[200px] rounded-md border border-border/50 bg-background px-3 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
           {/* Time Filter Toggle */}
           <div className="bg-muted px-1 py-1 rounded-lg flex items-center gap-1 border border-border/50">
             <Button 
@@ -188,18 +250,52 @@ export default function Dashboard() {
           </div>
 
           {/* Risk Filter Indicator/Action */}
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setRiskFilter(riskFilter === 'all' ? 'HIGH' : riskFilter === 'HIGH' ? 'MEDIUM' : 'all')}
-            className={cn(
-              "h-9 gap-2 font-black text-[10px] uppercase tracking-widest transition-all",
-              riskFilter !== 'all' && "border-primary/50 bg-primary/5"
-            )}
-          >
-            <Filter className={cn("h-4 w-4", riskFilter !== 'all' && "text-primary")} />
-            {riskFilter === 'all' ? 'Filters' : `Risk: ${riskFilter}`}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Select value={locationFilter} onValueChange={setLocationFilter}>
+              <SelectTrigger className="h-9 w-[130px] text-[10px] font-black uppercase bg-background border-border/50">
+                <SelectValue placeholder="Location" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Regions</SelectItem>
+                {locations.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+              </SelectContent>
+            </Select>
+
+            <Select value={diseaseFilter} onValueChange={setDiseaseFilter}>
+              <SelectTrigger className="h-9 w-[150px] text-[10px] font-black uppercase bg-background border-border/50">
+                <SelectValue placeholder="Disease" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Diseases</SelectItem>
+                {diseases.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+              </SelectContent>
+            </Select>
+
+            <Select value={classFilter} onValueChange={(v: any) => setClassFilter(v)}>
+              <SelectTrigger className="h-9 w-[130px] text-[10px] font-black uppercase bg-background border-border/50">
+                <SelectValue placeholder="Classification" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="Suspected">Suspected</SelectItem>
+                <SelectItem value="Probable">Probable</SelectItem>
+                <SelectItem value="Confirmed">Confirmed</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setRiskFilter(riskFilter === 'all' ? 'HIGH' : riskFilter === 'HIGH' ? 'MEDIUM' : 'all')}
+              className={cn(
+                "h-9 gap-2 font-black text-[10px] uppercase tracking-widest transition-all",
+                riskFilter !== 'all' && "border-primary/50 bg-primary/5"
+              )}
+            >
+              <Filter className={cn("h-4 w-4", riskFilter !== 'all' && "text-primary")} />
+              {riskFilter === 'all' ? 'Risk' : `Risk: ${riskFilter}`}
+            </Button>
+          </div>
 
           <Button 
             size="sm" 
@@ -336,26 +432,25 @@ export default function Dashboard() {
 
         <div className="space-y-6">
           <MetricCard 
-            title="Total Reports" 
-            value={total_reports} 
-            icon={<FileText className="h-5 w-5" />} 
-            subtitle="+12 this week" 
-            trend="up" 
-            className="shadow-primary/5"
-          />
-          <MetricCard 
-            title="Active Cases" 
+            title="Total Historical Cases" 
             value={total_cases} 
+            icon={<FileText className="h-5 w-5" />} 
+            subtitle="All-time cumulative ingestion" 
+            className="shadow-primary/5"
+          />
+          <MetricCard 
+            title="Active Filtered Cases" 
+            value={active_cases} 
             icon={<Users className="h-5 w-5" />} 
-            subtitle="+47 from yesterday" 
+            subtitle="Cases matching current view/filters" 
             trend="up" 
             className="shadow-primary/5"
           />
           <MetricCard 
-            title="Critical Zones" 
+            title="Critical Hubs" 
             value={high_risk_locations} 
             icon={<AlertTriangle className="h-5 w-5" />} 
-            subtitle="Requires rapid response" 
+            subtitle="Immediate response zones" 
             trend="up" 
             className="shadow-primary/5"
           />
@@ -376,12 +471,25 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent className="relative z-10">
-              <p className="text-xs font-medium text-foreground/80 leading-relaxed">
-                Mekelle region is showing a <span className="font-bold text-risk-high underline decoration-2 underline-offset-2">Significant Increase</span> in reported cases over the last 6 hours.
-              </p>
-              <Button size="sm" variant="link" className="px-0 mt-2 h-auto text-primary text-xs font-bold group-hover:gap-2 transition-all">
-                Investigate Cluster <ArrowUpRight className="h-3 w-3" />
-              </Button>
+              {activeAlert ? (
+                <>
+                  <p className="text-xs font-medium text-foreground/80 leading-relaxed">
+                    <span className="font-bold text-primary">{activeAlert.location}</span> region is showing a <span className="font-bold text-risk-high underline decoration-2 underline-offset-2">Significant Increase</span> in reported cases over the last 6 hours.
+                  </p>
+                  <Button 
+                    size="sm" 
+                    variant="link" 
+                    className="px-0 mt-2 h-auto text-primary text-xs font-bold group-hover:gap-2 transition-all"
+                    onClick={() => setLocationFilter(activeAlert.location)}
+                  >
+                    Investigate Cluster <ArrowUpRight className="h-3 w-3" />
+                  </Button>
+                </>
+              ) : (
+                <p className="text-xs font-medium text-foreground/80 leading-relaxed italic">
+                  No significant regional alerts detected in the last 6 hours. System monitoring active.
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -404,9 +512,9 @@ export default function Dashboard() {
                 <tr className="border-b border-border/50 text-left text-muted-foreground bg-muted/20">
                   <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Location Hub</th>
                   <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Pathology</th>
-                  <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Case Count</th>
+                  <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Status</th>
+                  <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Cases</th>
                   <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Risk Profile</th>
-                  <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Validation Status</th>
                   <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px] text-right">Action</th>
                 </tr>
               </thead>
@@ -418,31 +526,38 @@ export default function Dashboard() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.05 }}
                     className="hover:bg-primary/5 transition-colors group cursor-pointer"
-                    onClick={() => window.location.href = `/vault`}
+                    onClick={() => window.location.href = `/vault/details/${r.session_id}`}
                   >
                     <td className="px-6 py-4">
                       <div className="font-bold text-foreground group-hover:text-primary transition-colors">{r.extracted_data.location}</div>
-                      <div className="text-[10px] text-muted-foreground">{r.created_at ? new Date(r.created_at).toLocaleTimeString() : 'Recently'}</div>
+                      <div className="text-[10px] text-muted-foreground">{(r.created_at || r.timestamp) ? new Date(r.created_at || r.timestamp).toLocaleTimeString() : 'Recently'}</div>
                     </td>
                     <td className="px-6 py-4">
                       <Badge variant="secondary" className="font-bold text-[10px] uppercase tracking-tighter bg-muted/50">
                         {r.risk_analysis?.possible_disease || 'Unidentified'}
                       </Badge>
                     </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-1">
+                        <Badge variant="outline" className={cn(
+                          "font-black text-[9px] uppercase tracking-widest w-fit",
+                          r.extracted_data.classification === 'Confirmed' ? "bg-health/10 text-health border-health/20" :
+                          r.extracted_data.classification === 'Probable' ? "bg-risk-medium/10 text-risk-medium border-risk-medium/20" :
+                          "bg-muted text-muted-foreground border-border"
+                        )}>
+                          {r.extracted_data.classification || 'Suspected'}
+                        </Badge>
+                        <div className="flex items-center gap-1 opacity-60">
+                           <div className={cn(
+                             "w-1.5 h-1.5 rounded-full",
+                             r.validation?.valid ? "bg-health" : "bg-risk-high"
+                           )} />
+                           <span className="text-[8px] font-bold uppercase">{r.validation?.valid ? 'Validated' : 'Invalid'}</span>
+                        </div>
+                      </div>
+                    </td>
                     <td className="px-6 py-4 font-mono font-bold text-lg">{r.extracted_data.cases}</td>
                     <td className="px-6 py-4"><RiskBadge level={r.risk_analysis.risk_level} /></td>
-                    <td className="px-6 py-4">
-                      <Badge variant="outline" className={cn(
-                        "capitalize font-bold border-none px-0",
-                        r.status === 'pending' ? 'text-risk-medium' : r.status === 'approved' ? 'text-health' : 'text-risk-high'
-                      )}>
-                        <span className={cn(
-                          "w-2 h-2 rounded-full mr-2",
-                          r.status === 'pending' ? 'bg-risk-medium' : r.status === 'approved' ? 'bg-health' : 'bg-risk-high'
-                        )} />
-                        {r.status}
-                      </Badge>
-                    </td>
                     <td className="px-6 py-4 text-right">
                       <Button variant="ghost" size="icon" className="rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                         <ArrowUpRight className="h-4 w-4" />
@@ -470,7 +585,7 @@ export default function Dashboard() {
           onClick={() => setShowRaw(!showRaw)}
           className="text-xs font-bold text-muted-foreground hover:text-primary transition-all flex items-center gap-2 px-4 py-2 rounded-full bg-muted/30 hover:bg-muted/50 border border-border/50"
         >
-          {showRaw ? 'Hide' : 'Show'} System Kernel Data
+          {showRaw ? 'Hide' : 'Show'} Full Raw Data Stream (Kernel)
         </button>
       </div>
 
@@ -483,7 +598,7 @@ export default function Dashboard() {
             className="mt-4 glass-card p-4 rounded-xl overflow-hidden border border-border/50 bg-black/90 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-4 px-2">
-              <span className="text-[10px] font-mono text-green-500 uppercase font-bold tracking-widest">DEBUG_SESSION_KERNEL_STREAM</span>
+              <span className="text-[10px] font-mono text-green-500 uppercase font-bold tracking-widest">FULL_DATA_VALIDATE_STRUCTURED_STREAM</span>
               <div className="flex gap-1">
                 <div className="w-2 h-2 rounded-full bg-red-500/50" />
                 <div className="w-2 h-2 rounded-full bg-yellow-500/50" />

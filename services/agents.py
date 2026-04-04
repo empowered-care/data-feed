@@ -46,6 +46,7 @@ class ExtractionAgent:
         - symptoms: List of clinical signs (e.g. fever, cough).
         - cases: Integer number of affected individuals.
         - date: The specific date mentioned for this event.
+        - classification: Strictly classify as "Suspected", "Probable", or "Confirmed" based on wording like "suspected case", "likely case", or "lab confirmed". Default to "Suspected".
         - additional_info: Any other relevant clinical or environmental details.
 
         Return ONLY a JSON list of objects:
@@ -55,6 +56,7 @@ class ExtractionAgent:
             "symptoms": ["symptom1", "symptom2"],
             "cases": number,
             "date": "string or null",
+            "classification": "Suspected | Probable | Confirmed",
             "additional_info": {{}}
           }}
         ]
@@ -427,28 +429,71 @@ class DataAssistantAgent:
         except Exception as e:
             logger.error(f"❌ Failed to save data store to {self.storage_path}: {e}")
 
-    def add_report(self, report: Union[OutbreakReport, Dict[str, Any]], session_id: str = None, risk_analysis: Dict[str, Any] = None, alert: Dict[str, Any] = None, context_research: Dict[str, Any] = None, raw_report: str = ""):
-        """Add a report to the data store with full context."""
+    def add_report(self, report: Union[OutbreakReport, Dict[str, Any]], session_id: str = None, risk_analysis: Dict[str, Any] = None, alert: Dict[str, Any] = None, context_research: Dict[str, Any] = None, raw_report: str = "", validation: Dict[str, Any] = None, consensus: Dict[str, Any] = None):
+        """Add a report to the data store with full context. Groups similar reports from the same location."""
         report_dict = report.dict() if hasattr(report, "dict") else report
+        location = report_dict.get("location", "Unknown")
+        disease = (risk_analysis or {}).get("possible_disease", "Unknown")
         
-        # Add metadata for dashboard
-        entry = {
-            "session_id": session_id or str(uuid.uuid4()),
-            "extracted_data": report_dict,
-            "risk_analysis": risk_analysis or {"risk_level": "LOW"},
-            "context_research": context_research,
-            "alert": alert or {"title": "New Report"},
-            "status": "pending",
-            "timestamp": str(datetime.now()),
-            "raw_report": raw_report
-        }
+        # Check for existing report for the SAME location and SAME disease added very recently (e.g. 2 hours)
+        # to avoid separating related data points (User requirement: "dont separete")
+        found_existing = False
+        now = datetime.now()
         
-        self.data_store.insert(0, entry) # Newest first
+        for existing in self.data_store:
+            try:
+                # Parse existing timestamp
+                existing_time = datetime.fromisoformat(existing["timestamp"])
+                time_diff = (now - existing_time).total_seconds() / 3600 # hours
+                
+                if (existing["extracted_data"].get("location") == location and 
+                    (existing.get("risk_analysis") or {}).get("possible_disease") == disease and
+                    time_diff < 2): # Within 2 hours
+                    
+                    logger.info(f"Merging report into existing cluster for {location}")
+                    # Update cases
+                    existing["extracted_data"]["cases"] += report_dict.get("cases", 0)
+                    # Merge symptoms
+                    existing_symptoms = set(existing["extracted_data"].get("symptoms", []))
+                    new_symptoms = set(report_dict.get("symptoms", []))
+                    existing["extracted_data"]["symptoms"] = list(existing_symptoms.union(new_symptoms))
+                    # Update raw report to include both
+                    existing["raw_report"] = (existing.get("raw_report", "") + "\n---\n" + raw_report).strip()
+                    # Update timestamp to latest activity
+                    existing["timestamp"] = str(now)
+                    found_existing = True
+                    break
+            except Exception as e:
+                logger.error(f"Error checking existing report for merge: {e}")
+                continue
+
+        if not found_existing:
+            # Add metadata for dashboard
+            entry = {
+                "session_id": session_id or str(uuid.uuid4()),
+                "extracted_data": report_dict,
+                "validation": validation,
+                "risk_analysis": risk_analysis or {"risk_level": "LOW"},
+                "consensus": consensus,
+                "context_research": context_research,
+                "alert": alert or {"title": "New Report"},
+                "status": "pending",
+                "created_at": str(now),
+                "timestamp": str(now),
+                "raw_report": raw_report
+            }
+            self.data_store.insert(0, entry) # Newest first
+
+        # Ensure we don't exceed max reports
         if len(self.data_store) > MAX_STORED_REPORTS:
             self.data_store = self.data_store[:MAX_STORED_REPORTS]
         
+        # Sort by location to keep same-location data together in storage (User requirement: "stor eon same place")
+        # But keep newest reports at the top for each location
+        self.data_store.sort(key=lambda x: (x["extracted_data"].get("location", ""), x["timestamp"]), reverse=True)
+        
         self._save_data()
-        logger.info(f"Added report to data store. Total reports: {len(self.data_store)}")
+        logger.info(f"Added/Updated report in data store. Total records: {len(self.data_store)}")
 
     def update_report_status(self, session_id: str, status: str):
         """Update the approval status of a report."""

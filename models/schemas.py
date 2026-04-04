@@ -97,6 +97,7 @@ class OutbreakReport(BaseModel):
     symptoms: List[str] = Field(default_factory=list)
     cases: int
     date: Optional[str] = None
+    classification: str = "Suspected"  # Suspected, Probable, Confirmed
     additional_info: Dict[str, Any] = Field(default_factory=dict)
 
 class ContextData(BaseModel):
@@ -145,6 +146,9 @@ class OutbreakProcessResponse(BaseModel):
     metadata: dict = Field(default_factory=dict)
     message: str
     human_validation_required: bool = True
+    status: Optional[str] = "pending"
+    created_at: Optional[str] = None
+    raw_report: Optional[str] = None
 
 class QueryResponse(BaseModel):
     query: str

@@ -400,12 +400,18 @@ async def process_document(
     logger.info(f"📁 Input File: {file.filename} ({file.content_type})")
     
     # Convert PDF or Image
-    if file.content_type == "application/pdf":
+    content_type = (file.content_type or "").lower()
+    if content_type == "application/pdf" or file.filename.lower().endswith(".pdf"):
         logger.info("📄 Converting PDF to images...")
         images = pdf_to_images(content)
+        if not images:
+            raise HTTPException(status_code=400, detail="Failed to convert PDF into images for processing.")
     else:
         nparr = np.frombuffer(content, np.uint8)
-        images = [cv2.imdecode(nparr, cv2.IMREAD_COLOR)]
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        if img is None:
+            raise HTTPException(status_code=400, detail="Uploaded file is not a valid image or PDF.")
+        images = [img]
 
     final_annotated = None
     raw_text_total = ""
@@ -413,6 +419,7 @@ async def process_document(
     all_crops = []
     all_enhanced = []
     all_detections = []
+    final_structured_record = None
     
     for page_idx, img in enumerate(images):
         logger.info(f"📸 Page {page_idx + 1}/{len(images)}...")
@@ -449,17 +456,23 @@ async def process_document(
             structured_record = gemini_service.process_medical_record(temp_img_path)
             num_regions += 1
             raw_text_total += f"[Page_{page_idx+1}] Extracted successfully via Gemini.\n"
+            # Keep track of the results for all pages (or at least the first valid one)
+            if final_structured_record is None:
+                final_structured_record = structured_record
         except Exception as e:
-            logger.warning(f"⚠️ Gemini failed: {e}. Running local OCR fallback...")
-            # Fallback to local OCR
+            logger.warning(f"⚠️ Gemini failed on page {page_idx}: {e}. Running local OCR fallback...")
+            # Fallback logic...
+            page_text = ""
             for i, (box, conf, label) in enumerate(zip(boxes, confs, labels)):
                 x1, y1, x2, y2 = map(int, box)
                 region = img[y1:y2, x1:x2]
                 enhanced = Preprocessor.enhance(region)
                 text, conf_ocr = ocr.extract(enhanced)
-                raw_text_total += f"[{label}] {text}\n"
+                page_text += f"[{label}] {text}\n"
             
-            structured_record = Structurer.structure(raw_text_total, 0.7)
+            raw_text_total += page_text
+            if final_structured_record is None:
+                final_structured_record = Structurer.structure(page_text, 0.7)
 
     # Save visualization products
     if final_annotated is not None:
@@ -469,8 +482,11 @@ async def process_document(
 
     logger.info(f"--- ✨ Session Complete: {session_id} ---")
 
+    if final_structured_record is None:
+        raise HTTPException(status_code=400, detail="Failed to extract structured data from any page.")
+
     return ProcessResponse(
-        record=structured_record,
+        record=final_structured_record,
         detections=all_detections,
         annotated_image_base64=annotated_b64,
         raw_ocr_text=raw_text_total.strip(),
@@ -478,6 +494,7 @@ async def process_document(
         metadata={
             "num_regions": num_regions,
             "processed_at": str(datetime.now()),
+            "total_pages": len(images),
             "file_type": file.content_type,
             "engine": "Gemini-1.5-Flash"
         },
@@ -519,7 +536,9 @@ async def process_outbreak_report(
                 risk_analysis=result["risk_analysis"].model_dump(mode='json') if hasattr(result["risk_analysis"], "model_dump") else result["risk_analysis"],
                 alert=result["alert"].model_dump(mode='json') if hasattr(result["alert"], "model_dump") else result["alert"],
                 context_research=result["context_research"].model_dump(mode='json') if result.get("context_research") and hasattr(result["context_research"], "model_dump") else result.get("context_research"),
-                raw_report=text
+                raw_report=text,
+                validation=result["validation"].model_dump(mode='json') if hasattr(result["validation"], "model_dump") else result["validation"],
+                consensus=result["consensus"].model_dump(mode='json') if hasattr(result["consensus"], "model_dump") else result["consensus"]
             )
 
             response_list.append(OutbreakProcessResponse(
@@ -562,22 +581,27 @@ async def upload_outbreak_file(
     
     try:
         # Branch processing by file type
-        if file.content_type == "text/csv" or file.filename.endswith(".csv"):
+        filename = file.filename.lower()
+        content_type = (file.content_type or "").lower()
+        
+        if content_type == "text/csv" or filename.endswith(".csv"):
             df = pd.read_csv(io.BytesIO(content))
             extracted_text = "Outbreak CSV Dump:\n" + df.to_string()
             
-        elif file.content_type == "application/pdf" or file.filename.endswith(".pdf"):
+        elif content_type == "application/pdf" or filename.endswith(".pdf"):
             images = pdf_to_images(content)
+            if not images:
+                raise HTTPException(status_code=400, detail="Failed to extract images from PDF. Ensure the file is not corrupt.")
+            
             all_text = []
             prompt = "Extract all text from this medical/epidemiological report page. Return ONLY the text."
-            for img_pil in images:
-                img_byte_arr = io.BytesIO()
-                img_pil.save(img_byte_arr, format='JPEG')
-                text = gemini_service.generate_vision_text(img_byte_arr.getvalue(), prompt)
+            for img_np in images:
+                _, img_encoded = cv2.imencode('.jpg', img_np)
+                text = gemini_service.generate_vision_text(img_encoded.tobytes(), prompt)
                 all_text.append(text)
             extracted_text = "\n".join(all_text)
             
-        elif file.content_type.startswith("image/") or file.filename.endswith((".jpg", ".jpeg", ".png")):
+        elif content_type.startswith("image/") or filename.endswith((".jpg", ".jpeg", ".png")):
             prompt = "Extract all text from this medical note/report. Return ONLY the text."
             extracted_text = gemini_service.generate_vision_text(content, prompt)
             
@@ -603,7 +627,9 @@ async def upload_outbreak_file(
                 risk_analysis=result["risk_analysis"].model_dump(mode='json') if hasattr(result["risk_analysis"], "model_dump") else result["risk_analysis"],
                 alert=result["alert"].model_dump(mode='json') if hasattr(result["alert"], "model_dump") else result["alert"],
                 context_research=result["context_research"].model_dump(mode='json') if result.get("context_research") and hasattr(result["context_research"], "model_dump") else result.get("context_research"),
-                raw_report=extracted_text
+                raw_report=extracted_text,
+                validation=result["validation"].model_dump(mode='json') if hasattr(result["validation"], "model_dump") else result["validation"],
+                consensus=result["consensus"].model_dump(mode='json') if hasattr(result["consensus"], "model_dump") else result["consensus"]
             )
 
             response_list.append(OutbreakProcessResponse(
@@ -624,10 +650,6 @@ async def upload_outbreak_file(
 
         processing_time = (datetime.now() - start_time).total_seconds()
         return response_list
-
-    except Exception as e:
-        logger.error(f"❌ File processing failed: {e}")
-        raise HTTPException(status_code=500, detail=f"File processing failed: {str(e)}")
 
     except Exception as e:
         logger.error(f"❌ File processing failed: {e}")
@@ -723,17 +745,7 @@ async def clear_chat_session(session_id: str, user: dict = Depends(get_current_u
     else:
         return {"message": f"Session {session_id} not found or already empty"}
 
-# --- GET /outbreak/reports  (dashboard already calls this) ---
-
-@app.get("/outbreak/reports")
-async def get_all_outbreak_reports(user: dict = Depends(get_current_user)):
-    """Get all processed outbreak reports stored by DataAssistantAgent."""
-    return data_assistant.data_store
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# PATIENT RECORD ENDPOINTS  (manual form entry → data/patient_records.json)
-# ─────────────────────────────────────────────────────────────────────────────
+# --- PATIENT RECORD ENDPOINTS ---
 
 PATIENT_RECORDS_FILE = Path("data") / "patient_records.json"
 PATIENT_RECORDS_FILE.parent.mkdir(exist_ok=True)

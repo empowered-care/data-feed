@@ -49,6 +49,7 @@ LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 # Gemini AI Settings
 GEMINI_MODEL_PREFERENCES = [
     'gemini-3-flash-preview'
+
 ]
 
 # Validation Settings
