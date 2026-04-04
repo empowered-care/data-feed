@@ -27,6 +27,8 @@ huggingface_hub
 
 # AI Services
 google-generativeai==0.8.3
+crawl4ai==0.4.248
+playwright
 
 # Development & Testing
 pytest==8.3.2

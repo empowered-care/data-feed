@@ -513,7 +513,8 @@ async def process_outbreak_report(
             result["extracted_data"],
             session_id=session_id,
             risk_analysis=result["risk_analysis"].dict() if hasattr(result["risk_analysis"], "dict") else result["risk_analysis"],
-            alert=result["alert"].dict() if hasattr(result["alert"], "dict") else result["alert"]
+            alert=result["alert"].dict() if hasattr(result["alert"], "dict") else result["alert"],
+            context_research=result["context_research"].dict() if result.get("context_research") and hasattr(result["context_research"], "dict") else result.get("context_research")
         )
 
         processing_time = (datetime.now() - start_time).total_seconds()
@@ -524,6 +525,7 @@ async def process_outbreak_report(
             validation=result["validation"],
             risk_analysis=result["risk_analysis"],
             consensus=result["consensus"],
+            context_research=result["context_research"],
             alert=result["alert"],
             session_id=session_id,
             metadata={
@@ -588,7 +590,8 @@ async def upload_outbreak_file(
             result["extracted_data"],
             session_id=session_id,
             risk_analysis=result["risk_analysis"].dict() if hasattr(result["risk_analysis"], "dict") else result["risk_analysis"],
-            alert=result["alert"].dict() if hasattr(result["alert"], "dict") else result["alert"]
+            alert=result["alert"].dict() if hasattr(result["alert"], "dict") else result["alert"],
+            context_research=result["context_research"].dict() if result.get("context_research") and hasattr(result["context_research"], "dict") else result.get("context_research")
         )
         
         processing_time = (datetime.now() - start_time).total_seconds()
@@ -598,6 +601,7 @@ async def upload_outbreak_file(
             validation=result["validation"],
             risk_analysis=result["risk_analysis"],
             consensus=result["consensus"],
+            context_research=result["context_research"],
             alert=result["alert"],
             session_id=session_id,
             metadata={

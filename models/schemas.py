@@ -99,6 +99,16 @@ class OutbreakReport(BaseModel):
     date: Optional[str] = None
     additional_info: Dict[str, Any] = Field(default_factory=dict)
 
+class ContextData(BaseModel):
+    location: str
+    security_status: Optional[str] = None
+    water_quality: Optional[str] = None
+    temperature: Optional[str] = None
+    conflict_zone: bool = False
+    nearby_facilities: List[str] = Field(default_factory=list)
+    recent_news: List[str] = Field(default_factory=list)
+    last_updated: datetime = Field(default_factory=datetime.now)
+
 class ValidationResult(BaseModel):
     valid: bool
     confidence: float
@@ -129,6 +139,7 @@ class OutbreakProcessResponse(BaseModel):
     validation: ValidationResult
     risk_analysis: RiskAnalysis
     consensus: Optional[ConsensusResult] = None
+    context_research: Optional[ContextData] = None
     alert: AlertMessage
     session_id: str
     metadata: dict = Field(default_factory=dict)

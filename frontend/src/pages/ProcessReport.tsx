@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, RotateCcw, CheckCircle2, XCircle, Upload, FileText, Loader2, AlertTriangle, Zap } from 'lucide-react';
+import { Send, RotateCcw, CheckCircle2, XCircle, Upload, FileText, Loader2, AlertTriangle, Zap, Shield, Droplets, Thermometer, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
@@ -252,6 +252,37 @@ export default function ProcessReport() {
                              <p className="text-sm font-black truncate uppercase">{result.risk_analysis?.possible_disease || 'Unidentified'}</p>
                           </div>
                        </div>
+
+                       {result.context_research && (
+                         <div className="space-y-3 pt-2">
+                           <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Environmental Intelligence</p>
+                           <div className="grid grid-cols-3 gap-2">
+                              <div className="p-3 bg-muted/20 rounded-xl border border-border/40 flex flex-col items-center text-center">
+                                <Shield className={cn("h-4 w-4 mb-1", result.context_research.conflict_zone ? "text-risk-high" : "text-health")} />
+                                <p className="text-[8px] font-bold uppercase text-muted-foreground">Security</p>
+                                <p className="text-[10px] font-black truncate w-full">{result.context_research.conflict_zone ? 'Conflict' : 'Stable'}</p>
+                              </div>
+                              <div className="p-3 bg-muted/20 rounded-xl border border-border/40 flex flex-col items-center text-center">
+                                <Droplets className="h-4 w-4 mb-1 text-primary" />
+                                <p className="text-[8px] font-bold uppercase text-muted-foreground">Water</p>
+                                <p className="text-[10px] font-black truncate w-full">{result.context_research.water_quality || 'Unknown'}</p>
+                              </div>
+                              <div className="p-3 bg-muted/20 rounded-xl border border-border/40 flex flex-col items-center text-center">
+                                <Thermometer className="h-4 w-4 mb-1 text-orange-500" />
+                                <p className="text-[8px] font-bold uppercase text-muted-foreground">Temp</p>
+                                <p className="text-[10px] font-black truncate w-full">{result.context_research.temperature || 'N/A'}</p>
+                              </div>
+                           </div>
+                           <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10">
+                              <p className="text-[10px] font-bold text-primary uppercase tracking-tight flex items-center gap-1.5 mb-1">
+                                <Info className="h-3 w-3" /> Recent Context
+                              </p>
+                              <p className="text-[11px] font-medium leading-relaxed italic text-muted-foreground">
+                                {result.context_research.security_status}
+                              </p>
+                           </div>
+                         </div>
+                       )}
 
                        {result.human_validation_required ? (
                          <div className="pt-4 space-y-3">
