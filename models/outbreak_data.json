@@ -1,188 +1,77 @@
 [
     {
-        "session_id": "e070e7bd-9609-43e8-8b90-f6792bfa9b47",
+        "session_id": "0589235d-262b-4bc4-a7ce-4f0ab288ea6b",
         "extracted_data": {
-            "location": "Arba Minch Surroundings",
+            "location": "Unknown",
             "symptoms": [
-                "unusual skin lesions",
-                "itching"
+                "Unknown"
             ],
-            "cases": 4,
-            "date": null,
-            "classification": "Confirmed",
-            "additional_info": {
-                "disease": "localized fungal outbreak",
-                "patient_group": "plantation workers",
-                "environmental_factor": "exacerbated by recent flooding",
-                "confirmation_method": "confirmed by regional clinic"
-            }
-        },
-        "validation": {
-            "valid": true,
-            "confidence": 0.94,
-            "issues": [
-                "Missing specific onset or reporting date, which is critical for temporal mapping.",
-                "The low case count (4) suggests a cluster rather than a large-scale outbreak, but is statistically realistic for early surveillance detection.",
-                "Lack of specific laboratory details regarding the type of fungal pathogen (e.g., Tinea, Sporotrichosis).",
-                "Clinical symptoms and environmental factors (plantation work, recent flooding, humid climate of Arba Minch) are highly consistent and medically plausible."
-            ]
-        },
-        "risk_analysis": {
-            "risk_level": "MEDIUM",
-            "confidence": "75%",
-            "possible_disease": "Scabies",
-            "reason": "The clinical pattern of itching and skin lesions in a cluster of four individuals suggests a communicable skin condition. Given the additional context regarding water accessibility issues in the Arba Minch surroundings, conditions are highly favorable for water-washed diseases such as Scabies. While the 'unusual' nature of the lesions could also suggest Cutaneous Leishmaniasis (which is endemic to the region), the symptom of itching is more pathognomonic for Scabies. The risk is medium due to the small case count but high potential for transmission in a conflict-affected area with limited hygiene resources."
-        },
-        "consensus": {
-            "final_risk_level": "MEDIUM",
-            "average_confidence": 73.75,
-            "consensus_reached": true,
-            "agent_opinions": [
-                {
-                    "risk_level": "MEDIUM",
-                    "confidence": "75%",
-                    "possible_disease": "Scabies",
-                    "reason": "The clinical pattern of itching and skin lesions in a cluster of four individuals suggests a communicable skin condition. Given the additional context regarding water accessibility issues in the Arba Minch surroundings, conditions are highly favorable for water-washed diseases such as Scabies. While the 'unusual' nature of the lesions could also suggest Cutaneous Leishmaniasis (which is endemic to the region), the symptom of itching is more pathognomonic for Scabies. The risk is medium due to the small case count but high potential for transmission in a conflict-affected area with limited hygiene resources."
-                },
-                {
-                    "risk_level": "MEDIUM",
-                    "confidence": "70%",
-                    "possible_disease": "Scabies",
-                    "reason": "From a statistical perspective, a cluster of 4 cases indicates localized transmission rather than a sporadic event. While the case count is lower than historical high-risk respiratory outbreaks (45 cases) or suspected measles (5-12 cases) in the region, the context of conflict and documented water quality issues in Arba Minch likely leads to statistical under-reporting. The presence of a symptom cluster (itching/lesions) in a high-stress environment suggests an R0 > 1, warranting a medium risk assessment for further spread."
-                },
-                {
-                    "risk_level": "MEDIUM",
-                    "confidence": "75%",
-                    "possible_disease": "Scabies or Cutaneous Leishmaniasis",
-                    "reason": "Arba Minch and the surrounding Gamo Zone have a historical record of endemic neglected tropical diseases (NTDs), particularly Cutaneous Leishmaniasis and scabies outbreaks. The symptoms of itching and skin lesions are consistent with historical clusters in this region often triggered by displacement, poor sanitation, and proximity to stagnant water/vectors. While the current case count (4) is low, the context of ongoing conflict and documented water quality issues matches historical precursors for localized outbreaks in the Southern Ethiopia region."
-                },
-                {
-                    "risk_level": "MEDIUM",
-                    "confidence": "75%",
-                    "possible_disease": "Scabies",
-                    "reason": "The symptoms of unusual skin lesions and itching, combined with documented water quality issues and drinking water scarcity in Arba Minch, are highly indicative of hygiene-related skin infections. In conflict zones, the breakdown of sanitation infrastructure and potential displacement lead to overcrowding, which significantly accelerates the transmission of Scabies or similar dermatological conditions. Although the current case count is low (4), the environmental vulnerability\u2014characterized by poor water accessibility and security instability\u2014presents a high potential for rapid spread among the population."
-                }
-            ],
-            "final_reasoning": "Consensus reached from multiple perspectives: MEDIUM: The clinical pattern of itching and skin lesions i... | MEDIUM: From a statistical perspective, a cluster of 4 cas... | MEDIUM: Arba Minch and the surrounding Gamo Zone have a hi... | MEDIUM: The symptoms of unusual skin lesions and itching, ..."
-        },
-        "context_research": {
-            "location": "Arba Minch Surroundings",
-            "security_status": "Ongoing monitoring of security and conflict status is reported for Arba Minch and the Gamo Zone as of 2024.",
-            "water_quality": "There are documented reports concerning drinking water accessibility issues and water quality assessments in the Arba Minch surroundings.",
-            "temperature": "Information not provided in the source data.",
-            "conflict_zone": true,
-            "nearby_facilities": [],
-            "recent_news": [
-                "Arba Minch and Gamo Zone security updates current conflict status 2024",
-                "Water quality reports and drinking water accessibility issues in Arba Minch surroundings"
-            ],
-            "last_updated": "2026-04-04T10:57:00.938097"
-        },
-        "alert": {
-            "title": "Health Alert: Itchy Skin Rash Reported in Arba Minch Surroundings",
-            "message": "A cluster of 4 people in the Arba Minch area have reported unusual skin sores and intense itching. Health experts suspect an outbreak of Scabies. While this condition is treatable, it is highly contagious and can spread quickly through families and neighborhoods if people do not take precautions.",
-            "recommendations": [
-                "Visit the nearest health center immediately if you or your children have an itchy rash or unusual skin bumps.",
-                "Do not share personal items like towels, clothing, or blankets with others.",
-                "If one person in your household is diagnosed, every family member should be checked by a health worker.",
-                "Avoid scratching the itchy areas, as this can lead to more serious skin infections."
-            ],
-            "prevention_strategy": "To stop the spread, practice good hygiene. Regularly wash your clothes and bedding in hot water and dry them in direct sunlight. Avoid direct skin-to-skin contact with anyone who has a visible rash or is known to be infected.",
-            "why_urgent": "This alert was generated because 4 cases appeared at once in the same area. This region has a history of skin outbreaks, and since the infection spreads very easily through close contact, we must act now to prevent it from reaching more families and schools."
-        },
-        "status": "pending",
-        "timestamp": "2026-04-04 10:57:25.227794",
-        "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                                                                                                                               raw_content\n0  URGENT: Health alert from Jinka, South Omo Zone. We have 8 patients presenting with high-grade fever, severe headache, and jaundice (yellowing of eyes). 3 cases were lab-confirmed as Yellow Fever this morning, while the remaining 5 are considered probable based on clinical alignment. All patients are from the same village near the Omo River.\n1                                                                          Konso Health Post: Cluster of 15 cases of acute watery diarrhea and severe vomiting detected in the last 24 hours. Initial investigation suggests a contaminated communal well. 10 cases are currently suspected and 5 are probable cholera. Immediate medical supplies needed.\n2                                                                                            Turmi Update: 4 individuals in a nomadic group showing signs of high fever and hemorrhagic spots. These are currently suspected cases of an unidentified viral fever. Movement tracking is difficult due to their migratory patterns in the South Omo region.\n3                                                                                             Arba Minch Surroundings: Local surveillance detected 22 cases of unusual skin lesions and itching among plantation workers. 18 are suspected and 4 have been confirmed by the regional clinic as a localized fungal outbreak exacerbated by recent flooding."
-    },
-    {
-        "session_id": "f020491f-a14d-40dc-b4e2-01052662f022",
-        "extracted_data": {
-            "location": "Arba Minch Surroundings",
-            "symptoms": [
-                "unusual skin lesions",
-                "itching"
-            ],
-            "cases": 18,
+            "cases": 1,
             "date": null,
             "classification": "Suspected",
             "additional_info": {
-                "disease": "localized fungal outbreak",
-                "patient_group": "plantation workers",
-                "environmental_factor": "exacerbated by recent flooding"
+                "raw_text": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                                                                                                                               raw_content\n0  URGENT: Health alert from Jinka, South Omo Zone. We have 8 patients presenting with high-grade fever, severe headache, and jaundice (yellowing of eyes). 3 cases were lab-confirmed as Yellow Fever this morning, while the remaining 5 are considered probable based on clinical alignment. All patients are from the same village near the Omo River.\n1                                                                          Konso Health Post: Cluster of 15 cases of acute watery diarrhea and severe vomiting detected in the last 24 hours. Initial investigation suggests a contaminated communal well. 10 cases are currently suspected and 5 are probable cholera. Immediate medical supplies needed.\n2                                                                                            Turmi Update: 4 individuals in a nomadic group showing signs of high fever and hemorrhagic spots. These are currently suspected cases of an unidentified viral fever. Movement tracking is difficult due to their migratory patterns in the South Omo region.\n3                                                                                             Arba Minch Surroundings: Local surveillance detected 22 cases of unusual skin lesions and itching among plantation workers. 18 are suspected and 4 have been confirmed by the regional clinic as a localized fungal outbreak exacerbated by recent flooding.",
+                "error": "\u274c Gemini text generation failed: 404 models/gemini-1.5-flash-latest is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
             }
         },
         "validation": {
             "valid": true,
-            "confidence": 0.85,
+            "confidence": 0.5,
             "issues": [
-                "Missing temporal data: The absence of a specific date or timeframe makes it impossible to establish a definitive correlation between the flooding event and the onset of symptoms.",
-                "Subjective symptom description: The term 'unusual' is medically vague; more specific descriptors (e.g., annular, ulcerative, or nodular) would increase clinical validity.",
-                "Lack of diagnostic confirmation: The report does not specify if cases were confirmed via microscopy/culture or remain suspected based on clinical presentation.",
-                "Environmental consistency: While highly plausible for the humid climate of Arba Minch, fungal outbreaks usually have a longer incubation period post-flooding than bacterial or parasitic skin infections (e.g., leptospirosis or cercarial dermatitis)."
+                "Validation engine failure, defaulting to valid"
             ]
         },
         "risk_analysis": {
-            "risk_level": "MEDIUM",
-            "confidence": "75%",
-            "possible_disease": "Scabies",
-            "reason": "The clinical presentation of intense itching and unusual skin lesions across 18 cases strongly suggests a contagious parasitic infestation like Scabies, which is endemic in rural Ethiopia. The cluster size indicates rapid transmission, likely exacerbated by the water accessibility challenges noted in the research queries for Arba Minch. While morbidity is high, the risk is categorized as MEDIUM rather than HIGH because these symptoms currently lack systemic indicators (e.g., fever, respiratory distress) that would suggest a more lethal or viral outbreak like Mpox."
+            "risk_level": "UNKNOWN",
+            "confidence": "0%",
+            "possible_disease": "Unknown",
+            "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-flash-latest is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
         },
         "consensus": {
-            "final_risk_level": "MEDIUM",
-            "average_confidence": 72.5,
+            "final_risk_level": "UNKNOWN",
+            "average_confidence": 0.0,
             "consensus_reached": true,
             "agent_opinions": [
                 {
-                    "risk_level": "MEDIUM",
-                    "confidence": "75%",
-                    "possible_disease": "Scabies",
-                    "reason": "The clinical presentation of intense itching and unusual skin lesions across 18 cases strongly suggests a contagious parasitic infestation like Scabies, which is endemic in rural Ethiopia. The cluster size indicates rapid transmission, likely exacerbated by the water accessibility challenges noted in the research queries for Arba Minch. While morbidity is high, the risk is categorized as MEDIUM rather than HIGH because these symptoms currently lack systemic indicators (e.g., fever, respiratory distress) that would suggest a more lethal or viral outbreak like Mpox."
+                    "risk_level": "UNKNOWN",
+                    "confidence": "0%",
+                    "possible_disease": "Unknown",
+                    "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-flash-latest is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
                 },
                 {
-                    "risk_level": "MEDIUM",
-                    "confidence": "75%",
-                    "possible_disease": "Scabies or Cutaneous Leishmaniasis",
-                    "reason": "The report of 18 cases represents a larger cluster than several historical outbreaks in the Arba Minch area (e.g., the 12-case Measles and 15-case Chikungunya clusters). A cluster of this size involving 'unusual' lesions suggests a localized epidemic curve that has moved beyond sporadic transmission. While skin-based outbreaks typically have lower immediate mortality than the high-risk respiratory events noted in the history (45 cases), the statistical volume in a concentrated rural/semi-urban setting indicates a significant public health failure or environmental exposure."
+                    "risk_level": "UNKNOWN",
+                    "confidence": "0%",
+                    "possible_disease": "Unknown",
+                    "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-flash-latest is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
                 },
                 {
-                    "risk_level": "MEDIUM",
-                    "confidence": "75%",
-                    "possible_disease": "Scabies",
-                    "reason": "Arba Minch and the surrounding Gamo Zone are historically recognized hotspots for dermatological outbreaks, specifically Scabies and Cutaneous Leishmaniasis. A cluster of 18 cases with symptoms of itching and lesions follows past regional trends often exacerbated by water accessibility challenges in rural Arba Minch. While morbidity is high, the immediate mortality risk is lower than the respiratory or enteric diseases noted in historical records for this period."
+                    "risk_level": "UNKNOWN",
+                    "confidence": "0%",
+                    "possible_disease": "Unknown",
+                    "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-flash-latest is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
                 },
                 {
-                    "risk_level": "MEDIUM",
-                    "confidence": "65%",
-                    "possible_disease": "Scabies or Cutaneous Leishmaniasis",
-                    "reason": "The cluster of 18 cases presenting with skin lesions and itching in the Arba Minch surroundings suggests an environmental or hygiene-related transmission. Although specific water quality data is missing, the rural context and proximity to the Rift Valley lakes (Abaya and Chamo) increase susceptibility to water-washed diseases like Scabies (often exacerbated by limited access to clean water for hygiene) or vector-borne diseases like Cutaneous Leishmaniasis, which is endemic to the region's climate and soil conditions."
+                    "risk_level": "UNKNOWN",
+                    "confidence": "0%",
+                    "possible_disease": "Unknown",
+                    "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-flash-latest is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
                 }
             ],
-            "final_reasoning": "Consensus reached from multiple perspectives: MEDIUM: The clinical presentation of intense itching and u... | MEDIUM: The report of 18 cases represents a larger cluster... | MEDIUM: Arba Minch and the surrounding Gamo Zone are histo... | MEDIUM: The cluster of 18 cases presenting with skin lesio..."
+            "final_reasoning": "Consensus reached from multiple perspectives: UNKNOWN: Analysis failed: \u274c Gemini text generation failed: ... | UNKNOWN: Analysis failed: \u274c Gemini text generation failed: ... | UNKNOWN: Analysis failed: \u274c Gemini text generation failed: ... | UNKNOWN: Analysis failed: \u274c Gemini text generation failed: ..."
         },
-        "context_research": {
-            "location": "Arba Minch Surroundings",
-            "security_status": "Information not available. The provided data contains search queries for security updates in the Gamo Zone, but does not include the results or actual status descriptions.",
-            "water_quality": "Information not available. The text mentions a search query regarding 'water quality challenges and drinking water accessibility' in rural Arba Minch, but no findings are provided.",
-            "temperature": "Not specified in the provided data.",
-            "conflict_zone": false,
-            "nearby_facilities": [],
-            "recent_news": [],
-            "last_updated": "2026-04-04T10:56:06.003250"
-        },
+        "context_research": null,
         "alert": {
-            "title": "Health Alert: Outbreak of Itchy Skin Lesions in Arba Minch",
-            "message": "A cluster of 18 cases featuring unusual skin lesions and intense itching has been reported in the Arba Minch surroundings. Medical experts believe this is likely Scabies, a skin condition caused by tiny mites that spreads easily from person to person through close contact.",
+            "title": "Health Alert",
+            "message": "Potential outbreak in Unknown. Risk level: UNKNOWN.",
             "recommendations": [
-                "Visit the nearest health center immediately if you or your family members have persistent itching or skin sores.",
-                "Wash all clothing, bedding, and towels used by affected individuals in hot, soapy water and dry them thoroughly in the sun.",
-                "Avoid sharing personal items like clothes, blankets, or towels with others.",
-                "If one person in a household is diagnosed, all family members should be treated at the same time to stop the spread."
+                "Seek medical attention",
+                "Follow local health guidelines"
             ],
-            "prevention_strategy": "The best way to stay safe is to bathe regularly, wash your clothes and bedding often, and avoid close skin-to-skin contact with anyone showing symptoms of an itchy rash.",
-            "why_urgent": "This alert was generated because 18 people were affected in a short time in one area. Scabies is very contagious and can spread quickly through families, schools, and neighborhoods if it is not treated immediately."
+            "prevention_strategy": null,
+            "why_urgent": null
         },
         "status": "pending",
-        "timestamp": "2026-04-04 10:57:25.201545",
+        "timestamp": "2026-04-04 10:43:46.264005",
         "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                                                                                                                               raw_content\n0  URGENT: Health alert from Jinka, South Omo Zone. We have 8 patients presenting with high-grade fever, severe headache, and jaundice (yellowing of eyes). 3 cases were lab-confirmed as Yellow Fever this morning, while the remaining 5 are considered probable based on clinical alignment. All patients are from the same village near the Omo River.\n1                                                                          Konso Health Post: Cluster of 15 cases of acute watery diarrhea and severe vomiting detected in the last 24 hours. Initial investigation suggests a contaminated communal well. 10 cases are currently suspected and 5 are probable cholera. Immediate medical supplies needed.\n2                                                                                            Turmi Update: 4 individuals in a nomadic group showing signs of high fever and hemorrhagic spots. These are currently suspected cases of an unidentified viral fever. Movement tracking is difficult due to their migratory patterns in the South Omo region.\n3                                                                                             Arba Minch Surroundings: Local surveillance detected 22 cases of unusual skin lesions and itching among plantation workers. 18 are suspected and 4 have been confirmed by the regional clinic as a localized fungal outbreak exacerbated by recent flooding."
     },
     {
@@ -283,6 +172,75 @@
         "status": "pending",
         "timestamp": "2026-04-04 10:57:25.169012",
         "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                                                                                                                               raw_content\n0  URGENT: Health alert from Jinka, South Omo Zone. We have 8 patients presenting with high-grade fever, severe headache, and jaundice (yellowing of eyes). 3 cases were lab-confirmed as Yellow Fever this morning, while the remaining 5 are considered probable based on clinical alignment. All patients are from the same village near the Omo River.\n1                                                                          Konso Health Post: Cluster of 15 cases of acute watery diarrhea and severe vomiting detected in the last 24 hours. Initial investigation suggests a contaminated communal well. 10 cases are currently suspected and 5 are probable cholera. Immediate medical supplies needed.\n2                                                                                            Turmi Update: 4 individuals in a nomadic group showing signs of high fever and hemorrhagic spots. These are currently suspected cases of an unidentified viral fever. Movement tracking is difficult due to their migratory patterns in the South Omo region.\n3                                                                                             Arba Minch Surroundings: Local surveillance detected 22 cases of unusual skin lesions and itching among plantation workers. 18 are suspected and 4 have been confirmed by the regional clinic as a localized fungal outbreak exacerbated by recent flooding."
+    },
+    {
+        "session_id": "af4292a6-41fb-451b-9295-a0cd7976f43e",
+        "extracted_data": {
+            "location": "Semera Port",
+            "symptoms": [
+                "heat stroke",
+                "collapse",
+                "persistent vomiting"
+            ],
+            "cases": 3,
+            "date": "Today",
+            "additional_info": {
+                "environmental_factors": "High temperature recorded (41C)",
+                "suspected_cause": "possible viral infection or extreme heat",
+                "population": "truck drivers"
+            }
+        },
+        "risk_analysis": {
+            "risk_level": "MEDIUM",
+            "confidence": "85%",
+            "possible_disease": "Severe Heatstroke or Acute Watery Diarrhea (AWD)",
+            "reason": "The clinical presentation of collapse and persistent vomiting, combined with the 'heat stroke' label, is highly consistent with the extreme environmental conditions of Semera (up to 45\u00b0C). While the case count is currently low (3), the severity of the symptoms suggests either critical environmental exposure or an acute reaction to contaminated water sources, which are reported issues in the Awash basin. This differs significantly from the respiratory pattern seen in recent regional historical data."
+        },
+        "context_research": {
+            "location": "Semera Port",
+            "security_status": "The region is undergoing active monitoring for conflict zones and security updates; it remains a critical but sensitive logistics hub for the Ethiopia-Djibouti corridor.",
+            "water_quality": "Significant accessibility issues reported; current research focuses on drinking water quality and supply challenges within the Awash basin.",
+            "temperature": "Typically hot and arid (average ranges from 30\u00b0C to 45\u00b0C), though specific current figures were not in the provided snippet.",
+            "conflict_zone": false,
+            "nearby_facilities": [
+                "Semera Dry Port",
+                "Awash River Basin infrastructure",
+                "Semera University (Regional Landmark)",
+                "Logistics and Customs Hub"
+            ],
+            "recent_news": [
+                "Assessments of water quality and drinking water accessibility in the Awash basin.",
+                "Security status monitoring and conflict zone updates for the Afar regional transit routes."
+            ],
+            "last_updated": "2026-04-04T04:59:01.630294"
+        },
+        "alert": {
+            "title": "URGENT HEALTH ALERT: Illness Cases at Semera Port",
+            "message": "Three people at Semera Port have recently collapsed and experienced severe vomiting. This may be caused by the extreme heat in the area or a waterborne illness (Acute Watery Diarrhea). We are monitoring the situation closely to protect everyone at the port.",
+            "recommendations": [
+                "Seek medical help immediately if you feel dizzy, extremely hot, or start vomiting.",
+                "Drink plenty of clean, safe water throughout the day, even if you are not thirsty.",
+                "If someone collapses, move them to a cool, shaded area and call for help right away.",
+                "Report any similar symptoms to port health officers or supervisors immediately."
+            ],
+            "prevention_strategy": "Stay cool and stay clean: Drink safe water, rest in the shade during the hottest parts of the day, and always wash your hands with soap and clean water before eating or touching your face.",
+            "why_urgent": "This alert was issued because the high temperatures in the Afar region can cause life-threatening heatstroke, and symptoms like vomiting can spread quickly if they are caused by a germ in the water or food."
+        },
+        "status": "approved",
+        "timestamp": "2026-04-04 05:00:08.415033",
+        "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                raw_content\n0  URGENT: Seeing a spike in respiratory issues in Addis Ababa, specifically around the Mercato area. At least 45 people reported similar symptoms of dry cough and shortness of breath in the last 48 hours. Air quality seems poor today.\n1                             Health report from Hawassa: 12 students at a local school are down with high fever and skin rashes. We suspect the local well might be contaminated after the heavy rains. Need immediate water testing kits.\n2                              Bahir Dar update - Lake Tana area: 8 fishermen showing signs of severe nausea and abdominal pain. They mentioned a strange smell coming from the water near the northern shore. Local clinic is overwhelmed.\n3             Logistics Alert: Jijiga region. Movement of medical supplies is being slowed down by recent roadblocks. Meanwhile, we have 5 cases of suspected measles in the displacement camp. Vaccination status of the group is unknown.\n4                      Semera Port: High temperature recorded at the border today (41C). 3 truck drivers collapsed due to heat stroke, but one is also showing signs of persistent vomiting. Possible viral infection or just extreme heat?\n5                                                    Arba Minch: Banana plantation workers reporting unusual insect bites followed by joint pain. 15 cases so far. No deaths, but high morbidity. Is this Chikungunya or something similar?",
+        "validation": {
+            "valid": true,
+            "confidence": 0.95,
+            "issues": []
+        },
+        "consensus": {
+            "final_risk_level": "MEDIUM",
+            "average_confidence": 95.0,
+            "consensus_reached": true,
+            "agent_opinions": [],
+            "final_reasoning": "The clinical presentation of collapse and persistent vomiting, combined with the 'heat stroke' label, is highly consistent with the extreme environmental conditions of Semera (up to 45\u00b0C). While the case count is currently low (3), the severity of the symptoms suggests either critical environmental exposure or an acute reaction to contaminated water sources, which are reported issues in the Awash basin. This differs significantly from the respiratory pattern seen in recent regional historical data."
+        }
     },
     {
         "session_id": "11f58084-40b6-48e5-902d-4e801a75fa3a",
@@ -681,266 +639,95 @@
         "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                                                                                                                               raw_content\n0  URGENT: Health alert from Jinka, South Omo Zone. We have 8 patients presenting with high-grade fever, severe headache, and jaundice (yellowing of eyes). 3 cases were lab-confirmed as Yellow Fever this morning, while the remaining 5 are considered probable based on clinical alignment. All patients are from the same village near the Omo River.\n1                                                                          Konso Health Post: Cluster of 15 cases of acute watery diarrhea and severe vomiting detected in the last 24 hours. Initial investigation suggests a contaminated communal well. 10 cases are currently suspected and 5 are probable cholera. Immediate medical supplies needed.\n2                                                                                            Turmi Update: 4 individuals in a nomadic group showing signs of high fever and hemorrhagic spots. These are currently suspected cases of an unidentified viral fever. Movement tracking is difficult due to their migratory patterns in the South Omo region.\n3                                                                                             Arba Minch Surroundings: Local surveillance detected 22 cases of unusual skin lesions and itching among plantation workers. 18 are suspected and 4 have been confirmed by the regional clinic as a localized fungal outbreak exacerbated by recent flooding."
     },
     {
-        "session_id": "0589235d-262b-4bc4-a7ce-4f0ab288ea6b",
+        "session_id": "b7aca314-44f6-4974-99a1-01e6b64364d6",
         "extracted_data": {
-            "location": "Unknown",
+            "location": "Jimma zone",
             "symptoms": [
-                "Unknown"
+                "Fever",
+                "vomiting"
             ],
-            "cases": 1,
-            "date": null,
+            "cases": 4,
+            "date": "2 days ago",
             "classification": "Suspected",
             "additional_info": {
-                "raw_text": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                                                                                                                               raw_content\n0  URGENT: Health alert from Jinka, South Omo Zone. We have 8 patients presenting with high-grade fever, severe headache, and jaundice (yellowing of eyes). 3 cases were lab-confirmed as Yellow Fever this morning, while the remaining 5 are considered probable based on clinical alignment. All patients are from the same village near the Omo River.\n1                                                                          Konso Health Post: Cluster of 15 cases of acute watery diarrhea and severe vomiting detected in the last 24 hours. Initial investigation suggests a contaminated communal well. 10 cases are currently suspected and 5 are probable cholera. Immediate medical supplies needed.\n2                                                                                            Turmi Update: 4 individuals in a nomadic group showing signs of high fever and hemorrhagic spots. These are currently suspected cases of an unidentified viral fever. Movement tracking is difficult due to their migratory patterns in the South Omo region.\n3                                                                                             Arba Minch Surroundings: Local surveillance detected 22 cases of unusual skin lesions and itching among plantation workers. 18 are suspected and 4 have been confirmed by the regional clinic as a localized fungal outbreak exacerbated by recent flooding.",
-                "error": "\u274c Gemini text generation failed: 404 models/gemini-1.5-flash-latest is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+                "environmental_factors": "Started near local water source"
             }
         },
         "validation": {
             "valid": true,
-            "confidence": 0.5,
+            "confidence": 0.85,
             "issues": [
-                "Validation engine failure, defaulting to valid"
+                "The case count (4) is a statistically plausible cluster for an early outbreak detection.",
+                "Jimma zone is an area endemic to waterborne and vector-borne diseases, making the environmental link to a water source highly plausible.",
+                "The report lacks specific demographic information (age, gender), which is critical for identifying vulnerable groups.",
+                "Clinical data is non-specific; the presence or absence of diarrhea should be clarified to better differentiate between enteric infections (typhoid, cholera) and malaria, which is also prevalent in the region.",
+                "Jimma zone is a large administrative area; more granular location data (Woreda or Kebele) is required for a targeted response."
             ]
         },
         "risk_analysis": {
-            "risk_level": "UNKNOWN",
-            "confidence": "0%",
-            "possible_disease": "Unknown",
-            "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-flash-latest is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+            "risk_level": "MEDIUM",
+            "confidence": "70%",
+            "possible_disease": "Enteric Infection (e.g., Typhoid Fever or early-stage AWD)",
+            "reason": "The clinical pattern of fever and vomiting in a cluster of 4 cases within 48 hours indicates an infectious etiology, likely waterborne or foodborne. While Jimma is endemic for Malaria and Waterborne diseases, the lack of more specific symptoms such as acute watery diarrhea (for Cholera) or jaundice (for Yellow Fever) prevents a 'HIGH' classification at this stage. However, any cluster of febrile illness with vomiting in this region warrants concern due to historical prevalence of enteric fevers and the potential for rapid escalation."
         },
         "consensus": {
-            "final_risk_level": "UNKNOWN",
-            "average_confidence": 0.0,
+            "final_risk_level": "MEDIUM",
+            "average_confidence": 52.5,
             "consensus_reached": true,
             "agent_opinions": [
                 {
-                    "risk_level": "UNKNOWN",
-                    "confidence": "0%",
-                    "possible_disease": "Unknown",
-                    "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-flash-latest is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+                    "risk_level": "MEDIUM",
+                    "confidence": "70%",
+                    "possible_disease": "Enteric Infection (e.g., Typhoid Fever or early-stage AWD)",
+                    "reason": "The clinical pattern of fever and vomiting in a cluster of 4 cases within 48 hours indicates an infectious etiology, likely waterborne or foodborne. While Jimma is endemic for Malaria and Waterborne diseases, the lack of more specific symptoms such as acute watery diarrhea (for Cholera) or jaundice (for Yellow Fever) prevents a 'HIGH' classification at this stage. However, any cluster of febrile illness with vomiting in this region warrants concern due to historical prevalence of enteric fevers and the potential for rapid escalation."
+                },
+                {
+                    "risk_level": "MEDIUM",
+                    "confidence": "75%",
+                    "possible_disease": "Acute Watery Diarrhea (AWD) or Malaria",
+                    "reason": "From a statistical perspective, a cluster of 4 cases appearing within a 48-hour window in the Jimma zone indicates a localized outbreak rather than sporadic occurrences. The current incidence rate (2 cases/day) is statistically significant for a high-density area. While the absolute case count is currently low compared to the high-risk respiratory or cholera thresholds seen in historical data (45+ cases or 10+ cases), the potential for exponential growth in this geographic hub warrants a MEDIUM risk classification for immediate monitoring."
                 },
                 {
                     "risk_level": "UNKNOWN",
                     "confidence": "0%",
                     "possible_disease": "Unknown",
-                    "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-flash-latest is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+                    "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
                 },
                 {
-                    "risk_level": "UNKNOWN",
-                    "confidence": "0%",
-                    "possible_disease": "Unknown",
-                    "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-flash-latest is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
-                },
-                {
-                    "risk_level": "UNKNOWN",
-                    "confidence": "0%",
-                    "possible_disease": "Unknown",
-                    "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-flash-latest is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+                    "risk_level": "MEDIUM",
+                    "confidence": "65%",
+                    "possible_disease": "Waterborne Enteric Infection (e.g., Acute Watery Diarrhea)",
+                    "reason": "A cluster of 4 cases presenting with fever and vomiting in a 48-hour window suggests a localized environmental exposure, most likely via contaminated water or food sources. Although no conflict is reported and temperatures are normal, the lack of available water quality data for Jimma zone\u2014a region historically susceptible to enteric outbreaks\u2014warrants a medium risk rating to ensure environmental monitoring and source-point testing."
                 }
             ],
-            "final_reasoning": "Consensus reached from multiple perspectives: UNKNOWN: Analysis failed: \u274c Gemini text generation failed: ... | UNKNOWN: Analysis failed: \u274c Gemini text generation failed: ... | UNKNOWN: Analysis failed: \u274c Gemini text generation failed: ... | UNKNOWN: Analysis failed: \u274c Gemini text generation failed: ..."
-        },
-        "context_research": null,
-        "alert": {
-            "title": "Health Alert",
-            "message": "Potential outbreak in Unknown. Risk level: UNKNOWN.",
-            "recommendations": [
-                "Seek medical attention",
-                "Follow local health guidelines"
-            ],
-            "prevention_strategy": null,
-            "why_urgent": null
-        },
-        "status": "pending",
-        "timestamp": "2026-04-04 10:43:46.264005",
-        "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                                                                                                                               raw_content\n0  URGENT: Health alert from Jinka, South Omo Zone. We have 8 patients presenting with high-grade fever, severe headache, and jaundice (yellowing of eyes). 3 cases were lab-confirmed as Yellow Fever this morning, while the remaining 5 are considered probable based on clinical alignment. All patients are from the same village near the Omo River.\n1                                                                          Konso Health Post: Cluster of 15 cases of acute watery diarrhea and severe vomiting detected in the last 24 hours. Initial investigation suggests a contaminated communal well. 10 cases are currently suspected and 5 are probable cholera. Immediate medical supplies needed.\n2                                                                                            Turmi Update: 4 individuals in a nomadic group showing signs of high fever and hemorrhagic spots. These are currently suspected cases of an unidentified viral fever. Movement tracking is difficult due to their migratory patterns in the South Omo region.\n3                                                                                             Arba Minch Surroundings: Local surveillance detected 22 cases of unusual skin lesions and itching among plantation workers. 18 are suspected and 4 have been confirmed by the regional clinic as a localized fungal outbreak exacerbated by recent flooding."
-    },
-    {
-        "session_id": "7ba34628-2c99-4a1c-bb28-14c7c6331988",
-        "extracted_data": {
-            "location": "Haramaya General Hospital",
-            "symptoms": [
-                "Abdominal pain",
-                "Crampy abdominal pain",
-                "Abdominal tenderness"
-            ],
-            "cases": 1,
-            "date": "3/11/17",
-            "additional_info": {
-                "patient_name": "Cheru Abraham",
-                "age": 18,
-                "sex": "M",
-                "tentative_diagnosis": "perforated PUD",
-                "investigation_results": "Abdominal U/S showed perforated PUD",
-                "reason_for_referral": "Surgical intervention",
-                "referred_to": "Amede H.C",
-                "referring_physician": "Fuad (HO)"
-            }
-        },
-        "risk_analysis": {
-            "risk_level": "UNKNOWN",
-            "confidence": "0%",
-            "possible_disease": "Unknown",
-            "reason": "The multi-agent pipeline is awaiting a response from the cognitive engine. Re-triggering re-analysis is recommended."
-        },
-        "alert": {
-            "title": "Health Alert",
-            "message": "Potential outbreak in Haramaya General Hospital. Risk level: UNKNOWN.",
-            "recommendations": [
-                "Seek medical attention",
-                "Follow local health guidelines"
-            ],
-            "prevention_strategy": null,
-            "why_urgent": null
-        },
-        "status": "pending",
-        "timestamp": "2026-04-04 05:04:26.913894",
-        "raw_report": "System Signal Transmission Log for session: 7ba34628-2c99-4a1c-bb28-14c7c6331988",
-        "validation": {
-            "valid": true,
-            "confidence": 0.95,
-            "issues": []
-        },
-        "consensus": {
-            "final_risk_level": "UNKNOWN",
-            "average_confidence": 95.0,
-            "consensus_reached": true,
-            "agent_opinions": [],
-            "final_reasoning": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
-        }
-    },
-    {
-        "session_id": "f2fe955a-1518-4739-bde0-e93219455047",
-        "extracted_data": {
-            "location": "Arba Minch, Banana plantation",
-            "symptoms": [
-                "unusual insect bites",
-                "joint pain"
-            ],
-            "cases": 15,
-            "date": null,
-            "additional_info": {
-                "population": "plantation workers",
-                "mortality": 0,
-                "morbidity": "high",
-                "suspected_disease": "Chikungunya"
-            }
-        },
-        "risk_analysis": {
-            "risk_level": "MEDIUM",
-            "confidence": "80%",
-            "possible_disease": "Chikungunya Fever",
-            "reason": "The clinical triad of localized 'unusual insect bites' (likely representing a pruritic rash or vector exposure) combined with joint pain (arthralgia) is a classic presentation for alphaviral infections. Given the location in a banana plantation in Ethiopia\u2014where Aedes and Anopheles mosquito vectors are prevalent\u2014Chikungunya or O'nyong-nyong fever are the most probable matches. A cluster of 15 cases indicates an active transmission cycle requiring immediate vector control."
+            "final_reasoning": "Consensus reached from multiple perspectives: MEDIUM: The clinical pattern of fever and vomiting in a cl... | MEDIUM: From a statistical perspective, a cluster of 4 cas... | UNKNOWN: Analysis failed: \u274c Gemini text generation failed: ... | MEDIUM: A cluster of 4 cases presenting with fever and vom..."
         },
         "context_research": {
-            "location": "Arba Minch, Banana plantation",
-            "security_status": "The region is under monitoring for security and conflict updates as of 2024. While search data indicates interest in conflict updates for the Gamo Zone, specific active hostilities are not detailed in the snippets.",
-            "water_quality": "Reports indicate existing challenges regarding water quality and accessibility within the banana plantations and surrounding rural areas.",
-            "temperature": "Not specified in the provided research data.",
+            "location": "Jimma zone",
+            "security_status": "Data unavailable",
+            "water_quality": "Data unavailable",
+            "temperature": "Normal",
             "conflict_zone": false,
             "nearby_facilities": [],
-            "recent_news": [
-                "Security situation and conflict updates for Arba Minch and Gamo Zone (2024)",
-                "Water quality challenges and accessibility in Arba Minch banana plantations and rural areas"
-            ],
-            "last_updated": "2026-04-04T04:59:48.443903"
+            "recent_news": [],
+            "last_updated": "2026-04-04T11:57:29.341160"
         },
         "alert": {
-            "title": "Health Alert: Sudden Increase in Fever and Joint Pain in Arba Minch",
-            "message": "We have detected 15 cases of people working in Arba Minch banana plantations suffering from unusual insect bites and severe joint pain. These symptoms point to Chikungunya Fever, a disease carried by mosquitoes. Because many people in the same area are getting sick at once, we need to take action to stop it from spreading further to other workers and families.",
+            "title": "Health Alert: Fever and Vomiting Cluster in Jimma Zone",
+            "message": "Health officials have identified a group of 4 people in the Jimma zone suffering from high fever and vomiting. These symptoms suggest a possible stomach or intestinal infection, such as Typhoid Fever or the early stages of a diarrheal illness. We are advising the community to take immediate precautions to stop the spread.",
             "recommendations": [
-                "Go to the nearest health center immediately if you have a fever or painful joints.",
-                "Rest as much as possible and drink plenty of clean water if you feel unwell.",
-                "Tell your coworkers and neighbors to watch for these symptoms.",
-                "Do not take medicine without a doctor's advice, as some painkillers can be dangerous depending on the illness."
+                "Go to the nearest health center immediately if you or a family member develop a fever or start vomiting.",
+                "Drink plenty of safe, clean fluids (like ORS or boiled water) to prevent dehydration.",
+                "Do not take any medication without a doctor's prescription.",
+                "Report any similar illnesses in your neighborhood to local health workers."
             ],
-            "prevention_strategy": "The best way to stay safe is to avoid mosquito bites. Wear long-sleeved shirts and long trousers while working in the plantation. Use mosquito nets when sleeping and empty out any containers with standing water where mosquitoes like to lay their eggs.",
-            "why_urgent": "This alert was generated because 15 people in a small area got sick very quickly. Arba Minch's warm environment and the plantation conditions make it easy for mosquitoes to spread this disease fast if we don't protect ourselves now."
+            "prevention_strategy": "Always wash your hands with soap and clean water before eating and after using the latrine. Drink only water that has been boiled or treated, and ensure all food is cooked thoroughly and kept covered from flies.",
+            "why_urgent": "This alert was issued because when several people in the same area get sick with the same symptoms at the same time, it can be a sign of a spreading outbreak. Early action helps prevent more people from getting sick."
         },
         "status": "pending",
-        "timestamp": "2026-04-04 05:00:08.419117",
-        "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                raw_content\n0  URGENT: Seeing a spike in respiratory issues in Addis Ababa, specifically around the Mercato area. At least 45 people reported similar symptoms of dry cough and shortness of breath in the last 48 hours. Air quality seems poor today.\n1                             Health report from Hawassa: 12 students at a local school are down with high fever and skin rashes. We suspect the local well might be contaminated after the heavy rains. Need immediate water testing kits.\n2                              Bahir Dar update - Lake Tana area: 8 fishermen showing signs of severe nausea and abdominal pain. They mentioned a strange smell coming from the water near the northern shore. Local clinic is overwhelmed.\n3             Logistics Alert: Jijiga region. Movement of medical supplies is being slowed down by recent roadblocks. Meanwhile, we have 5 cases of suspected measles in the displacement camp. Vaccination status of the group is unknown.\n4                      Semera Port: High temperature recorded at the border today (41C). 3 truck drivers collapsed due to heat stroke, but one is also showing signs of persistent vomiting. Possible viral infection or just extreme heat?\n5                                                    Arba Minch: Banana plantation workers reporting unusual insect bites followed by joint pain. 15 cases so far. No deaths, but high morbidity. Is this Chikungunya or something similar?",
-        "validation": {
-            "valid": true,
-            "confidence": 0.95,
-            "issues": []
-        },
-        "consensus": {
-            "final_risk_level": "MEDIUM",
-            "average_confidence": 95.0,
-            "consensus_reached": true,
-            "agent_opinions": [],
-            "final_reasoning": "The clinical triad of localized 'unusual insect bites' (likely representing a pruritic rash or vector exposure) combined with joint pain (arthralgia) is a classic presentation for alphaviral infections. Given the location in a banana plantation in Ethiopia\u2014where Aedes and Anopheles mosquito vectors are prevalent\u2014Chikungunya or O'nyong-nyong fever are the most probable matches. A cluster of 15 cases indicates an active transmission cycle requiring immediate vector control."
-        }
-    },
-    {
-        "session_id": "af4292a6-41fb-451b-9295-a0cd7976f43e",
-        "extracted_data": {
-            "location": "Semera Port",
-            "symptoms": [
-                "heat stroke",
-                "collapse",
-                "persistent vomiting"
-            ],
-            "cases": 3,
-            "date": "Today",
-            "additional_info": {
-                "environmental_factors": "High temperature recorded (41C)",
-                "suspected_cause": "possible viral infection or extreme heat",
-                "population": "truck drivers"
-            }
-        },
-        "risk_analysis": {
-            "risk_level": "MEDIUM",
-            "confidence": "85%",
-            "possible_disease": "Severe Heatstroke or Acute Watery Diarrhea (AWD)",
-            "reason": "The clinical presentation of collapse and persistent vomiting, combined with the 'heat stroke' label, is highly consistent with the extreme environmental conditions of Semera (up to 45\u00b0C). While the case count is currently low (3), the severity of the symptoms suggests either critical environmental exposure or an acute reaction to contaminated water sources, which are reported issues in the Awash basin. This differs significantly from the respiratory pattern seen in recent regional historical data."
-        },
-        "context_research": {
-            "location": "Semera Port",
-            "security_status": "The region is undergoing active monitoring for conflict zones and security updates; it remains a critical but sensitive logistics hub for the Ethiopia-Djibouti corridor.",
-            "water_quality": "Significant accessibility issues reported; current research focuses on drinking water quality and supply challenges within the Awash basin.",
-            "temperature": "Typically hot and arid (average ranges from 30\u00b0C to 45\u00b0C), though specific current figures were not in the provided snippet.",
-            "conflict_zone": false,
-            "nearby_facilities": [
-                "Semera Dry Port",
-                "Awash River Basin infrastructure",
-                "Semera University (Regional Landmark)",
-                "Logistics and Customs Hub"
-            ],
-            "recent_news": [
-                "Assessments of water quality and drinking water accessibility in the Awash basin.",
-                "Security status monitoring and conflict zone updates for the Afar regional transit routes."
-            ],
-            "last_updated": "2026-04-04T04:59:01.630294"
-        },
-        "alert": {
-            "title": "URGENT HEALTH ALERT: Illness Cases at Semera Port",
-            "message": "Three people at Semera Port have recently collapsed and experienced severe vomiting. This may be caused by the extreme heat in the area or a waterborne illness (Acute Watery Diarrhea). We are monitoring the situation closely to protect everyone at the port.",
-            "recommendations": [
-                "Seek medical help immediately if you feel dizzy, extremely hot, or start vomiting.",
-                "Drink plenty of clean, safe water throughout the day, even if you are not thirsty.",
-                "If someone collapses, move them to a cool, shaded area and call for help right away.",
-                "Report any similar symptoms to port health officers or supervisors immediately."
-            ],
-            "prevention_strategy": "Stay cool and stay clean: Drink safe water, rest in the shade during the hottest parts of the day, and always wash your hands with soap and clean water before eating or touching your face.",
-            "why_urgent": "This alert was issued because the high temperatures in the Afar region can cause life-threatening heatstroke, and symptoms like vomiting can spread quickly if they are caused by a germ in the water or food."
-        },
-        "status": "approved",
-        "timestamp": "2026-04-04 05:00:08.415033",
-        "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                raw_content\n0  URGENT: Seeing a spike in respiratory issues in Addis Ababa, specifically around the Mercato area. At least 45 people reported similar symptoms of dry cough and shortness of breath in the last 48 hours. Air quality seems poor today.\n1                             Health report from Hawassa: 12 students at a local school are down with high fever and skin rashes. We suspect the local well might be contaminated after the heavy rains. Need immediate water testing kits.\n2                              Bahir Dar update - Lake Tana area: 8 fishermen showing signs of severe nausea and abdominal pain. They mentioned a strange smell coming from the water near the northern shore. Local clinic is overwhelmed.\n3             Logistics Alert: Jijiga region. Movement of medical supplies is being slowed down by recent roadblocks. Meanwhile, we have 5 cases of suspected measles in the displacement camp. Vaccination status of the group is unknown.\n4                      Semera Port: High temperature recorded at the border today (41C). 3 truck drivers collapsed due to heat stroke, but one is also showing signs of persistent vomiting. Possible viral infection or just extreme heat?\n5                                                    Arba Minch: Banana plantation workers reporting unusual insect bites followed by joint pain. 15 cases so far. No deaths, but high morbidity. Is this Chikungunya or something similar?",
-        "validation": {
-            "valid": true,
-            "confidence": 0.95,
-            "issues": []
-        },
-        "consensus": {
-            "final_risk_level": "MEDIUM",
-            "average_confidence": 95.0,
-            "consensus_reached": true,
-            "agent_opinions": [],
-            "final_reasoning": "The clinical presentation of collapse and persistent vomiting, combined with the 'heat stroke' label, is highly consistent with the extreme environmental conditions of Semera (up to 45\u00b0C). While the case count is currently low (3), the severity of the symptoms suggests either critical environmental exposure or an acute reaction to contaminated water sources, which are reported issues in the Awash basin. This differs significantly from the respiratory pattern seen in recent regional historical data."
-        }
+        "created_at": "2026-04-04 11:59:19.021144",
+        "timestamp": "2026-04-04 11:59:19.021144",
+        "raw_report": "Fever, vomiting, 4 people affected in Jimma zone. Started 2 days ago near local water source."
     },
     {
         "session_id": "da34f997-3485-47e4-912b-04a51cf0ca42",
@@ -1001,6 +788,130 @@
             "consensus_reached": true,
             "agent_opinions": [],
             "final_reasoning": "From a symptomatic perspective, measles is highly contagious with an R0 of 12-18. In a displacement camp setting, five cases suggest an active transmission chain within a dense, vulnerable population. Given the context of recent respiratory illness clusters in the area (45 cases of pneumonia), the healthcare infrastructure is likely stressed, increasing the risk that these suspected measles cases could lead to a rapid, high-mortality outbreak."
+        }
+    },
+    {
+        "session_id": "179a3e3f-9fcf-420b-9af6-6a7ec3733f12",
+        "extracted_data": {
+            "location": "Hawassa",
+            "symptoms": [
+                "high fever",
+                "skin rashes"
+            ],
+            "cases": 12,
+            "date": null,
+            "additional_info": {
+                "suspected_cause": "contaminated local well",
+                "environmental_context": "heavy rains",
+                "requirements": "water testing kits",
+                "population": "students"
+            }
+        },
+        "risk_analysis": {
+            "risk_level": "MEDIUM",
+            "confidence": "85%",
+            "possible_disease": "Measles (Rubeola)",
+            "reason": "The clinical presentation of high fever paired with skin rashes in a cluster of 12 cases is highly characteristic of Measles, which remains endemic in parts of Ethiopia. While the symptoms could also align with vector-borne diseases like Dengue or Chikungunya given the mild tropical climate and proximity to Lake Hawassa, the rapid appearance of a rash-fever cluster in an urban center typically suggests a highly contagious viral exanthem. The risk is marked as Medium because while the case count is currently low compared to historical respiratory data, the potential for rapid transmission in a densely populated urban area like Hawassa is significant."
+        },
+        "context_research": {
+            "location": "Hawassa",
+            "security_status": "Generally stable and considered one of the safer urban centers in Ethiopia; however, it remains under the national security oversight due to broader regional tensions and historical ethnic friction in the Sidama region.",
+            "water_quality": "Variable; reports indicate challenges with industrial runoff affecting Lake Hawassa and high fluoride levels in some local groundwater sources, impacting drinking water accessibility.",
+            "temperature": "Typical daily highs range from 24\u00b0C to 29\u00b0C (75\u00b0F - 84\u00b0F) with a mild tropical climate.",
+            "conflict_zone": false,
+            "nearby_facilities": [
+                "Hawassa University Referral Hospital",
+                "Adare General Hospital",
+                "Hawassa Industrial Park",
+                "Kibru Hospital"
+            ],
+            "recent_news": [
+                "Assessment of water quality and environmental impact on Lake Hawassa 2024",
+                "Security briefings regarding regional stability in the Sidama State",
+                "Infrastructure and industrial growth reports from the Hawassa Industrial Park"
+            ],
+            "last_updated": "2026-04-04T04:56:36.299991"
+        },
+        "alert": {
+            "title": "Health Alert: Possible Measles Outbreak in Hawassa",
+            "message": "Health officials have identified 12 cases of suspected Measles (Rubeola) in Hawassa. Patients are reporting high fever and skin rashes. Because this many cases have appeared at once, there is a medium risk that the illness could spread further into the community if precautions are not taken immediately.",
+            "recommendations": [
+                "Seek medical help immediately at the nearest health center if you or your child develop a high fever and a rash.",
+                "Keep children with symptoms at home and away from school or public places to prevent the virus from spreading.",
+                "Check your family's immunization records to ensure everyone has received their measles vaccinations.",
+                "Practice good hygiene by washing hands frequently with soap and water."
+            ],
+            "prevention_strategy": "The best way to prevent Measles is through vaccination. Ensure all children receive their two doses of the vaccine. Additionally, avoid crowded places and keep living areas well-ventilated to reduce the chance of the virus spreading through the air.",
+            "why_urgent": "This alert was generated because 12 cases in one area indicate the virus is actively moving through the community. Measles is highly contagious, and Hawassa\u2019s population density makes it easy for the disease to spread quickly to many families if we don't act now."
+        },
+        "status": "pending",
+        "timestamp": "2026-04-04 05:00:08.265498",
+        "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                raw_content\n0  URGENT: Seeing a spike in respiratory issues in Addis Ababa, specifically around the Mercato area. At least 45 people reported similar symptoms of dry cough and shortness of breath in the last 48 hours. Air quality seems poor today.\n1                             Health report from Hawassa: 12 students at a local school are down with high fever and skin rashes. We suspect the local well might be contaminated after the heavy rains. Need immediate water testing kits.\n2                              Bahir Dar update - Lake Tana area: 8 fishermen showing signs of severe nausea and abdominal pain. They mentioned a strange smell coming from the water near the northern shore. Local clinic is overwhelmed.\n3             Logistics Alert: Jijiga region. Movement of medical supplies is being slowed down by recent roadblocks. Meanwhile, we have 5 cases of suspected measles in the displacement camp. Vaccination status of the group is unknown.\n4                      Semera Port: High temperature recorded at the border today (41C). 3 truck drivers collapsed due to heat stroke, but one is also showing signs of persistent vomiting. Possible viral infection or just extreme heat?\n5                                                    Arba Minch: Banana plantation workers reporting unusual insect bites followed by joint pain. 15 cases so far. No deaths, but high morbidity. Is this Chikungunya or something similar?",
+        "validation": {
+            "valid": true,
+            "confidence": 0.95,
+            "issues": []
+        },
+        "consensus": {
+            "final_risk_level": "MEDIUM",
+            "average_confidence": 95.0,
+            "consensus_reached": true,
+            "agent_opinions": [],
+            "final_reasoning": "The clinical presentation of high fever paired with skin rashes in a cluster of 12 cases is highly characteristic of Measles, which remains endemic in parts of Ethiopia. While the symptoms could also align with vector-borne diseases like Dengue or Chikungunya given the mild tropical climate and proximity to Lake Hawassa, the rapid appearance of a rash-fever cluster in an urban center typically suggests a highly contagious viral exanthem. The risk is marked as Medium because while the case count is currently low compared to historical respiratory data, the potential for rapid transmission in a densely populated urban area like Hawassa is significant."
+        }
+    },
+    {
+        "session_id": "7ba34628-2c99-4a1c-bb28-14c7c6331988",
+        "extracted_data": {
+            "location": "Haramaya General Hospital",
+            "symptoms": [
+                "Abdominal pain",
+                "Crampy abdominal pain",
+                "Abdominal tenderness"
+            ],
+            "cases": 1,
+            "date": "3/11/17",
+            "additional_info": {
+                "patient_name": "Cheru Abraham",
+                "age": 18,
+                "sex": "M",
+                "tentative_diagnosis": "perforated PUD",
+                "investigation_results": "Abdominal U/S showed perforated PUD",
+                "reason_for_referral": "Surgical intervention",
+                "referred_to": "Amede H.C",
+                "referring_physician": "Fuad (HO)"
+            }
+        },
+        "risk_analysis": {
+            "risk_level": "UNKNOWN",
+            "confidence": "0%",
+            "possible_disease": "Unknown",
+            "reason": "The multi-agent pipeline is awaiting a response from the cognitive engine. Re-triggering re-analysis is recommended."
+        },
+        "alert": {
+            "title": "Health Alert",
+            "message": "Potential outbreak in Haramaya General Hospital. Risk level: UNKNOWN.",
+            "recommendations": [
+                "Seek medical attention",
+                "Follow local health guidelines"
+            ],
+            "prevention_strategy": null,
+            "why_urgent": null
+        },
+        "status": "pending",
+        "timestamp": "2026-04-04 05:04:26.913894",
+        "raw_report": "System Signal Transmission Log for session: 7ba34628-2c99-4a1c-bb28-14c7c6331988",
+        "validation": {
+            "valid": true,
+            "confidence": 0.95,
+            "issues": []
+        },
+        "consensus": {
+            "final_risk_level": "UNKNOWN",
+            "average_confidence": 95.0,
+            "consensus_reached": true,
+            "agent_opinions": [],
+            "final_reasoning": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
         }
     },
     {
@@ -1074,61 +985,55 @@
         }
     },
     {
-        "session_id": "179a3e3f-9fcf-420b-9af6-6a7ec3733f12",
+        "session_id": "f2fe955a-1518-4739-bde0-e93219455047",
         "extracted_data": {
-            "location": "Hawassa",
+            "location": "Arba Minch, Banana plantation",
             "symptoms": [
-                "high fever",
-                "skin rashes"
+                "unusual insect bites",
+                "joint pain"
             ],
-            "cases": 12,
+            "cases": 15,
             "date": null,
             "additional_info": {
-                "suspected_cause": "contaminated local well",
-                "environmental_context": "heavy rains",
-                "requirements": "water testing kits",
-                "population": "students"
+                "population": "plantation workers",
+                "mortality": 0,
+                "morbidity": "high",
+                "suspected_disease": "Chikungunya"
             }
         },
         "risk_analysis": {
             "risk_level": "MEDIUM",
-            "confidence": "85%",
-            "possible_disease": "Measles (Rubeola)",
-            "reason": "The clinical presentation of high fever paired with skin rashes in a cluster of 12 cases is highly characteristic of Measles, which remains endemic in parts of Ethiopia. While the symptoms could also align with vector-borne diseases like Dengue or Chikungunya given the mild tropical climate and proximity to Lake Hawassa, the rapid appearance of a rash-fever cluster in an urban center typically suggests a highly contagious viral exanthem. The risk is marked as Medium because while the case count is currently low compared to historical respiratory data, the potential for rapid transmission in a densely populated urban area like Hawassa is significant."
+            "confidence": "80%",
+            "possible_disease": "Chikungunya Fever",
+            "reason": "The clinical triad of localized 'unusual insect bites' (likely representing a pruritic rash or vector exposure) combined with joint pain (arthralgia) is a classic presentation for alphaviral infections. Given the location in a banana plantation in Ethiopia\u2014where Aedes and Anopheles mosquito vectors are prevalent\u2014Chikungunya or O'nyong-nyong fever are the most probable matches. A cluster of 15 cases indicates an active transmission cycle requiring immediate vector control."
         },
         "context_research": {
-            "location": "Hawassa",
-            "security_status": "Generally stable and considered one of the safer urban centers in Ethiopia; however, it remains under the national security oversight due to broader regional tensions and historical ethnic friction in the Sidama region.",
-            "water_quality": "Variable; reports indicate challenges with industrial runoff affecting Lake Hawassa and high fluoride levels in some local groundwater sources, impacting drinking water accessibility.",
-            "temperature": "Typical daily highs range from 24\u00b0C to 29\u00b0C (75\u00b0F - 84\u00b0F) with a mild tropical climate.",
+            "location": "Arba Minch, Banana plantation",
+            "security_status": "The region is under monitoring for security and conflict updates as of 2024. While search data indicates interest in conflict updates for the Gamo Zone, specific active hostilities are not detailed in the snippets.",
+            "water_quality": "Reports indicate existing challenges regarding water quality and accessibility within the banana plantations and surrounding rural areas.",
+            "temperature": "Not specified in the provided research data.",
             "conflict_zone": false,
-            "nearby_facilities": [
-                "Hawassa University Referral Hospital",
-                "Adare General Hospital",
-                "Hawassa Industrial Park",
-                "Kibru Hospital"
-            ],
+            "nearby_facilities": [],
             "recent_news": [
-                "Assessment of water quality and environmental impact on Lake Hawassa 2024",
-                "Security briefings regarding regional stability in the Sidama State",
-                "Infrastructure and industrial growth reports from the Hawassa Industrial Park"
+                "Security situation and conflict updates for Arba Minch and Gamo Zone (2024)",
+                "Water quality challenges and accessibility in Arba Minch banana plantations and rural areas"
             ],
-            "last_updated": "2026-04-04T04:56:36.299991"
+            "last_updated": "2026-04-04T04:59:48.443903"
         },
         "alert": {
-            "title": "Health Alert: Possible Measles Outbreak in Hawassa",
-            "message": "Health officials have identified 12 cases of suspected Measles (Rubeola) in Hawassa. Patients are reporting high fever and skin rashes. Because this many cases have appeared at once, there is a medium risk that the illness could spread further into the community if precautions are not taken immediately.",
+            "title": "Health Alert: Sudden Increase in Fever and Joint Pain in Arba Minch",
+            "message": "We have detected 15 cases of people working in Arba Minch banana plantations suffering from unusual insect bites and severe joint pain. These symptoms point to Chikungunya Fever, a disease carried by mosquitoes. Because many people in the same area are getting sick at once, we need to take action to stop it from spreading further to other workers and families.",
             "recommendations": [
-                "Seek medical help immediately at the nearest health center if you or your child develop a high fever and a rash.",
-                "Keep children with symptoms at home and away from school or public places to prevent the virus from spreading.",
-                "Check your family's immunization records to ensure everyone has received their measles vaccinations.",
-                "Practice good hygiene by washing hands frequently with soap and water."
+                "Go to the nearest health center immediately if you have a fever or painful joints.",
+                "Rest as much as possible and drink plenty of clean water if you feel unwell.",
+                "Tell your coworkers and neighbors to watch for these symptoms.",
+                "Do not take medicine without a doctor's advice, as some painkillers can be dangerous depending on the illness."
             ],
-            "prevention_strategy": "The best way to prevent Measles is through vaccination. Ensure all children receive their two doses of the vaccine. Additionally, avoid crowded places and keep living areas well-ventilated to reduce the chance of the virus spreading through the air.",
-            "why_urgent": "This alert was generated because 12 cases in one area indicate the virus is actively moving through the community. Measles is highly contagious, and Hawassa\u2019s population density makes it easy for the disease to spread quickly to many families if we don't act now."
+            "prevention_strategy": "The best way to stay safe is to avoid mosquito bites. Wear long-sleeved shirts and long trousers while working in the plantation. Use mosquito nets when sleeping and empty out any containers with standing water where mosquitoes like to lay their eggs.",
+            "why_urgent": "This alert was generated because 15 people in a small area got sick very quickly. Arba Minch's warm environment and the plantation conditions make it easy for mosquitoes to spread this disease fast if we don't protect ourselves now."
         },
         "status": "pending",
-        "timestamp": "2026-04-04 05:00:08.265498",
+        "timestamp": "2026-04-04 05:00:08.419117",
         "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                raw_content\n0  URGENT: Seeing a spike in respiratory issues in Addis Ababa, specifically around the Mercato area. At least 45 people reported similar symptoms of dry cough and shortness of breath in the last 48 hours. Air quality seems poor today.\n1                             Health report from Hawassa: 12 students at a local school are down with high fever and skin rashes. We suspect the local well might be contaminated after the heavy rains. Need immediate water testing kits.\n2                              Bahir Dar update - Lake Tana area: 8 fishermen showing signs of severe nausea and abdominal pain. They mentioned a strange smell coming from the water near the northern shore. Local clinic is overwhelmed.\n3             Logistics Alert: Jijiga region. Movement of medical supplies is being slowed down by recent roadblocks. Meanwhile, we have 5 cases of suspected measles in the displacement camp. Vaccination status of the group is unknown.\n4                      Semera Port: High temperature recorded at the border today (41C). 3 truck drivers collapsed due to heat stroke, but one is also showing signs of persistent vomiting. Possible viral infection or just extreme heat?\n5                                                    Arba Minch: Banana plantation workers reporting unusual insect bites followed by joint pain. 15 cases so far. No deaths, but high morbidity. Is this Chikungunya or something similar?",
         "validation": {
             "valid": true,
@@ -1140,8 +1045,194 @@
             "average_confidence": 95.0,
             "consensus_reached": true,
             "agent_opinions": [],
-            "final_reasoning": "The clinical presentation of high fever paired with skin rashes in a cluster of 12 cases is highly characteristic of Measles, which remains endemic in parts of Ethiopia. While the symptoms could also align with vector-borne diseases like Dengue or Chikungunya given the mild tropical climate and proximity to Lake Hawassa, the rapid appearance of a rash-fever cluster in an urban center typically suggests a highly contagious viral exanthem. The risk is marked as Medium because while the case count is currently low compared to historical respiratory data, the potential for rapid transmission in a densely populated urban area like Hawassa is significant."
+            "final_reasoning": "The clinical triad of localized 'unusual insect bites' (likely representing a pruritic rash or vector exposure) combined with joint pain (arthralgia) is a classic presentation for alphaviral infections. Given the location in a banana plantation in Ethiopia\u2014where Aedes and Anopheles mosquito vectors are prevalent\u2014Chikungunya or O'nyong-nyong fever are the most probable matches. A cluster of 15 cases indicates an active transmission cycle requiring immediate vector control."
         }
+    },
+    {
+        "session_id": "e070e7bd-9609-43e8-8b90-f6792bfa9b47",
+        "extracted_data": {
+            "location": "Arba Minch Surroundings",
+            "symptoms": [
+                "unusual skin lesions",
+                "itching"
+            ],
+            "cases": 4,
+            "date": null,
+            "classification": "Confirmed",
+            "additional_info": {
+                "disease": "localized fungal outbreak",
+                "patient_group": "plantation workers",
+                "environmental_factor": "exacerbated by recent flooding",
+                "confirmation_method": "confirmed by regional clinic"
+            }
+        },
+        "validation": {
+            "valid": true,
+            "confidence": 0.94,
+            "issues": [
+                "Missing specific onset or reporting date, which is critical for temporal mapping.",
+                "The low case count (4) suggests a cluster rather than a large-scale outbreak, but is statistically realistic for early surveillance detection.",
+                "Lack of specific laboratory details regarding the type of fungal pathogen (e.g., Tinea, Sporotrichosis).",
+                "Clinical symptoms and environmental factors (plantation work, recent flooding, humid climate of Arba Minch) are highly consistent and medically plausible."
+            ]
+        },
+        "risk_analysis": {
+            "risk_level": "MEDIUM",
+            "confidence": "75%",
+            "possible_disease": "Scabies",
+            "reason": "The clinical pattern of itching and skin lesions in a cluster of four individuals suggests a communicable skin condition. Given the additional context regarding water accessibility issues in the Arba Minch surroundings, conditions are highly favorable for water-washed diseases such as Scabies. While the 'unusual' nature of the lesions could also suggest Cutaneous Leishmaniasis (which is endemic to the region), the symptom of itching is more pathognomonic for Scabies. The risk is medium due to the small case count but high potential for transmission in a conflict-affected area with limited hygiene resources."
+        },
+        "consensus": {
+            "final_risk_level": "MEDIUM",
+            "average_confidence": 73.75,
+            "consensus_reached": true,
+            "agent_opinions": [
+                {
+                    "risk_level": "MEDIUM",
+                    "confidence": "75%",
+                    "possible_disease": "Scabies",
+                    "reason": "The clinical pattern of itching and skin lesions in a cluster of four individuals suggests a communicable skin condition. Given the additional context regarding water accessibility issues in the Arba Minch surroundings, conditions are highly favorable for water-washed diseases such as Scabies. While the 'unusual' nature of the lesions could also suggest Cutaneous Leishmaniasis (which is endemic to the region), the symptom of itching is more pathognomonic for Scabies. The risk is medium due to the small case count but high potential for transmission in a conflict-affected area with limited hygiene resources."
+                },
+                {
+                    "risk_level": "MEDIUM",
+                    "confidence": "70%",
+                    "possible_disease": "Scabies",
+                    "reason": "From a statistical perspective, a cluster of 4 cases indicates localized transmission rather than a sporadic event. While the case count is lower than historical high-risk respiratory outbreaks (45 cases) or suspected measles (5-12 cases) in the region, the context of conflict and documented water quality issues in Arba Minch likely leads to statistical under-reporting. The presence of a symptom cluster (itching/lesions) in a high-stress environment suggests an R0 > 1, warranting a medium risk assessment for further spread."
+                },
+                {
+                    "risk_level": "MEDIUM",
+                    "confidence": "75%",
+                    "possible_disease": "Scabies or Cutaneous Leishmaniasis",
+                    "reason": "Arba Minch and the surrounding Gamo Zone have a historical record of endemic neglected tropical diseases (NTDs), particularly Cutaneous Leishmaniasis and scabies outbreaks. The symptoms of itching and skin lesions are consistent with historical clusters in this region often triggered by displacement, poor sanitation, and proximity to stagnant water/vectors. While the current case count (4) is low, the context of ongoing conflict and documented water quality issues matches historical precursors for localized outbreaks in the Southern Ethiopia region."
+                },
+                {
+                    "risk_level": "MEDIUM",
+                    "confidence": "75%",
+                    "possible_disease": "Scabies",
+                    "reason": "The symptoms of unusual skin lesions and itching, combined with documented water quality issues and drinking water scarcity in Arba Minch, are highly indicative of hygiene-related skin infections. In conflict zones, the breakdown of sanitation infrastructure and potential displacement lead to overcrowding, which significantly accelerates the transmission of Scabies or similar dermatological conditions. Although the current case count is low (4), the environmental vulnerability\u2014characterized by poor water accessibility and security instability\u2014presents a high potential for rapid spread among the population."
+                }
+            ],
+            "final_reasoning": "Consensus reached from multiple perspectives: MEDIUM: The clinical pattern of itching and skin lesions i... | MEDIUM: From a statistical perspective, a cluster of 4 cas... | MEDIUM: Arba Minch and the surrounding Gamo Zone have a hi... | MEDIUM: The symptoms of unusual skin lesions and itching, ..."
+        },
+        "context_research": {
+            "location": "Arba Minch Surroundings",
+            "security_status": "Ongoing monitoring of security and conflict status is reported for Arba Minch and the Gamo Zone as of 2024.",
+            "water_quality": "There are documented reports concerning drinking water accessibility issues and water quality assessments in the Arba Minch surroundings.",
+            "temperature": "Information not provided in the source data.",
+            "conflict_zone": true,
+            "nearby_facilities": [],
+            "recent_news": [
+                "Arba Minch and Gamo Zone security updates current conflict status 2024",
+                "Water quality reports and drinking water accessibility issues in Arba Minch surroundings"
+            ],
+            "last_updated": "2026-04-04T10:57:00.938097"
+        },
+        "alert": {
+            "title": "Health Alert: Itchy Skin Rash Reported in Arba Minch Surroundings",
+            "message": "A cluster of 4 people in the Arba Minch area have reported unusual skin sores and intense itching. Health experts suspect an outbreak of Scabies. While this condition is treatable, it is highly contagious and can spread quickly through families and neighborhoods if people do not take precautions.",
+            "recommendations": [
+                "Visit the nearest health center immediately if you or your children have an itchy rash or unusual skin bumps.",
+                "Do not share personal items like towels, clothing, or blankets with others.",
+                "If one person in your household is diagnosed, every family member should be checked by a health worker.",
+                "Avoid scratching the itchy areas, as this can lead to more serious skin infections."
+            ],
+            "prevention_strategy": "To stop the spread, practice good hygiene. Regularly wash your clothes and bedding in hot water and dry them in direct sunlight. Avoid direct skin-to-skin contact with anyone who has a visible rash or is known to be infected.",
+            "why_urgent": "This alert was generated because 4 cases appeared at once in the same area. This region has a history of skin outbreaks, and since the infection spreads very easily through close contact, we must act now to prevent it from reaching more families and schools."
+        },
+        "status": "pending",
+        "timestamp": "2026-04-04 10:57:25.227794",
+        "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                                                                                                                               raw_content\n0  URGENT: Health alert from Jinka, South Omo Zone. We have 8 patients presenting with high-grade fever, severe headache, and jaundice (yellowing of eyes). 3 cases were lab-confirmed as Yellow Fever this morning, while the remaining 5 are considered probable based on clinical alignment. All patients are from the same village near the Omo River.\n1                                                                          Konso Health Post: Cluster of 15 cases of acute watery diarrhea and severe vomiting detected in the last 24 hours. Initial investigation suggests a contaminated communal well. 10 cases are currently suspected and 5 are probable cholera. Immediate medical supplies needed.\n2                                                                                            Turmi Update: 4 individuals in a nomadic group showing signs of high fever and hemorrhagic spots. These are currently suspected cases of an unidentified viral fever. Movement tracking is difficult due to their migratory patterns in the South Omo region.\n3                                                                                             Arba Minch Surroundings: Local surveillance detected 22 cases of unusual skin lesions and itching among plantation workers. 18 are suspected and 4 have been confirmed by the regional clinic as a localized fungal outbreak exacerbated by recent flooding."
+    },
+    {
+        "session_id": "f020491f-a14d-40dc-b4e2-01052662f022",
+        "extracted_data": {
+            "location": "Arba Minch Surroundings",
+            "symptoms": [
+                "unusual skin lesions",
+                "itching"
+            ],
+            "cases": 18,
+            "date": null,
+            "classification": "Suspected",
+            "additional_info": {
+                "disease": "localized fungal outbreak",
+                "patient_group": "plantation workers",
+                "environmental_factor": "exacerbated by recent flooding"
+            }
+        },
+        "validation": {
+            "valid": true,
+            "confidence": 0.85,
+            "issues": [
+                "Missing temporal data: The absence of a specific date or timeframe makes it impossible to establish a definitive correlation between the flooding event and the onset of symptoms.",
+                "Subjective symptom description: The term 'unusual' is medically vague; more specific descriptors (e.g., annular, ulcerative, or nodular) would increase clinical validity.",
+                "Lack of diagnostic confirmation: The report does not specify if cases were confirmed via microscopy/culture or remain suspected based on clinical presentation.",
+                "Environmental consistency: While highly plausible for the humid climate of Arba Minch, fungal outbreaks usually have a longer incubation period post-flooding than bacterial or parasitic skin infections (e.g., leptospirosis or cercarial dermatitis)."
+            ]
+        },
+        "risk_analysis": {
+            "risk_level": "MEDIUM",
+            "confidence": "75%",
+            "possible_disease": "Scabies",
+            "reason": "The clinical presentation of intense itching and unusual skin lesions across 18 cases strongly suggests a contagious parasitic infestation like Scabies, which is endemic in rural Ethiopia. The cluster size indicates rapid transmission, likely exacerbated by the water accessibility challenges noted in the research queries for Arba Minch. While morbidity is high, the risk is categorized as MEDIUM rather than HIGH because these symptoms currently lack systemic indicators (e.g., fever, respiratory distress) that would suggest a more lethal or viral outbreak like Mpox."
+        },
+        "consensus": {
+            "final_risk_level": "MEDIUM",
+            "average_confidence": 72.5,
+            "consensus_reached": true,
+            "agent_opinions": [
+                {
+                    "risk_level": "MEDIUM",
+                    "confidence": "75%",
+                    "possible_disease": "Scabies",
+                    "reason": "The clinical presentation of intense itching and unusual skin lesions across 18 cases strongly suggests a contagious parasitic infestation like Scabies, which is endemic in rural Ethiopia. The cluster size indicates rapid transmission, likely exacerbated by the water accessibility challenges noted in the research queries for Arba Minch. While morbidity is high, the risk is categorized as MEDIUM rather than HIGH because these symptoms currently lack systemic indicators (e.g., fever, respiratory distress) that would suggest a more lethal or viral outbreak like Mpox."
+                },
+                {
+                    "risk_level": "MEDIUM",
+                    "confidence": "75%",
+                    "possible_disease": "Scabies or Cutaneous Leishmaniasis",
+                    "reason": "The report of 18 cases represents a larger cluster than several historical outbreaks in the Arba Minch area (e.g., the 12-case Measles and 15-case Chikungunya clusters). A cluster of this size involving 'unusual' lesions suggests a localized epidemic curve that has moved beyond sporadic transmission. While skin-based outbreaks typically have lower immediate mortality than the high-risk respiratory events noted in the history (45 cases), the statistical volume in a concentrated rural/semi-urban setting indicates a significant public health failure or environmental exposure."
+                },
+                {
+                    "risk_level": "MEDIUM",
+                    "confidence": "75%",
+                    "possible_disease": "Scabies",
+                    "reason": "Arba Minch and the surrounding Gamo Zone are historically recognized hotspots for dermatological outbreaks, specifically Scabies and Cutaneous Leishmaniasis. A cluster of 18 cases with symptoms of itching and lesions follows past regional trends often exacerbated by water accessibility challenges in rural Arba Minch. While morbidity is high, the immediate mortality risk is lower than the respiratory or enteric diseases noted in historical records for this period."
+                },
+                {
+                    "risk_level": "MEDIUM",
+                    "confidence": "65%",
+                    "possible_disease": "Scabies or Cutaneous Leishmaniasis",
+                    "reason": "The cluster of 18 cases presenting with skin lesions and itching in the Arba Minch surroundings suggests an environmental or hygiene-related transmission. Although specific water quality data is missing, the rural context and proximity to the Rift Valley lakes (Abaya and Chamo) increase susceptibility to water-washed diseases like Scabies (often exacerbated by limited access to clean water for hygiene) or vector-borne diseases like Cutaneous Leishmaniasis, which is endemic to the region's climate and soil conditions."
+                }
+            ],
+            "final_reasoning": "Consensus reached from multiple perspectives: MEDIUM: The clinical presentation of intense itching and u... | MEDIUM: The report of 18 cases represents a larger cluster... | MEDIUM: Arba Minch and the surrounding Gamo Zone are histo... | MEDIUM: The cluster of 18 cases presenting with skin lesio..."
+        },
+        "context_research": {
+            "location": "Arba Minch Surroundings",
+            "security_status": "Information not available. The provided data contains search queries for security updates in the Gamo Zone, but does not include the results or actual status descriptions.",
+            "water_quality": "Information not available. The text mentions a search query regarding 'water quality challenges and drinking water accessibility' in rural Arba Minch, but no findings are provided.",
+            "temperature": "Not specified in the provided data.",
+            "conflict_zone": false,
+            "nearby_facilities": [],
+            "recent_news": [],
+            "last_updated": "2026-04-04T10:56:06.003250"
+        },
+        "alert": {
+            "title": "Health Alert: Outbreak of Itchy Skin Lesions in Arba Minch",
+            "message": "A cluster of 18 cases featuring unusual skin lesions and intense itching has been reported in the Arba Minch surroundings. Medical experts believe this is likely Scabies, a skin condition caused by tiny mites that spreads easily from person to person through close contact.",
+            "recommendations": [
+                "Visit the nearest health center immediately if you or your family members have persistent itching or skin sores.",
+                "Wash all clothing, bedding, and towels used by affected individuals in hot, soapy water and dry them thoroughly in the sun.",
+                "Avoid sharing personal items like clothes, blankets, or towels with others.",
+                "If one person in a household is diagnosed, all family members should be treated at the same time to stop the spread."
+            ],
+            "prevention_strategy": "The best way to stay safe is to bathe regularly, wash your clothes and bedding often, and avoid close skin-to-skin contact with anyone showing symptoms of an itchy rash.",
+            "why_urgent": "This alert was generated because 18 people were affected in a short time in one area. Scabies is very contagious and can spread quickly through families, schools, and neighborhoods if it is not treated immediately."
+        },
+        "status": "pending",
+        "timestamp": "2026-04-04 10:57:25.201545",
+        "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                                                                                                                               raw_content\n0  URGENT: Health alert from Jinka, South Omo Zone. We have 8 patients presenting with high-grade fever, severe headache, and jaundice (yellowing of eyes). 3 cases were lab-confirmed as Yellow Fever this morning, while the remaining 5 are considered probable based on clinical alignment. All patients are from the same village near the Omo River.\n1                                                                          Konso Health Post: Cluster of 15 cases of acute watery diarrhea and severe vomiting detected in the last 24 hours. Initial investigation suggests a contaminated communal well. 10 cases are currently suspected and 5 are probable cholera. Immediate medical supplies needed.\n2                                                                                            Turmi Update: 4 individuals in a nomadic group showing signs of high fever and hemorrhagic spots. These are currently suspected cases of an unidentified viral fever. Movement tracking is difficult due to their migratory patterns in the South Omo region.\n3                                                                                             Arba Minch Surroundings: Local surveillance detected 22 cases of unusual skin lesions and itching among plantation workers. 18 are suspected and 4 have been confirmed by the regional clinic as a localized fungal outbreak exacerbated by recent flooding."
     },
     {
         "session_id": "a679b14f-71b3-45f2-badf-cedbb1423f34",

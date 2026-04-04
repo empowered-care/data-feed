@@ -158,7 +158,7 @@ export default function ProcessReport() {
                       className="h-14 px-8 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black shadow-xl shadow-primary/20 flex-1 gap-3 uppercase tracking-widest text-xs"
                     >
                       {pipeline.isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-                      Initialize Cognitive Scan
+                        submit
                     </Button>
                     <Button 
                       variant="outline" 
