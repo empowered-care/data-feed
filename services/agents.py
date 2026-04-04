@@ -4,8 +4,9 @@ import asyncio
 import uuid
 from datetime import datetime
 from typing import Dict, Any, List, Optional, Union
-from models.schemas import OutbreakReport, ValidationResult, RiskAnalysis, AlertMessage, ConsensusResult
+from models.schemas import OutbreakReport, ValidationResult, RiskAnalysis, AlertMessage, ConsensusResult, ContextData
 from services.gemini_service import GeminiService
+from services.research_agent import ContextResearchAgent
 from config import VALID_SYMPTOMS, MAX_STORED_REPORTS, BASE_DIR
 
 # Configure logging
@@ -183,9 +184,20 @@ class RiskAnalysisAgent:
     def __init__(self, gemini_service: GeminiService):
         self.gemini = gemini_service
 
-    async def analyze_risk(self, report: OutbreakReport, perspective: str = "general") -> RiskAnalysis:
+    async def analyze_risk(self, report: OutbreakReport, perspective: str = "general", context: ContextData = None) -> RiskAnalysis:
         """Analyze outbreak risk level from a specific perspective."""
         logger.info(f"Analyzing risk for {report.location} from perspective: {perspective}")
+
+        context_info = ""
+        if context:
+            context_info = f"""
+            Additional Context from Web Research:
+            - Security Status: {context.security_status}
+            - Water Quality: {context.water_quality}
+            - Environmental (Temp): {context.temperature}
+            - Conflict Zone: {"Yes" if context.conflict_zone else "No"}
+            - Recent News: {', '.join(context.recent_news)}
+            """
 
         prompt = f"""
         You are a Risk Analysis Sub-Agent specializing in {perspective}.
@@ -195,11 +207,13 @@ class RiskAnalysisAgent:
         Symptoms: {', '.join(report.symptoms)}
         Cases: {report.cases}
         Date: {report.date or 'Not specified'}
+        {context_info}
 
         Perspective Specific Instructions:
         - If perspective is 'symptoms': Focus on clinical patterns and disease matches.
         - If perspective is 'statistical': Focus on case count growth and population density.
         - If perspective is 'historical': Focus on seasonal trends and known regional hotspots.
+        - If perspective is 'environmental': Focus on how water, security, and conflict impact transmission.
         - Otherwise: Provide a general epidemiological risk assessment.
 
         Risk levels: HIGH, MEDIUM, LOW
@@ -314,6 +328,7 @@ class SuperAgent:
         self.validator = ValidationAgent(gemini_service)
         self.risk_agent = RiskAnalysisAgent(gemini_service)
         self.alert_agent = AlertGenerationAgent(gemini_service)
+        self.research_agent = ContextResearchAgent(gemini_service)
 
     async def process_outbreak_parallel(self, text: str) -> Dict[str, Any]:
         """Dynamic hierarchical processing of outbreak reports."""
@@ -332,21 +347,28 @@ class SuperAgent:
         else:
             report = await self.extractor.extract(text)
         
-        # 2. Dynamic Validation Sub-Agents
+        # 2. Dynamic Research Agent (New step based on location)
+        context_data = None
+        if report.location and report.location != "Unknown":
+            logger.info(f"🧠 SuperAgent: Spawning Research Agent for {report.location}...")
+            context_data = await self.research_agent.research(report.location)
+
+        # 3. Dynamic Validation Sub-Agents
         # We use one primary validator but it could be expanded to cross-check sub-agents
         validation_result = await self.validator.validate(report)
         
-        # 3. Dynamic Risk Sub-Agents (PERSPECTIVE-BASED)
-        perspectives = ["symptoms", "statistical", "historical"]
+        # 4. Dynamic Risk Sub-Agents (PERSPECTIVE-BASED)
+        # Use research data in risk analysis if available
+        perspectives = ["symptoms", "statistical", "historical", "environmental"]
         logger.info(f"🧠 SuperAgent: Spawning {len(perspectives)} Risk Sub-Agents...")
         
-        risk_tasks = [self.risk_agent.analyze_risk(report, p) for p in perspectives]
+        risk_tasks = [self.risk_agent.analyze_risk(report, p, context_data) for p in perspectives]
         risk_opinions = await asyncio.gather(*risk_tasks)
         
-        # 4. Merge Layer / Consensus
+        # 5. Merge Layer / Consensus
         consensus = self._reach_consensus(risk_opinions)
         
-        # 5. Alert Generation
+        # 6. Alert Generation
         alert = await self.alert_agent.generate_alert(report, consensus)
         
         return {
@@ -354,6 +376,7 @@ class SuperAgent:
             "validation": validation_result,
             "risk_analysis": risk_opinions[0], # Maintain compatibility
             "consensus": consensus,
+            "context_research": context_data,
             "alert": alert
         }
 
@@ -424,7 +447,7 @@ class DataAssistantAgent:
         except Exception as e:
             logger.error(f"❌ Failed to save data store to {self.storage_path}: {e}")
 
-    def add_report(self, report: Union[OutbreakReport, Dict[str, Any]], session_id: str = None, risk_analysis: Dict[str, Any] = None, alert: Dict[str, Any] = None):
+    def add_report(self, report: Union[OutbreakReport, Dict[str, Any]], session_id: str = None, risk_analysis: Dict[str, Any] = None, alert: Dict[str, Any] = None, context_research: Dict[str, Any] = None):
         """Add a report to the data store with full context."""
         report_dict = report.dict() if hasattr(report, "dict") else report
         
@@ -433,6 +456,7 @@ class DataAssistantAgent:
             "session_id": session_id or str(uuid.uuid4()),
             "extracted_data": report_dict,
             "risk_analysis": risk_analysis or {"risk_level": "LOW"},
+            "context_research": context_research,
             "alert": alert or {"title": "New Report"},
             "status": "pending",
             "timestamp": str(datetime.now())
