@@ -99,7 +99,7 @@ class AuthService:
         )
 
         # Send invitation email
-        email_sent = await send_invitation_email(invite_data.email, token)
+        email_sent = await send_invitation_email(invite_data.email, token, invite_data.frontend_url)
         if not email_sent:
             raise Exception("Failed to send invitation email.")
 
@@ -137,7 +137,7 @@ class AuthService:
 
         return {"message": "User registered successfully."}
 
-    async def request_password_reset(self, email: str):
+    async def request_password_reset(self, email: str, frontend_url: Optional[str] = None):
         """Send password reset link to user."""
         user = self.get_user_by_email(email)
         if not user:
@@ -145,7 +145,7 @@ class AuthService:
             return {"message": "If the email exists, a reset link will be sent."}
 
         token = create_reset_token(email, timedelta(hours=RESET_TOKEN_EXPIRE_HOURS))
-        email_sent = await send_reset_password_email(email, token)
+        email_sent = await send_reset_password_email(email, token, frontend_url)
         
         if not email_sent:
             raise Exception("Failed to send password reset email.")
@@ -182,3 +182,40 @@ class AuthService:
         self._save_users()
 
         return {"message": "Password changed successfully."}
+    
+    async def get_all_users(self) -> List[dict]:
+        """Return a list of all users without sensitive information."""
+        return [
+            {
+                "id": u["id"], 
+                "email": u["email"], 
+                "full_name": u.get("full_name"), 
+                "role": u["role"], 
+                "is_active": u.get("is_active", True),
+                "created_at": u.get("created_at")
+            } 
+            for u in self.users
+        ]
+
+    async def delete_user(self, user_id: str, admin_user: dict):
+        """Allow admin to remove a user from the system."""
+        if admin_user["role"] != UserRole.ADMIN:
+            raise Exception("Only administrators can delete users.")
+            
+        if admin_user["id"] == user_id:
+            raise Exception("You cannot delete your own account.")
+
+        user_found = False
+        new_users = []
+        for u in self.users:
+            if u["id"] == user_id:
+                user_found = True
+            else:
+                new_users.append(u)
+        
+        if not user_found:
+            raise Exception("User not found.")
+            
+        self.users = new_users
+        self._save_users()
+        return {"message": "User deleted successfully."}

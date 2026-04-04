@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware';
 export interface AuthUser {
   email: string;
   full_name: string | null;
-  role: 'admin' | 'vw';
+  role: 'admin' | 'vw' | 'data_entry';
   created_at: string;
 }
 

@@ -1,5 +1,46 @@
 [
     {
+        "session_id": "7ba34628-2c99-4a1c-bb28-14c7c6331988",
+        "extracted_data": {
+            "location": "Haramaya General Hospital",
+            "symptoms": [
+                "Abdominal pain",
+                "Crampy abdominal pain",
+                "Abdominal tenderness"
+            ],
+            "cases": 1,
+            "date": "3/11/17",
+            "additional_info": {
+                "patient_name": "Cheru Abraham",
+                "age": 18,
+                "sex": "M",
+                "tentative_diagnosis": "perforated PUD",
+                "investigation_results": "Abdominal U/S showed perforated PUD",
+                "reason_for_referral": "Surgical intervention",
+                "referred_to": "Amede H.C",
+                "referring_physician": "Fuad (HO)"
+            }
+        },
+        "risk_analysis": {
+            "risk_level": "UNKNOWN",
+            "confidence": "0%",
+            "possible_disease": "Unknown",
+            "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+        },
+        "alert": {
+            "title": "Health Alert",
+            "message": "Potential outbreak in Haramaya General Hospital. Risk level: UNKNOWN.",
+            "recommendations": [
+                "Seek medical attention",
+                "Follow local health guidelines"
+            ],
+            "prevention_strategy": null,
+            "why_urgent": null
+        },
+        "status": "pending",
+        "timestamp": "2026-04-04 05:04:26.913894"
+    },
+    {
         "session_id": "f2fe955a-1518-4739-bde0-e93219455047",
         "extracted_data": {
             "location": "Addis Ababa",

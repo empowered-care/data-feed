@@ -17,6 +17,7 @@ import SettingsPage from "@/pages/SettingsPage";
 import AdminPage from "@/pages/AdminPage";
 import ProfilePage from "@/pages/ProfilePage";
 import NotFound from "@/pages/NotFound";
+import DataEntryPage from "@/pages/DataEntryPage";
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/store/appStore";
 import SplashScreen from "@/components/SplashScreen";
@@ -92,6 +93,13 @@ const App = () => {
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/admin" element={<AdminPage />} />
                   </Route>
+
+                  {/* Data Entry Portal – restricted to data_entry and admin roles */}
+                  <Route path="/data-entry" element={
+                    <ProtectedRoute allowedRoles={['data_entry', 'admin']}>
+                      <DataEntryPage />
+                    </ProtectedRoute>
+                  } />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>
