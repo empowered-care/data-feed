@@ -6,6 +6,7 @@ Empowered Care - Unified Multi-Agent Disease Outbreak Detection & Document Proce
 import logging
 import uuid
 import io
+import json
 import cv2
 import numpy as np
 import pandas as pd
@@ -19,12 +20,14 @@ from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI, HTTPException, UploadFile, File, Depends, status, Security
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.responses import FileResponse
 
 from models.schemas import (
     OutbreakProcessResponse, QueryResponse, ChatRequest, ChatResponse,
-    UserRole, UserInvite, UserAcceptInvite, PasswordResetRequest, 
+    UserRole, UserInvite, UserAcceptInvite, PasswordResetRequest,
     PasswordResetConfirm, ChangePassword, Token, User, UserBase,
-    ProcessResponse, Detection
+    ProcessResponse, Detection,
+    PatientRecord, PatientRecordResponse, VitalSigns
 )
 from services.gemini_service import GeminiService
 from services.agents import (
@@ -311,6 +314,22 @@ async def invite_user(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@app.get("/admin/users")
+async def get_users(admin: dict = Depends(get_current_admin)):
+    """Return a list of all current users."""
+    try:
+        return await auth_service.get_all_users()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.delete("/admin/users/{user_id}")
+async def delete_user(user_id: str, admin: dict = Depends(get_current_admin)):
+    """Delete a user account."""
+    try:
+        return await auth_service.delete_user(user_id, admin)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @app.post("/auth/register")
 async def register_user(accept_data: UserAcceptInvite):
     """Register a new user using the invitation token from email."""
@@ -323,7 +342,7 @@ async def register_user(accept_data: UserAcceptInvite):
 async def forgot_password(request: PasswordResetRequest):
     """Request a password reset link to be sent via email."""
     try:
-        return await auth_service.request_password_reset(request.email)
+        return await auth_service.request_password_reset(request.email, request.frontend_url)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -703,6 +722,94 @@ async def clear_chat_session(session_id: str, user: dict = Depends(get_current_u
         return {"message": f"Session {session_id} cleared successfully"}
     else:
         return {"message": f"Session {session_id} not found or already empty"}
+
+# --- GET /outbreak/reports  (dashboard already calls this) ---
+
+@app.get("/outbreak/reports")
+async def get_all_outbreak_reports(user: dict = Depends(get_current_user)):
+    """Get all processed outbreak reports stored by DataAssistantAgent."""
+    return data_assistant.data_store
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PATIENT RECORD ENDPOINTS  (manual form entry → data/patient_records.json)
+# ─────────────────────────────────────────────────────────────────────────────
+
+PATIENT_RECORDS_FILE = Path("data") / "patient_records.json"
+PATIENT_RECORDS_FILE.parent.mkdir(exist_ok=True)
+
+
+def _load_patient_records() -> List[dict]:
+    if PATIENT_RECORDS_FILE.exists():
+        try:
+            with open(PATIENT_RECORDS_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return []
+
+
+def _save_patient_records(records: List[dict]):
+    with open(PATIENT_RECORDS_FILE, "w") as f:
+        json.dump(records, f, indent=2, ensure_ascii=False)
+
+
+@app.post("/patient/record", response_model=PatientRecordResponse)
+async def save_patient_record(
+    record: PatientRecord,
+    user: dict = Depends(get_current_user)
+):
+    """Save a manually entered patient record (form submission)."""
+    records = _load_patient_records()
+    record_id = str(uuid.uuid4())
+    saved_at = datetime.now().isoformat()
+
+    entry = {
+        "id": record_id,
+        "saved_at": saved_at,
+        "saved_by": user["email"],
+        **record.model_dump()
+    }
+    records.append(entry)
+    _save_patient_records(records)
+
+    logger.info(
+        f"📋 Patient record saved: {record.patient_name} "
+        f"(ID: {record_id}) by {user['email']}"
+    )
+    return PatientRecordResponse(
+        id=record_id,
+        message="✅ Patient record saved successfully.",
+        patient_name=record.patient_name,
+        mrn=record.mrn,
+        saved_at=saved_at
+    )
+
+
+@app.get("/patient/records")
+async def get_patient_records(user: dict = Depends(get_current_user)):
+    """Return patient records.
+    
+    - admin: all records
+    - data_entry: only records saved by this user
+    """
+    records = _load_patient_records()
+    if user["role"] == "data_entry":
+        records = [r for r in records if r.get("saved_by") == user["email"]]
+    return {"total": len(records), "records": records}
+
+
+@app.get("/patient/record/{record_id}")
+async def get_patient_record(
+    record_id: str,
+    user: dict = Depends(get_current_user)
+):
+    """Return a single patient record by ID."""
+    for r in _load_patient_records():
+        if r["id"] == record_id:
+            return r
+    raise HTTPException(status_code=404, detail="Record not found")
+
 
 if __name__ == "__main__":
     import uvicorn
