@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, X, Send, Bot, User, Loader2, Sparkles, Minimize2, Lightbulb, Maximize2 } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, User, Loader2, Sparkles, Minimize2, Lightbulb, Maximize2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
+import ReactMarkdown from 'react-markdown';
+
 
 interface Message {
   role: 'user' | 'assistant';
@@ -37,7 +39,15 @@ export function FloatingAssistant() {
   ]);
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleCopy = (text: string, index: number) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
 
   // Trigger welcome message on navigation
   useEffect(() => {
@@ -173,15 +183,36 @@ export function FloatingAssistant() {
                     {m.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
                   </div>
                   <div className={cn(
-                    "max-w-[75%] p-3 rounded-2xl text-xs font-semibold leading-relaxed shadow-sm",
+                    "max-w-[85%] p-3 rounded-2xl text-xs font-semibold leading-relaxed shadow-sm",
                     m.role === 'user' 
                       ? "bg-muted/30 border border-border/50 rounded-tr-none" 
-                      : "bg-background border border-border/80 rounded-tl-none"
+                      : "bg-background border border-border/80 rounded-tl-none prose prose-xs dark:prose-invert"
                   )}>
-                    {m.content}
-                    {m.agent && (
-                      <div className="mt-2 pt-2 border-t border-border/20 text-[8px] font-black uppercase text-primary/60">
-                        Node: {m.agent}
+                    {m.role === 'user' ? (
+                      m.content
+                    ) : (
+                      <ReactMarkdown>{m.content}</ReactMarkdown>
+                    )}
+                    {m.role === 'assistant' && (
+                      <div className="mt-2 pt-2 border-t border-border/20 flex items-center justify-between">
+                        {m.agent ? (
+                          <span className="text-[8px] font-black uppercase text-primary/60">
+                            Node: {m.agent}
+                          </span>
+                        ) : (
+                          <span />
+                        )}
+                        <button 
+                          onClick={() => handleCopy(m.content, i)}
+                          className="text-muted-foreground hover:text-primary transition-colors hover:scale-110 flex items-center gap-1 text-[9px] uppercase font-bold"
+                          title="Copy response"
+                        >
+                          {copiedIndex === i ? (
+                            <><Check className="h-3 w-3 text-green-500" /> <span className="text-green-500">Copied</span></>
+                          ) : (
+                            <><Copy className="h-3 w-3" /> Copy</>
+                          )}
+                        </button>
                       </div>
                     )}
                   </div>

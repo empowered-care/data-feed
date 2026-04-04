@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, User, Loader2, Trash2, Sparkles } from 'lucide-react';
+import { Send, Bot, User, Loader2, Trash2, Sparkles, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
+import ReactMarkdown from 'react-markdown';
+
 
 interface Message {
   role: 'user' | 'assistant';
@@ -28,7 +30,15 @@ export default function QueryPage() {
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
   const [showRaw, setShowRaw] = useState<number | null>(null);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleCopy = (text: string, index: number) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -152,21 +162,46 @@ export default function QueryPage() {
                     ? 'bg-muted/30 border border-border/50 rounded-tr-sm' 
                     : 'bg-background border border-border/80 rounded-tl-sm'
                 )}>
-                  <p className="text-sm font-medium leading-relaxed tracking-tight text-foreground/90 whitespace-pre-wrap">
-                    {m.content}
-                  </p>
+                  <div className="text-sm font-medium leading-relaxed tracking-tight text-foreground/90 whitespace-pre-wrap">
+                    {m.role === 'user' ? (
+                      m.content
+                    ) : (
+                      <div className="prose prose-sm dark:prose-invert max-w-none">
+                        <ReactMarkdown>{m.content}</ReactMarkdown>
+                      </div>
+                    )}
+                  </div>
                   
-                  {m.agent && (
+                  {m.role === 'assistant' && (
                     <div className="mt-4 pt-4 border-t border-border/30 flex items-center justify-between gap-4">
-                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/60 px-2 py-0.5 bg-primary/5 rounded-full">
-                        Cognitive Node: {m.agent}
-                      </span>
-                      <button 
-                        onClick={() => setShowRaw(showRaw === i ? null : i)}
-                        className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50 hover:text-primary transition-colors"
-                      >
-                        {showRaw === i ? 'Close Data' : 'Trace Signal'}
-                      </button>
+                      {m.agent ? (
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/60 px-2 py-0.5 bg-primary/5 rounded-full">
+                          Cognitive Node: {m.agent}
+                        </span>
+                      ) : (
+                        <span />
+                      )}
+                      <div className="flex items-center gap-4">
+                        <button 
+                          onClick={() => handleCopy(m.content, i)}
+                          className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-muted-foreground/50 hover:text-primary transition-colors"
+                          title="Copy response"
+                        >
+                          {copiedIndex === i ? (
+                            <><Check className="h-3 w-3 text-green-500" /> <span className="text-green-500">Copied</span></>
+                          ) : (
+                            <><Copy className="h-3 w-3" /> Copy</>
+                          )}
+                        </button>
+                        {m.raw && (
+                          <button 
+                            onClick={() => setShowRaw(showRaw === i ? null : i)}
+                            className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50 hover:text-primary transition-colors"
+                          >
+                            {showRaw === i ? 'Close Data' : 'Trace Signal'}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
