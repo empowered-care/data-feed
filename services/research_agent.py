@@ -45,17 +45,39 @@ class ContextResearchAgent:
             
             scraped_content = []
             
-            # 2. Use Crawl4AI to gather data
+            # 2. Use Crawl4AI to gather data from MULTIPLE SOURCES (Google + Bing)
             async with AsyncWebCrawler() as crawler:
-                for query in queries[:2]: # Limit to 2 queries for speed
-                    search_url = f"https://www.google.com/search?q={query.replace(' ', '+')}"
-                    logger.info(f"🕷️ Crawling: {search_url}")
-                    
-                    result = await crawler.arun(url=search_url)
-                    if result and result.markdown:
-                        scraped_content.append(result.markdown[:2000]) # Cap content size
+                # Source 1: Google (General/Weather)
+                try:
+                    google_url = f"https://www.google.com/search?q={queries[0].replace(' ', '+')}"
+                    logger.info(f"🕷️ Source A (Google): {google_url}")
+                    res_google = await crawler.arun(url=google_url, bypass_cache=True)
+                    if res_google and res_google.markdown:
+                        scraped_content.append(f"SOURCE A (GOOGLE):\n{res_google.markdown[:1500]}")
+                except Exception as ce:
+                    logger.warning(f"⚠️ Google crawl failed: {ce}")
 
-            # 3. Analyze scraped content using Gemini
+                # Small delay to avoid triggering concurrent connection limits
+                await asyncio.sleep(1)
+
+                # Source 2: Bing (Security/Current Events)
+                try:
+                    bing_url = f"https://www.bing.com/search?q={queries[1].replace(' ', '+')}"
+                    logger.info(f"🕷️ Source B (Bing): {bing_url}")
+                    res_bing = await crawler.arun(url=bing_url, bypass_cache=True)
+                    if res_bing and res_bing.markdown:
+                        scraped_content.append(f"SOURCE B (BING):\n{res_bing.markdown[:1500]}")
+                    else:
+                        # Fallback to DuckDuckGo if Bing is empty/blocked
+                        ddg_url = f"https://duckduckgo.com/html/?q={queries[1].replace(' ', '+')}"
+                        logger.info(f"🕷️ Fallback (DDG): {ddg_url}")
+                        res_ddg = await crawler.arun(url=ddg_url, bypass_cache=True)
+                        if res_ddg and res_ddg.markdown:
+                            scraped_content.append(f"SOURCE B (DDG-FALLBACK):\n{res_ddg.markdown[:1500]}")
+                except Exception as ce:
+                    logger.warning(f"⚠️ Secondary source crawl failed: {ce}")
+
+            # 3. Analyze merged intelligence from multiple sources using Gemini
             analysis_prompt = f"""
             Analyze the following research data for the location '{location}'.
             Data:

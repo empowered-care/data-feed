@@ -10,6 +10,7 @@ interface AppState {
   reports: OutbreakReport[];
   setReports: (reports: OutbreakReport[]) => void;
   addReport: (r: OutbreakReport) => void;
+  addReports: (rs: OutbreakReport[]) => void;
   updateReportStatus: (id: string, status: 'approved' | 'rejected') => void;
   alerts: AlertMessage[];
   addAlert: (a: AlertMessage) => void;
@@ -18,6 +19,7 @@ interface AppState {
   completePipelineStep: (step: AgentStep) => void;
   setPipelineProcessing: (v: boolean) => void;
   setPipelineResult: (r: OutbreakReport | null) => void;
+  setPipelineResults: (rs: OutbreakReport[]) => void;
   setPipelineError: (e: string | null) => void;
   resetPipeline: () => void;
   notifications: { id: string; message: string; read: boolean }[];
@@ -30,6 +32,7 @@ const initialPipeline: AgentPipelineState = {
   completedSteps: [],
   isProcessing: false,
   result: null,
+  pipelineResults: [],
   error: null,
 };
 
@@ -48,6 +51,7 @@ export const useAppStore = create<AppState>()(
       reports: [],
       setReports: (reports) => set({ reports }),
       addReport: (r) => set((s) => ({ reports: [r, ...s.reports] })),
+      addReports: (rs) => set((s) => ({ reports: [...rs, ...s.reports] })),
       updateReportStatus: (id, status) =>
         set((s) => ({
           reports: s.reports.map((r) => (r.session_id === id ? { ...r, status } : r)),
@@ -62,6 +66,7 @@ export const useAppStore = create<AppState>()(
         })),
       setPipelineProcessing: (v) => set((s) => ({ pipeline: { ...s.pipeline, isProcessing: v } })),
       setPipelineResult: (r) => set((s) => ({ pipeline: { ...s.pipeline, result: r } })),
+      setPipelineResults: (rs) => set((s) => ({ pipeline: { ...s.pipeline, pipelineResults: rs } })),
       setPipelineError: (e) => set((s) => ({ pipeline: { ...s.pipeline, error: e } })),
       resetPipeline: () => set({ pipeline: initialPipeline }),
       notifications: [],

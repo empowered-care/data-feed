@@ -18,7 +18,7 @@ export default function ProcessReport() {
   const [input, setInput] = useState('Fever, vomiting, 4 people affected in Jimma zone. Started 2 days ago near local water source.');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { pipeline, setPipelineStep, completePipelineStep, setPipelineProcessing, setPipelineResult, setPipelineError, resetPipeline, addReport, addNotification } = useAppStore();
+  const { pipeline, setPipelineStep, completePipelineStep, setPipelineProcessing, setPipelineResult, setPipelineResults, setPipelineError, resetPipeline, addReport, addReports, addNotification } = useAppStore();
 
   const processText = async () => {
     if (!input.trim()) return;
@@ -34,10 +34,13 @@ export default function ProcessReport() {
         completePipelineStep(step);
       }
 
-      const result = await apiPromise;
-      setPipelineResult(result);
-      addReport(result);
-      addNotification(`New intelligence ingested: ${result.extracted_data.location}`);
+      const results = await apiPromise;
+      if (results && results.length > 0) {
+        setPipelineResult(results[0]);
+        setPipelineResults(results);
+        addReports(results);
+        addNotification(`New intelligence ingested: ${results.length} records`);
+      }
       toast.success('Cognitive extraction complete');
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Uplink failed';
@@ -62,10 +65,13 @@ export default function ProcessReport() {
         completePipelineStep(step);
       }
 
-      const result = await apiPromise;
-      setPipelineResult(result);
-      addReport(result);
-      addNotification(`Archive ingested: ${selectedFile.name}`);
+      const results = await apiPromise;
+      if (results && results.length > 0) {
+        setPipelineResult(results[0]);
+        setPipelineResults(results);
+        addReports(results);
+        addNotification(`Archive ingested: ${results.length} records`);
+      }
       toast.success('Visual extraction complete');
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Inversion failed';
@@ -84,11 +90,13 @@ export default function ProcessReport() {
 
   const handleApproval = async (approved: boolean) => {
     if (!pipeline.result) return;
+    const status = approved ? 'approved' : 'rejected';
     try {
       await api.approveReport(pipeline.result.session_id, approved);
+      updateReportStatus(pipeline.result.session_id, status);
     } catch {}
     toast.success(approved ? 'Report Verified' : 'Report Rejected');
-    setPipelineResult({ ...pipeline.result, status: approved ? 'approved' : 'rejected', human_validation_required: false });
+    setPipelineResult({ ...pipeline.result, status, human_validation_required: false });
   };
 
   const result = pipeline.result;
@@ -221,6 +229,25 @@ export default function ProcessReport() {
                 completedSteps={pipeline.completedSteps}
                 isProcessing={pipeline.isProcessing}
               />
+
+              {pipeline.pipelineResults.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                   {pipeline.pipelineResults.map((r, i) => (
+                     <button
+                        key={r.session_id}
+                        onClick={() => setPipelineResult(r)}
+                        className={cn(
+                          "px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border-2 shrink-0 transition-all",
+                          pipeline.result?.session_id === r.session_id
+                            ? "bg-primary border-primary text-white shadow-lg"
+                            : "bg-background border-border/50 text-muted-foreground hover:border-primary/30"
+                        )}
+                     >
+                       Location {i + 1}: {r.extracted_data.location}
+                     </button>
+                   ))}
+                </div>
+              )}
               
               <AnimatePresence>
                 {result && !pipeline.isProcessing && (

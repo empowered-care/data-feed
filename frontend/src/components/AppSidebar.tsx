@@ -11,12 +11,14 @@ import {
   X,
   ShieldCheck,
   User,
+  Database,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
 
 const baseNavItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/vault', icon: Database, label: 'Intelligence Vault' },
   { to: '/process', icon: FileText, label: 'Process Report' },
   { to: '/query', icon: Search, label: 'Query Data' },
   { to: '/alerts', icon: AlertTriangle, label: 'Alerts' },
