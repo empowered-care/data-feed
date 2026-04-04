@@ -2,7 +2,7 @@
     {
         "id": "3a8c47da-960c-40ca-a297-2ece50a30ac9",
         "email": "masrialemuwork@gmail.com",
-        "hashed_password": "$2b$12$ki8mjyUXRV8vlTHKIXHmGe8gA3d9fm/3nctUIIXZgfGXf.0837CWq",
+        "hashed_password": "$2b$12$MwAhcJGJBgsaX1K52yrTaOG4EM.7u7rXbI/3smwMT.ag8yhHKqBSy",
         "full_name": "Admin User",
         "role": "admin",
         "is_active": true,
