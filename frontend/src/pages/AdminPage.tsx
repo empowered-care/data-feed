@@ -357,7 +357,7 @@ export default function AdminPage() {
           </div>
 
           {/* Outbreak Heatmap Preview */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-card rounded-2xl p-8 space-y-6">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="space-y-6">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-2xl bg-orange-500/10 text-orange-500">
                 <AlertTriangle className="h-6 w-6" />
@@ -368,15 +368,7 @@ export default function AdminPage() {
               </div>
             </div>
             
-            <div className="aspect-[16/9] w-full bg-background/50 rounded-2xl border border-border/50 overflow-hidden relative group">
-              <div className="absolute inset-0 z-10 bg-gradient-to-t from-background/80 to-transparent flex items-end p-8">
-                <div className="space-y-2">
-                  <p className="text-lg font-bold">Heatmap Integration</p>
-                  <p className="text-xs text-muted-foreground max-w-sm">
-                    Interactive region-by-region risk weighting dashboard. Click on regions to adjust their clinical suspicion score based on current local outbreaks.
-                  </p>
-                </div>
-              </div>
+            <div className="border-none shadow-xl shadow-primary/5 bg-background/50 backdrop-blur-sm border border-border/50 overflow-hidden relative group rounded-2xl">
               <EthiopiaMap />
             </div>
           </motion.div>

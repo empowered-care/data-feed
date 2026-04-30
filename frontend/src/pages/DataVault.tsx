@@ -74,79 +74,89 @@ export default function DataVault() {
 
   return (
     <div className="space-y-6 pb-10">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-black tracking-tighter flex items-center gap-3">
-            <Database className="h-8 w-8 text-primary" />
-            Intelligence Vault
+          <h2 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
+            <Database className="h-7 w-7 text-primary" />
+            Surveillance Archive
           </h2>
-          <p className="text-muted-foreground font-medium">Historical repository of all analyzed epidemiological signals</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Historical records of all processed regional health reports
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button 
             variant={showDetailedTable ? "secondary" : "outline"} 
             size="sm" 
             onClick={() => setShowDetailedTable(!showDetailedTable)} 
-            className="gap-2 font-bold uppercase tracking-widest text-[10px] h-10 shadow-sm"
+            className="gap-2 font-medium text-xs h-10 shadow-sm rounded-xl"
           >
-            <Database className="h-4 w-4" /> {showDetailedTable ? "Standard View" : "Deep Analysis Table"}
+            <Database className="h-4 w-4" /> {showDetailedTable ? "Standard View" : "Detailed View"}
           </Button>
-          <Button variant="outline" size="sm" onClick={exportData} className="gap-2 font-bold uppercase tracking-widest text-[10px] h-10 shadow-sm">
+          <Button variant="default" size="sm" onClick={exportData} className="gap-2 font-medium text-xs h-10 shadow-sm rounded-xl">
             <Download className="h-4 w-4" /> Export Archive
           </Button>
         </div>
       </div>
 
-      <div className="grid md:flex items-center gap-4">
-        <div className="relative flex-1">
+      <div className="flex flex-col sm:flex-row flex-wrap items-center gap-3 bg-background/80 backdrop-blur-xl border border-border/40 p-2 rounded-2xl shadow-sm w-full md:w-auto">
+        <div className="relative flex-1 sm:min-w-[300px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="Search by location or disease pathology..." 
-            className="pl-10 h-12 bg-background/50 border-2 border-border/50 focus:border-primary/50 transition-all rounded-xl font-medium"
+            placeholder="Search locations or conditions..." 
+            className="pl-9 h-10 bg-muted/30 border-none focus-visible:ring-1 focus-visible:ring-primary/50 transition-all rounded-xl text-sm"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-2">
-           {['ALL', 'HIGH', 'MEDIUM', 'LOW'].map(level => (
-             <button
-                key={level}
-                onClick={() => setFilterRisk(level === 'ALL' ? null : (filterRisk === level ? null : level))}
+        <div className="w-px h-6 bg-border/50 hidden sm:block mx-1" />
+        <div className="flex items-center gap-1">
+           {[
+             { label: 'All Levels', value: 'ALL' },
+             { label: 'High', value: 'HIGH' },
+             { label: 'Medium', value: 'MEDIUM' },
+             { label: 'Low', value: 'LOW' }
+           ].map(level => (
+             <Button
+                key={level.value}
+                variant={((level.value === 'ALL' && !filterRisk) || (filterRisk === level.value)) ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setFilterRisk(level.value === 'ALL' ? null : (filterRisk === level.value ? null : level.value))}
                 className={cn(
-                  "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all",
-                  (level === 'ALL' && !filterRisk) || (filterRisk === level)
-                    ? "bg-primary border-primary text-white shadow-lg shadow-primary/20" 
-                    : "bg-background border-border/50 text-muted-foreground hover:border-primary/30"
+                  "h-8 rounded-lg text-xs font-medium px-3",
+                  ((level.value === 'ALL' && !filterRisk) || (filterRisk === level.value))
+                    ? "shadow-sm" 
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                 )}
              >
-               {level}
-             </button>
+               {level.label}
+             </Button>
            ))}
         </div>
       </div>
 
-      <div className="glass-card rounded-[2rem] overflow-hidden border-border/40 shadow-2xl bg-background/30 backdrop-blur-md">
+      <div className="border-none shadow-xl shadow-border/5 overflow-hidden bg-background/60 backdrop-blur-md border border-border/40 rounded-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-muted/50 text-left text-muted-foreground border-b border-border/50">
-                <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Transmission Date</th>
-                <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Location Hub</th>
+              <tr className="bg-muted/10 text-left text-muted-foreground border-b border-border/40">
+                <th className="px-6 py-4 font-semibold text-xs tracking-wide">Date</th>
+                <th className="px-6 py-4 font-semibold text-xs tracking-wide">Location</th>
                 {showDetailedTable ? (
                   <>
-                    <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Validation</th>
-                    <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Consensus Reason</th>
-                    <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Symptoms Identified</th>
+                    <th className="px-6 py-4 font-semibold text-xs tracking-wide">Validation</th>
+                    <th className="px-6 py-4 font-semibold text-xs tracking-wide">Consensus Notes</th>
+                    <th className="px-6 py-4 font-semibold text-xs tracking-wide">Symptoms</th>
                   </>
                 ) : (
                   <>
-                    <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Pathology</th>
-                    <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Case Volume</th>
-                    <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Threat Level</th>
-                    <th className="px-6 py-5 font-black uppercase tracking-widest text-[10px]">Web Context</th>
+                    <th className="px-6 py-4 font-semibold text-xs tracking-wide">Condition</th>
+                    <th className="px-6 py-4 font-semibold text-xs tracking-wide">Cases</th>
+                    <th className="px-6 py-4 font-semibold text-xs tracking-wide">Risk Level</th>
+                    <th className="px-6 py-4 font-semibold text-xs tracking-wide">Context</th>
                   </>
                 )}
-                <th className="px-6 py-5 text-right font-black uppercase tracking-widest text-[10px]">Action</th>
+                <th className="px-6 py-4 text-right font-semibold text-xs tracking-wide">Details</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/30">
@@ -244,9 +254,9 @@ export default function DataVault() {
               {filteredReports.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-6 py-20 text-center">
-                    <div className="flex flex-col items-center gap-4 text-muted-foreground opacity-30">
-                      <Database className="h-16 w-16" />
-                      <p className="font-black uppercase tracking-widest text-sm">Vault Empty or No Matches Found</p>
+                    <div className="flex flex-col items-center gap-3 text-muted-foreground opacity-50">
+                      <Database className="h-10 w-10" />
+                      <p className="font-medium text-sm">No archive records found</p>
                     </div>
                   </td>
                 </tr>
@@ -264,24 +274,24 @@ export default function DataVault() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="glass-card rounded-[2rem] p-8 border-primary/20 shadow-2xl bg-primary/5"
+              className="border border-border/40 rounded-2xl p-6 md:p-8 bg-muted/10 shadow-sm"
             >
               <div className="grid lg:grid-cols-3 gap-8">
                 <div className="space-y-6">
                   <div>
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Detailed Symptoms</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Detailed Symptoms</p>
                     <div className="flex flex-wrap gap-2">
                       {report.extracted_data.symptoms.map(s => (
-                        <Badge key={s} variant="outline" className="font-bold uppercase text-[9px] bg-background border-primary/20 text-primary">
+                        <Badge key={s} variant="secondary" className="font-medium text-[11px]">
                           {s}
                         </Badge>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">AI Reasoning</p>
-                    <p className="text-xs font-medium leading-relaxed italic text-foreground/80">
-                      "{report.risk_analysis?.reason}"
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Analysis Notes</p>
+                    <p className="text-sm font-medium leading-relaxed text-foreground/80">
+                      {report.risk_analysis?.reason}
                     </p>
                   </div>
                 </div>
@@ -290,23 +300,23 @@ export default function DataVault() {
                   {report.context_research && (
                     <>
                       <div>
-                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                          <Shield className="h-3 w-3" /> Environmental Intelligence
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                          <Shield className="h-4 w-4" /> Environmental Context
                         </p>
                         <div className="grid grid-cols-2 gap-3">
-                           <div className="p-3 bg-background rounded-xl border border-border/50">
-                              <p className="text-[8px] font-bold text-muted-foreground uppercase">Water Quality</p>
-                              <p className="text-[10px] font-black uppercase">{report.context_research.water_quality}</p>
+                           <div className="p-3 bg-background rounded-xl border border-border/40">
+                              <p className="text-[10px] font-semibold text-muted-foreground uppercase">Water Quality</p>
+                              <p className="text-xs font-medium mt-0.5">{report.context_research.water_quality}</p>
                            </div>
-                           <div className="p-3 bg-background rounded-xl border border-border/50">
-                              <p className="text-[8px] font-bold text-muted-foreground uppercase">Temp/Environment</p>
-                              <p className="text-[10px] font-black uppercase">{report.context_research.temperature}</p>
+                           <div className="p-3 bg-background rounded-xl border border-border/40">
+                              <p className="text-[10px] font-semibold text-muted-foreground uppercase">Temp/Environment</p>
+                              <p className="text-xs font-medium mt-0.5">{report.context_research.temperature}</p>
                            </div>
                         </div>
                       </div>
                       <div>
-                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Web Narrative Summary</p>
-                        <p className="text-[11px] font-medium leading-relaxed text-muted-foreground">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Security & Context</p>
+                        <p className="text-sm font-medium leading-relaxed text-muted-foreground">
                           {report.context_research.security_status}
                         </p>
                       </div>
@@ -315,13 +325,13 @@ export default function DataVault() {
                 </div>
 
                 <div className="space-y-4">
-                  <div className="p-4 bg-background rounded-2xl border border-primary/20 shadow-sm">
-                    <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-2 flex items-center gap-2">
-                      <AlertCircle className="h-3 w-3" /> System Recommendation
+                  <div className="p-4 bg-background rounded-2xl border border-border/40 shadow-sm">
+                    <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3 flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4" /> Key Recommendations
                     </p>
-                    <ul className="space-y-2">
+                    <ul className="space-y-2.5">
                       {report.alert?.recommendations.slice(0, 3).map((rec, i) => (
-                        <li key={i} className="text-[10px] font-bold leading-tight flex items-start gap-2">
+                        <li key={i} className="text-xs font-medium leading-tight flex items-start gap-2">
                           <span className="h-1.5 w-1.5 rounded-full bg-primary mt-1 shrink-0" />
                           {rec}
                         </li>
@@ -330,19 +340,19 @@ export default function DataVault() {
                   </div>
                   <div className="flex gap-2">
                     <Button 
-                      variant="ghost" 
+                      variant="outline" 
                       size="sm" 
-                      className="flex-1 text-[9px] font-black uppercase border border-border/50 rounded-xl"
+                      className="flex-1 text-xs font-medium rounded-xl"
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate(`/vault/details/${report.session_id}`);
                       }}
                     >
-                      View Deep Intel Report
+                      View Full Report
                     </Button>
                     <Button 
                       size="sm" 
-                      className="flex-1 text-[9px] font-black uppercase rounded-xl"
+                      className="flex-1 text-xs font-medium rounded-xl"
                       onClick={(e) => {
                         e.stopPropagation();
                         window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(report.extracted_data.location)}`, '_blank');
