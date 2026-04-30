@@ -1,5 +1,81 @@
 [
     {
+        "session_id": "a0081ea8-45fb-4c9d-b081-5c17b095eafd",
+        "extracted_data": {
+            "location": "Unknown",
+            "symptoms": [
+                "Unknown"
+            ],
+            "cases": 2,
+            "date": null,
+            "classification": "Suspected",
+            "additional_info": {
+                "raw_text": "Fever, vomiting, 4 people affected in Jimma zone. Started 2 days ago near local water source.",
+                "error": "\u274c Gemini text generation failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+            }
+        },
+        "validation": {
+            "valid": true,
+            "confidence": 0.5,
+            "issues": [
+                "Validation engine failure, defaulting to valid"
+            ]
+        },
+        "risk_analysis": {
+            "risk_level": "UNKNOWN",
+            "confidence": "0%",
+            "possible_disease": "Unknown",
+            "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+        },
+        "consensus": {
+            "final_risk_level": "UNKNOWN",
+            "average_confidence": 0.0,
+            "consensus_reached": true,
+            "agent_opinions": [
+                {
+                    "risk_level": "UNKNOWN",
+                    "confidence": "0%",
+                    "possible_disease": "Unknown",
+                    "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+                },
+                {
+                    "risk_level": "UNKNOWN",
+                    "confidence": "0%",
+                    "possible_disease": "Unknown",
+                    "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+                },
+                {
+                    "risk_level": "UNKNOWN",
+                    "confidence": "0%",
+                    "possible_disease": "Unknown",
+                    "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+                },
+                {
+                    "risk_level": "UNKNOWN",
+                    "confidence": "0%",
+                    "possible_disease": "Unknown",
+                    "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+                }
+            ],
+            "final_reasoning": "Consensus reached from multiple perspectives: UNKNOWN: Analysis failed: \u274c Gemini text generation failed: ... | UNKNOWN: Analysis failed: \u274c Gemini text generation failed: ... | UNKNOWN: Analysis failed: \u274c Gemini text generation failed: ... | UNKNOWN: Analysis failed: \u274c Gemini text generation failed: ..."
+        },
+        "context_research": null,
+        "alert": {
+            "title": "Health Alert",
+            "message": "Potential outbreak in Unknown. Risk level: UNKNOWN.",
+            "recommendations": [
+                "Seek medical attention",
+                "Follow local health guidelines"
+            ],
+            "prevention_strategy": null,
+            "why_urgent": null
+        },
+        "status": "pending",
+        "created_at": "2026-04-04 13:02:36.188537",
+        "timestamp": "2026-04-04 13:06:42.860537",
+        "raw_report": "Fever, vomiting, 4 people affected in Jimma zone. Started 2 days ago near local water source.\n---\nFever, vomiting, 4 people affected in Jimma zone. Started 2 days ago near local water source."
+    },
+    {
         "session_id": "0589235d-262b-4bc4-a7ce-4f0ab288ea6b",
         "extracted_data": {
             "location": "Unknown",
@@ -70,7 +146,7 @@
             "prevention_strategy": null,
             "why_urgent": null
         },
-        "status": "pending",
+        "status": "approved",
         "timestamp": "2026-04-04 10:43:46.264005",
         "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                                                                                                                               raw_content\n0  URGENT: Health alert from Jinka, South Omo Zone. We have 8 patients presenting with high-grade fever, severe headache, and jaundice (yellowing of eyes). 3 cases were lab-confirmed as Yellow Fever this morning, while the remaining 5 are considered probable based on clinical alignment. All patients are from the same village near the Omo River.\n1                                                                          Konso Health Post: Cluster of 15 cases of acute watery diarrhea and severe vomiting detected in the last 24 hours. Initial investigation suggests a contaminated communal well. 10 cases are currently suspected and 5 are probable cholera. Immediate medical supplies needed.\n2                                                                                            Turmi Update: 4 individuals in a nomadic group showing signs of high fever and hemorrhagic spots. These are currently suspected cases of an unidentified viral fever. Movement tracking is difficult due to their migratory patterns in the South Omo region.\n3                                                                                             Arba Minch Surroundings: Local surveillance detected 22 cases of unusual skin lesions and itching among plantation workers. 18 are suspected and 4 have been confirmed by the regional clinic as a localized fungal outbreak exacerbated by recent flooding."
     },
@@ -637,6 +713,95 @@
         "status": "pending",
         "timestamp": "2026-04-04 10:57:24.844649",
         "raw_report": "Outbreak CSV Dump:\n                                                                                                                                                                                                                                                                                                                                               raw_content\n0  URGENT: Health alert from Jinka, South Omo Zone. We have 8 patients presenting with high-grade fever, severe headache, and jaundice (yellowing of eyes). 3 cases were lab-confirmed as Yellow Fever this morning, while the remaining 5 are considered probable based on clinical alignment. All patients are from the same village near the Omo River.\n1                                                                          Konso Health Post: Cluster of 15 cases of acute watery diarrhea and severe vomiting detected in the last 24 hours. Initial investigation suggests a contaminated communal well. 10 cases are currently suspected and 5 are probable cholera. Immediate medical supplies needed.\n2                                                                                            Turmi Update: 4 individuals in a nomadic group showing signs of high fever and hemorrhagic spots. These are currently suspected cases of an unidentified viral fever. Movement tracking is difficult due to their migratory patterns in the South Omo region.\n3                                                                                             Arba Minch Surroundings: Local surveillance detected 22 cases of unusual skin lesions and itching among plantation workers. 18 are suspected and 4 have been confirmed by the regional clinic as a localized fungal outbreak exacerbated by recent flooding."
+    },
+    {
+        "session_id": "60a7eea0-7e2b-4df8-a624-bffc3e5de5ec",
+        "extracted_data": {
+            "location": "Jimma zone",
+            "symptoms": [
+                "Fever",
+                "vomiting"
+            ],
+            "cases": 4,
+            "date": "2 days ago",
+            "classification": "Suspected",
+            "additional_info": {
+                "environmental_context": "Started near local water source"
+            }
+        },
+        "validation": {
+            "valid": true,
+            "confidence": 0.85,
+            "issues": [
+                "Symptoms are non-specific; the absence of information regarding diarrhea makes it difficult to differentiate between various waterborne etiologies common in the Jimma zone, such as Cholera vs. Typhoid.",
+                "Small cluster size (4 cases) is realistic for early detection but lacks enough data to establish a definitive attack rate.",
+                "Missing demographic data (age and gender of the cases) which is critical for identifying specific exposure patterns.",
+                "Lack of clinical outcome data; it is unclear if the cases are hospitalized, recovering, or if any fatalities occurred.",
+                "Environmental context is helpful but requires more detail on the type of water source (e.g., river, well, or communal tap) to assess specific risk factors."
+            ]
+        },
+        "risk_analysis": {
+            "risk_level": "MEDIUM",
+            "confidence": "75%",
+            "possible_disease": "Enteric Infection (e.g., Typhoid Fever or early-stage Acute Watery Diarrhea)",
+            "reason": "The presentation of fever and vomiting in a cluster of 4 cases within a 48-hour window suggests a common-source exposure, likely related to contaminated water or food. From a clinical perspective, these symptoms are characteristic of early-stage enteric infections. While not currently exhibiting high-risk indicators like hemorrhaging or high mortality, the cluster formation warrants a medium risk rating due to the potential for rapid transmission."
+        },
+        "consensus": {
+            "final_risk_level": "LOW",
+            "average_confidence": 37.5,
+            "consensus_reached": true,
+            "agent_opinions": [
+                {
+                    "risk_level": "MEDIUM",
+                    "confidence": "75%",
+                    "possible_disease": "Enteric Infection (e.g., Typhoid Fever or early-stage Acute Watery Diarrhea)",
+                    "reason": "The presentation of fever and vomiting in a cluster of 4 cases within a 48-hour window suggests a common-source exposure, likely related to contaminated water or food. From a clinical perspective, these symptoms are characteristic of early-stage enteric infections. While not currently exhibiting high-risk indicators like hemorrhaging or high mortality, the cluster formation warrants a medium risk rating due to the potential for rapid transmission."
+                },
+                {
+                    "risk_level": "UNKNOWN",
+                    "confidence": "0%",
+                    "possible_disease": "Unknown",
+                    "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+                },
+                {
+                    "risk_level": "UNKNOWN",
+                    "confidence": "0%",
+                    "possible_disease": "Unknown",
+                    "reason": "Analysis failed: \u274c Gemini text generation failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+                },
+                {
+                    "risk_level": "MEDIUM",
+                    "confidence": "75%",
+                    "possible_disease": "Enteric Infection (e.g., Typhoid Fever or early-stage Acute Watery Diarrhea)",
+                    "reason": "A localized cluster of 4 cases presenting with fever and vomiting over a 48-hour period strongly indicates a common-source environmental exposure, likely related to contaminated water or food infrastructure. While specific water quality data is unavailable, Jimma's ecological profile and the simultaneous onset in multiple individuals suggest an environmental transmission route rather than isolated incidents. The lack of conflict and normal temperatures reduce the risk of a massive displaced-population outbreak, but the potential for further contamination of local water sources warrants a medium risk rating."
+                }
+            ],
+            "final_reasoning": "Consensus reached from multiple perspectives: MEDIUM: The presentation of fever and vomiting in a cluste... | UNKNOWN: Analysis failed: \u274c Gemini text generation failed: ... | UNKNOWN: Analysis failed: \u274c Gemini text generation failed: ... | MEDIUM: A localized cluster of 4 cases presenting with fev..."
+        },
+        "context_research": {
+            "location": "Jimma zone",
+            "security_status": "Data unavailable",
+            "water_quality": "Data unavailable",
+            "temperature": "Normal",
+            "conflict_zone": false,
+            "nearby_facilities": [],
+            "recent_news": [],
+            "last_updated": "2026-04-04T12:22:47.388791"
+        },
+        "alert": {
+            "title": "Health Alert",
+            "message": "Potential outbreak in Jimma zone. Risk level: LOW.",
+            "recommendations": [
+                "Seek medical attention",
+                "Follow local health guidelines"
+            ],
+            "prevention_strategy": null,
+            "why_urgent": null
+        },
+        "status": "pending",
+        "created_at": "2026-04-04 12:23:05.234631",
+        "timestamp": "2026-04-04 12:23:05.234631",
+        "raw_report": "Fever, vomiting, 4 people affected in Jimma zone. Started 2 days ago near local water source."
     },
     {
         "session_id": "b7aca314-44f6-4974-99a1-01e6b64364d6",
