@@ -62,8 +62,8 @@ async def verify_admin_user(email, password):
 
 async def main():
     # You can change these values or pass them as arguments
-    admin_email = "admin@aegis-lite.com"
-    admin_password = "SecureAdminPassword123!"
+    admin_email = "dagiteferi2011@gmail.com"
+    admin_password = "123456789"
     
     print("--- Aegis Lite Admin Creation Tool ---")
     

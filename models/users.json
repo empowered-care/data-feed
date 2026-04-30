@@ -43,5 +43,14 @@
         "role": "admin",
         "is_active": true,
         "created_at": "2026-04-04T02:35:45.703104"
+    },
+    {
+        "id": "1876003b-2640-4738-8f43-854b4e1c4c7d",
+        "email": "dagiteferi2011@gmail.com",
+        "hashed_password": "$2b$12$tzwAOxgLPuSHPX32ihmAuOgsmR9RkDbhKhsXeboMUfIMxwd/DGJc2",
+        "full_name": "System Administrator",
+        "role": "admin",
+        "is_active": true,
+        "created_at": "2026-05-01T00:04:56.928071"
     }
 ]
