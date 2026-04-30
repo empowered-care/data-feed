@@ -128,8 +128,8 @@ export default function AdminPage() {
     }
   };
 
-  const filteredUsers = users.filter(u => 
-    u.email.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredUsers = users.filter(u =>
+    u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (u.full_name && u.full_name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
@@ -148,7 +148,7 @@ export default function AdminPage() {
         {/* Left Column: Analysis Engines */}
         <div className="lg:col-span-12 space-y-8">
           <div className="grid md:grid-cols-2 gap-8">
-             {/* Analysis Control */}
+            {/* Analysis Control */}
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card rounded-xl p-8 space-y-6">
               <div className="flex items-center gap-4">
                 <div className="p-3 rounded-2xl bg-primary/10 text-primary">
@@ -176,8 +176,8 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <Button 
-                onClick={handleManualAnalysis} 
+              <Button
+                onClick={handleManualAnalysis}
                 className="w-full h-12 rounded-xl text-md font-bold gap-2 shadow-lg shadow-primary/20"
                 disabled={runningAnalysis || analysisStatus?.is_running}
               >
@@ -190,7 +190,7 @@ export default function AdminPage() {
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }} className="glass-card rounded-xl p-8 space-y-6">
               <div className="flex items-center gap-4">
                 <div className="p-3 rounded-2xl bg-primary/10 text-primary">
-                <Timer className="h-6 w-6" />
+                  <Timer className="h-6 w-6" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold">Automation Scheduler</h3>
@@ -202,8 +202,8 @@ export default function AdminPage() {
                 <div className="space-y-2">
                   <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Cron Expression</Label>
                   <div className="flex gap-2">
-                    <Input 
-                      value={cronExpression} 
+                    <Input
+                      value={cronExpression}
                       onChange={(e) => setCronExpression(e.target.value)}
                       placeholder="* * * * *"
                       className="font-mono h-11"
@@ -246,9 +246,9 @@ export default function AdminPage() {
                 {/* Search */}
                 <div className="relative w-64 hidden md:block">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search staff..." 
-                    className="pl-9 h-10 w-full rounded-xl bg-background/50" 
+                  <Input
+                    placeholder="Search staff..."
+                    className="pl-9 h-10 w-full rounded-xl bg-background/50"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -265,10 +265,10 @@ export default function AdminPage() {
                     <form onSubmit={handleInvite} className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="invite-email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Email Address</Label>
-                        <Input 
+                        <Input
                           id="invite-email"
-                          type="email" 
-                          value={inviteEmail} 
+                          type="email"
+                          value={inviteEmail}
                           onChange={(e) => setInviteEmail(e.target.value)}
                           placeholder="staff@hospital.com"
                           className="h-11"
@@ -306,9 +306,9 @@ export default function AdminPage() {
                     </div>
                     <div className="divide-y divide-border/30 max-h-[400px] overflow-y-auto custom-scrollbar">
                       {loadingUsers ? (
-                         <div className="p-12 text-center text-muted-foreground flex items-center justify-center gap-3">
-                           <Loader2 className="h-4 w-4 animate-spin" /> Loading team list...
-                         </div>
+                        <div className="p-12 text-center text-muted-foreground flex items-center justify-center gap-3">
+                          <Loader2 className="h-4 w-4 animate-spin" /> Loading team list...
+                        </div>
                       ) : filteredUsers.length === 0 ? (
                         <div className="p-12 text-center text-muted-foreground">
                           No team members found.
@@ -323,9 +323,9 @@ export default function AdminPage() {
                             <div className="col-span-4">
                               <span className={cn(
                                 "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border",
-                                u.role === 'admin' ? "bg-amber-500/10 text-amber-600 border-amber-500/20" : 
-                                u.role === 'data_entry' ? "bg-primary/10 text-primary border-primary/20" : 
-                                "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                                u.role === 'admin' ? "bg-amber-500/10 text-amber-600 border-amber-500/20" :
+                                  u.role === 'data_entry' ? "bg-primary/10 text-primary border-primary/20" :
+                                    "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                               )}>
                                 {u.role === 'admin' && <Shield className="h-3 w-3" />}
                                 {u.role === 'data_entry' && <ClipboardList className="h-3 w-3" />}
@@ -357,7 +357,7 @@ export default function AdminPage() {
           </div>
 
           {/* Outbreak Heatmap Preview */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-card rounded-2xl p-8 space-y-6">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="space-y-6">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-2xl bg-orange-500/10 text-orange-500">
                 <AlertTriangle className="h-6 w-6" />
@@ -367,16 +367,8 @@ export default function AdminPage() {
                 <p className="text-sm text-muted-foreground">Adjust risk weights based on geographic disease trends in Ethiopia</p>
               </div>
             </div>
-            
-            <div className="aspect-[16/9] w-full bg-background/50 rounded-2xl border border-border/50 overflow-hidden relative group">
-              <div className="absolute inset-0 z-10 bg-gradient-to-t from-background/80 to-transparent flex items-end p-8">
-                <div className="space-y-2">
-                  <p className="text-lg font-bold">Heatmap Integration</p>
-                  <p className="text-xs text-muted-foreground max-w-sm">
-                    Interactive region-by-region risk weighting dashboard. Click on regions to adjust their clinical suspicion score based on current local outbreaks.
-                  </p>
-                </div>
-              </div>
+
+            <div className="border-none shadow-xl shadow-primary/5 bg-background/50 backdrop-blur-sm border border-border/50 overflow-hidden relative group rounded-2xl">
               <EthiopiaMap />
             </div>
           </motion.div>

@@ -1,4 +1,5 @@
 import os
+import time
 import PIL.Image
 import google.generativeai as genai
 import json
@@ -18,8 +19,8 @@ class GeminiService:
         
         genai.configure(api_key=self.api_key)
 
-        # Using Gemini 3 Flash Preview as requested
-        self.models = ['gemini-3-flash-preview', 'gemini-2.0-flash', 'gemini-1.5-flash']
+        # Using currently supported active models
+        self.models = ['gemini-2.5-flash', 'gemini-2.0-flash']
 
     def process_medical_record(self, image_path) -> StructuredMedicalRecord:
         img = PIL.Image.open(image_path)
@@ -60,92 +61,100 @@ class GeminiService:
 
         last_error = None
         for model_name in self.models:
-            try:
-                print(f"🧠 Universal Scan: Using {model_name}...")
-                model = genai.GenerativeModel(model_name)
-                response = model.generate_content([prompt, img])
-                
-                # Check response text
-                if not response or not hasattr(response, 'text'):
-                     if response.candidates:
-                         raw_text = response.candidates[0].content.parts[0].text
-                     else:
-                         raise ValueError("Empty response")
-                else:
-                    raw_text = response.text
-                
-                print(f"\n📂 UNIVERSAL VISION RESULT:\n{raw_text}\n--------------------------\n")
+            for attempt in range(2): # Try to retry if rate limit is encountered
+                try:
+                    print(f"🧠 Universal Scan: Using {model_name}...")
+                    model = genai.GenerativeModel(model_name)
+                    response = model.generate_content([prompt, img])
+                    
+                    # Check response text
+                    if not response or not hasattr(response, 'text'):
+                         if response.candidates:
+                             raw_text = response.candidates[0].content.parts[0].text
+                         else:
+                             raise ValueError("Empty response")
+                    else:
+                        raw_text = response.text
+                    
+                    print(f"\n📂 UNIVERSAL VISION RESULT:\n{raw_text}\n--------------------------\n")
 
+                    if "```json" in raw_text:
+                        json_text = raw_text.split("```json")[1].split("```")[0].strip()
+                    elif "```" in raw_text:
+                        json_text = raw_text.split("```")[1].split("```")[0].strip()
+                    else:
+                        json_text = raw_text.strip()
+                    
+                    data = json.loads(json_text)
+                    
+                    return StructuredMedicalRecord(
+                        document_type=data.get("document_type", "Medical Record"),
+                        patient_name=data.get("patient_name", "Unknown"),
+                        patient_id=data.get("patient_id"),
+                        date_of_birth=data.get("date_of_birth"),
+                        gender=data.get("gender"),
+                        visit_date=data.get("visit_date"),
+                        referred_from=data.get("referred_from"),
+                        referred_to=data.get("referred_to"),
+                        diagnosis=data.get("diagnosis", []),
+                        symptoms=data.get("symptoms", []),
+                        investigations=data.get("investigations", []),
+                        medications=[Medication(**m) for m in data.get("medications", [])],
+                        allergies=data.get("allergies", []),
+                        notes=data.get("notes", ""),
+                        additional_info=data.get("additional_info", {}),
+                        confidence=float(data.get("confidence", 0.99))
+                    )
 
-                if "```json" in raw_text:
-                    json_text = raw_text.split("```json")[1].split("```")[0].strip()
-                elif "```" in raw_text:
-                    json_text = raw_text.split("```")[1].split("```")[0].strip()
-                else:
-                    json_text = raw_text.strip()
-                
-                data = json.loads(json_text)
-                
-                return StructuredMedicalRecord(
-                    document_type=data.get("document_type", "Medical Record"),
-                    patient_name=data.get("patient_name", "Unknown"),
-                    patient_id=data.get("patient_id"),
-
-                    date_of_birth=data.get("date_of_birth"),
-                    gender=data.get("gender"),
-                    visit_date=data.get("visit_date"),
-                    referred_from=data.get("referred_from"),
-                    referred_to=data.get("referred_to"),
-                    diagnosis=data.get("diagnosis", []),
-                    symptoms=data.get("symptoms", []),
-                    investigations=data.get("investigations", []),
-                    medications=[Medication(**m) for m in data.get("medications", [])],
-                    allergies=data.get("allergies", []),
-                    notes=data.get("notes", ""),
-                    additional_info=data.get("additional_info", {}),
-                    confidence=float(data.get("confidence", 0.99))
-                )
-
-
-            except Exception as e:
-                print(f"⚠️ {model_name} Error: {e}")
-                last_error = e
-                continue
-        
-        raise ValueError(f"❌ Gemini failed: {last_error}")
+                except Exception as e:
+                    print(f"⚠️ {model_name} Error (Attempt {attempt+1}): {e}")
+                    last_error = e
+                    if "429" in str(e):
+                        print("⏳ 429 Rate limit encountered. Pausing for 35 seconds...")
+                        time.sleep(35)
+                    else:
+                        break # Stop trying with the current model for non-rate-limit errors
+            continue # Attempt the next model in the list
+            
+        raise ValueError(f"❌ Gemini failed with all models: {last_error}")
 
     def generate_text(self, prompt: str) -> str:
         """Generate text response using Gemini for text-only prompts."""
         last_error = None
         for model_name in self.models:
-            try:
-                print(f"🧠 Text Generation: Using {model_name}...")
-                model = genai.GenerativeModel(model_name)
-                response = model.generate_content(prompt)
-                
-                if not response or not hasattr(response, 'text'):
-                    if response.candidates:
-                        raw_text = response.candidates[0].content.parts[0].text
+            for attempt in range(2):
+                try:
+                    print(f"🧠 Text Generation: Using {model_name}...")
+                    model = genai.GenerativeModel(model_name)
+                    response = model.generate_content(prompt)
+                    
+                    if not response or not hasattr(response, 'text'):
+                        if response.candidates:
+                            raw_text = response.candidates[0].content.parts[0].text
+                        else:
+                            raise ValueError("Empty response")
                     else:
-                        raise ValueError("Empty response")
-                else:
-                    raw_text = response.text
-                
-                # Extract JSON from code blocks if present
-                if "```json" in raw_text:
-                    json_text = raw_text.split("```json")[1].split("```")[0].strip()
-                elif "```" in raw_text:
-                    json_text = raw_text.split("```")[1].split("```")[0].strip()
-                else:
-                    json_text = raw_text.strip()
-                
-                return json_text
-                
-            except Exception as e:
-                print(f"⚠️ {model_name} Error: {e}")
-                last_error = e
-                continue
-        
+                        raw_text = response.text
+                    
+                    if "```json" in raw_text:
+                        json_text = raw_text.split("```json")[1].split("```")[0].strip()
+                    elif "```" in raw_text:
+                        json_text = raw_text.split("```")[1].split("```")[0].strip()
+                    else:
+                        json_text = raw_text.strip()
+                    
+                    return json_text
+                    
+                except Exception as e:
+                    print(f"⚠️ {model_name} Error (Attempt {attempt+1}): {e}")
+                    last_error = e
+                    if "429" in str(e):
+                        print("⏳ 429 Rate limit encountered. Pausing for 35 seconds...")
+                        time.sleep(35)
+                    else:
+                        break
+            continue
+            
         raise ValueError(f"❌ Gemini text generation failed: {last_error}")
 
     def generate_vision_text(self, image_path_or_bytes, prompt: str) -> str:
@@ -157,26 +166,30 @@ class GeminiService:
             
         last_error = None
         for model_name in self.models:
-            try:
-                print(f"🧠 Vision Scan: Using {model_name}...")
-                model = genai.GenerativeModel(model_name)
-                response = model.generate_content([prompt, img])
-                
-                if not response or not hasattr(response, 'text'):
-                     if response.candidates:
-                         raw_text = response.candidates[0].content.parts[0].text
-                     else:
-                         raise ValueError("Empty response")
-                else:
-                    raw_text = response.text
-                
-                return raw_text.strip()
-            except Exception as e:
-                print(f"⚠️ {model_name} Vision Error: {e}")
-                last_error = e
-                continue
-        
+            for attempt in range(2):
+                try:
+                    print(f"🧠 Vision Scan: Using {model_name}...")
+                    model = genai.GenerativeModel(model_name)
+                    response = model.generate_content([prompt, img])
+                    
+                    if not response or not hasattr(response, 'text'):
+                         if response.candidates:
+                             raw_text = response.candidates[0].content.parts[0].text
+                         else:
+                             raise ValueError("Empty response")
+                    else:
+                        raw_text = response.text
+                    
+                    return raw_text.strip()
+                    
+                except Exception as e:
+                    print(f"⚠️ {model_name} Vision Error (Attempt {attempt+1}): {e}")
+                    last_error = e
+                    if "429" in str(e):
+                        print("⏳ 429 Rate limit encountered. Pausing for 35 seconds...")
+                        time.sleep(35)
+                    else:
+                        break
+            continue
+            
         raise ValueError(f"❌ Gemini Vision failed: {last_error}")
-
-
-

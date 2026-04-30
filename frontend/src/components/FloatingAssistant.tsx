@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, X, Send, Bot, User, Loader2, Sparkles, Minimize2, Lightbulb, Maximize2, Copy, Check } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, User, Loader2, Sparkles, Lightbulb, Maximize2, Copy, Check, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
+import ReactMarkdown from 'react-markdown';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -119,8 +120,8 @@ export function FloatingAssistant() {
                    <Bot className="h-6 w-6" />
                  </div>
                  <div>
-                   <h3 className="font-black text-sm tracking-tight leading-none">Neural Link Active</h3>
-                   <span className="text-[10px] opacity-70 font-bold uppercase tracking-widest">Multi-Agent Intelligence</span>
+                   <h3 className="font-bold text-sm tracking-tight leading-none">AI Assistant</h3>
+                   <span className="text-[10px] opacity-70 font-medium uppercase tracking-widest">Data Analyst</span>
                  </div>
                </div>
                <div className="flex items-center gap-1 relative z-10">
@@ -186,29 +187,44 @@ export function FloatingAssistant() {
                       : "bg-background border border-border/80 rounded-tl-none prose prose-xs dark:prose-invert"
                   )}>
                     {m.role === 'user' ? (
-                      m.content
+                      <span>{m.content}</span>
                     ) : (
-                      <div className="whitespace-pre-wrap">{m.content}</div>
+                      <div className="
+                        [&_h1]:text-sm [&_h1]:font-black [&_h1]:mb-1 [&_h1]:mt-2
+                        [&_h2]:text-sm [&_h2]:font-black [&_h2]:mb-1 [&_h2]:mt-2
+                        [&_h3]:text-xs [&_h3]:font-black [&_h3]:mb-1 [&_h3]:mt-2
+                        [&_p]:mb-1.5 [&_p]:leading-relaxed
+                        [&_ul]:pl-4 [&_ul]:space-y-0.5 [&_ul]:mb-1.5
+                        [&_ol]:pl-4 [&_ol]:space-y-0.5 [&_ol]:mb-1.5
+                        [&_ul>li]:list-disc [&_ol>li]:list-decimal
+                        [&_li]:text-xs [&_li]:leading-relaxed
+                        [&_strong]:font-black [&_strong]:text-foreground
+                        [&_em]:italic [&_em]:text-foreground/80
+                        [&_code]:bg-muted [&_code]:px-1 [&_code]:rounded [&_code]:text-[10px] [&_code]:font-mono
+                        [&_blockquote]:border-l-2 [&_blockquote]:border-primary/40 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-muted-foreground
+                      ">
+                        <ReactMarkdown>{m.content}</ReactMarkdown>
+                      </div>
                     )}
                     {m.role === 'assistant' && (
                       <div className="mt-2 pt-2 border-t border-border/20 flex items-center justify-between">
                         {m.agent ? (
-                          <span className="text-[8px] font-black uppercase text-primary/60">
-                            Node: {m.agent}
-                          </span>
-                        ) : (
-                          <span />
-                        )}
-                        <button 
+                          <div className="flex items-center gap-1">
+                            <Activity className="h-2.5 w-2.5 text-primary/50" />
+                            <span className="text-[8px] font-black uppercase text-muted-foreground">
+                              {m.agent === 'location' ? 'Location Specialist' :
+                               m.agent === 'infection' ? 'Infection Specialist' :
+                               m.agent === 'history' ? 'History Specialist' : 'AI Assistant'}
+                            </span>
+                          </div>
+                        ) : <span />}
+                        <button
                           onClick={() => handleCopy(m.content, i)}
-                          className="text-muted-foreground hover:text-primary transition-colors hover:scale-110 flex items-center gap-1 text-[9px] uppercase font-bold"
-                          title="Copy response"
+                          className="flex items-center gap-1 text-[9px] uppercase font-bold text-muted-foreground hover:text-primary transition-colors"
                         >
-                          {copiedIndex === i ? (
-                            <><Check className="h-3 w-3 text-green-500" /> <span className="text-green-500">Copied</span></>
-                          ) : (
-                            <><Copy className="h-3 w-3" /> Copy</>
-                          )}
+                          {copiedIndex === i
+                            ? <><Check className="h-3 w-3 text-emerald-500" /><span className="text-emerald-500">Copied</span></>
+                            : <><Copy className="h-3 w-3" />Copy</>}
                         </button>
                       </div>
                     )}

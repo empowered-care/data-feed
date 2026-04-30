@@ -1,363 +1,437 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  Database, 
-  FileText, 
-  Shield, 
-  Droplets, 
-  Thermometer, 
-  AlertTriangle,
-  CheckCircle2,
-  Download,
-  ExternalLink,
-  MapPin,
-  Clock,
-  Info
+import {
+  ArrowLeft, Database, FileText, Shield, Droplets, Thermometer,
+  AlertTriangle, CheckCircle2, Download, ExternalLink, MapPin,
+  Clock, Info, Zap, Activity, ChevronDown, ChevronUp, Copy, Check
 } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { api } from '@/lib/api';
 import { RiskBadge } from '@/components/RiskBadge';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+
+function ExpandableText({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const LIMIT = 220;
+  const isLong = text.length > LIMIT;
+  return (
+    <div>
+      <p className="text-sm font-medium leading-relaxed text-foreground/85">
+        {expanded || !isLong ? text : `${text.slice(0, LIMIT)}…`}
+      </p>
+      {isLong && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="mt-2 flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-colors"
+        >
+          {expanded ? <><ChevronUp className="h-3 w-3" /> Show Less</> : <><ChevronDown className="h-3 w-3" /> Read More</>}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function Section({ title, icon, children, className }: { title: string; icon: React.ReactNode; children: React.ReactNode; className?: string }) {
+  return (
+    <div className={cn('bg-background/70 border border-border/40 rounded-2xl overflow-hidden shadow-sm', className)}>
+      <div className="flex items-center gap-2.5 px-6 py-4 border-b border-border/40 bg-muted/10">
+        <span className="text-primary">{icon}</span>
+        <h2 className="text-xs font-black uppercase tracking-widest text-foreground">{title}</h2>
+      </div>
+      <div className="p-6">{children}</div>
+    </div>
+  );
+}
 
 export default function RecordDetailsPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const { reports, setReports } = useAppStore();
   const [report, setReport] = useState<any>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (reports.length === 0) {
       api.getReports().then(data => {
         setReports(data);
-        const found = data.find((r: any) => r.session_id === sessionId);
-        setReport(found);
+        setReport(data.find((r: any) => r.session_id === sessionId));
       });
     } else {
-      const found = reports.find(r => r.session_id === sessionId);
-      setReport(found);
+      setReport(reports.find(r => r.session_id === sessionId));
     }
   }, [sessionId, reports, setReports]);
 
   if (!report) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-        <Database className="h-12 w-12 text-muted/20 animate-pulse" />
-        <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">Retrieving Intelligence record...</p>
+        <Database className="h-10 w-10 text-muted/20 animate-pulse" />
+        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Loading record...</p>
       </div>
     );
   }
 
   const exportRecordCSV = () => {
-    const headers = ["Field", "Value"];
     const rows = [
-      ["Session ID", report.session_id],
-      ["Location", report.extracted_data.location],
-      ["Cases", report.extracted_data.cases],
-      ["Date", report.extracted_data.date || "N/A"],
-      ["Symptoms", report.extracted_data.symptoms.join(", ")],
-      ["Disease Match", report.risk_analysis?.possible_disease || "Unknown"],
-      ["Risk Level", report.risk_analysis?.risk_level || "Unknown"],
-      ["Validation", report.validation?.valid ? "Valid" : "Invalid"],
-      ["Validation Confidence", `${Math.round((report.validation?.confidence || 0) * 100)}%`],
-      ["Consensus Reasoning", report.consensus?.final_reasoning || report.risk_analysis?.reason],
-      ["Water Quality", report.context_research?.water_quality || "N/A"],
-      ["Security Status", report.context_research?.security_status || "N/A"],
-      ["Conflict Zone", report.context_research?.conflict_zone ? "Yes" : "No"],
-      ["Raw Report", report.raw_report || "N/A"]
+      ['Field', 'Value'],
+      ['Session ID', report.session_id],
+      ['Location', report.extracted_data.location],
+      ['Cases', report.extracted_data.cases],
+      ['Date', report.extracted_data.date || 'N/A'],
+      ['Symptoms', report.extracted_data.symptoms.join(', ')],
+      ['Disease Match', report.risk_analysis?.possible_disease || 'Unknown'],
+      ['Risk Level', report.risk_analysis?.risk_level || 'Unknown'],
+      ['Validation', report.validation?.valid ? 'Valid' : 'Invalid'],
+      ['Confidence', `${Math.round((report.validation?.confidence || 0) * 100)}%`],
+      ['Raw Report', report.raw_report || 'N/A'],
     ];
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = `record_${report.session_id}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+  };
 
-    const csvContent = [
-      headers.join(","),
-      ...rows.map(row => row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))
-    ].join("\n");
+  const copyRaw = () => {
+    const cleaned = (report.raw_report || '').split('\n').map((l: string) => l.trim().replace(/\s{2,}/g, ' ')).filter(Boolean).join('\n');
+    navigator.clipboard.writeText(cleaned);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `record_${report.session_id}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const riskLevel = report.risk_analysis?.risk_level || 'UNKNOWN';
+  const isVerified = report.status === 'approved';
+  const confidence = Math.round(report.consensus?.average_confidence || (report.validation?.confidence || 0) * 100);
+
+  // Parse consensus reasoning into individual agent opinions
+  const reasoningText = report.consensus?.final_reasoning || report.risk_analysis?.reason || '';
+  const reasoningPoints = reasoningText
+    .replace(/Consensus reached from multiple perspectives:\s*/i, '')
+    .split(' | ')
+    .map((s: string) => {
+      const m = s.match(/^(HIGH|MEDIUM|LOW|UNKNOWN):\s*(.*)/is);
+      return m ? { level: m[1].toUpperCase(), text: m[2].trim() } : { level: null, text: s.trim() };
+    })
+    .filter((p: any) => p.text);
+
+  const levelStyle = (level: string | null) => {
+    if (level === 'HIGH') return { border: 'border-l-red-500', badge: 'bg-red-500/10 text-red-500 border-red-500/30' };
+    if (level === 'MEDIUM') return { border: 'border-l-amber-500', badge: 'bg-amber-500/10 text-amber-500 border-amber-500/30' };
+    if (level === 'LOW') return { border: 'border-l-emerald-500', badge: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30' };
+    return { border: 'border-l-border', badge: 'bg-muted text-muted-foreground border-border' };
   };
 
   return (
-    <div className="space-y-8 pb-20 max-w-7xl mx-auto">
+    <div className="space-y-6 pb-16 max-w-7xl mx-auto">
+
+      {/* ── TOP NAV ─────────────────────────────── */}
       <div className="flex items-center justify-between">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/vault')}
-          className="gap-2 font-bold uppercase tracking-widest text-[10px] hover:bg-primary/10 hover:text-primary transition-all"
-        >
+        <Button variant="ghost" onClick={() => navigate('/vault')}
+          className="gap-2 text-xs font-bold hover:bg-muted/50 rounded-xl">
           <ArrowLeft className="h-4 w-4" /> Back to Vault
         </Button>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={exportRecordCSV}
-            className="gap-2 font-black uppercase tracking-widest text-[10px] h-10"
-          >
-            <Download className="h-4 w-4" /> Export Single CSV
+          <Button variant="outline" size="sm" onClick={exportRecordCSV}
+            className="gap-2 text-xs font-bold rounded-xl h-9">
+            <Download className="h-3.5 w-3.5" /> Export CSV
           </Button>
-          <Button 
-            size="sm" 
+          <Button size="sm"
             onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(report.extracted_data.location)}`, '_blank')}
-            className="gap-2 font-black uppercase tracking-widest text-[10px] h-10"
-          >
-            <ExternalLink className="h-4 w-4" /> View in Maps
+            className="gap-2 text-xs font-bold rounded-xl h-9">
+            <ExternalLink className="h-3.5 w-3.5" /> View in Maps
           </Button>
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border/50 pb-8">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <Badge className="bg-primary/10 text-primary border-primary/20 font-black px-3 py-1 uppercase tracking-widest text-[9px]">
-              INTEL_ID: {report.session_id.split('-')[0]}
-            </Badge>
-            <RiskBadge level={report.risk_analysis?.risk_level} />
+      {/* ── HERO HEADER ─────────────────────────── */}
+      <div className="bg-background/70 border border-border/40 rounded-2xl p-6 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                ID: {report.session_id.split('-')[0]}
+              </span>
+              <RiskBadge level={riskLevel} />
+              <span className={cn('text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border flex items-center gap-1',
+                isVerified ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-amber-500/10 text-amber-600 border-amber-500/20')}>
+                {isVerified ? <CheckCircle2 className="h-3 w-3" /> : <Info className="h-3 w-3" />}
+                {isVerified ? 'Verified' : 'Pending Review'}
+              </span>
+            </div>
+            <h1 className="text-3xl font-black tracking-tight text-foreground">{report.extracted_data.location}</h1>
+            <div className="flex flex-wrap items-center gap-4 mt-2">
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                <Clock className="h-3.5 w-3.5 text-primary" />
+                Ingested: {report.created_at ? new Date(report.created_at).toLocaleString() : 'Recently'}
+              </span>
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                <MapPin className="h-3.5 w-3.5 text-primary" />
+                Event Date: {report.extracted_data.date || 'Not specified'}
+              </span>
+            </div>
           </div>
-          <h1 className="text-5xl font-black tracking-tighter text-foreground uppercase">
-            {report.extracted_data.location}
-          </h1>
-          <div className="flex items-center gap-4 mt-3 text-muted-foreground">
-            <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-tight">
-              <Clock className="h-3.5 w-3.5 text-primary" />
-              Ingested: {report.created_at ? new Date(report.created_at).toLocaleString() : 'Recently'}
-            </span>
-            <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-tight">
-              <MapPin className="h-3.5 w-3.5 text-primary" />
-              Event Date: {report.extracted_data.date || 'N/A'}
-            </span>
-          </div>
-        </div>
-        
-        <div className="flex flex-col items-end gap-2">
-          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Verification Status</div>
-          <div className={cn(
-            "px-6 py-3 rounded-2xl border-2 flex items-center gap-3 font-black uppercase tracking-widest text-xs shadow-lg",
-            report.status === 'approved' ? "bg-health/5 border-health/20 text-health shadow-health/10" : "bg-muted/50 border-border text-muted-foreground"
-          )}>
-            {report.status === 'approved' ? <CheckCircle2 className="h-5 w-5" /> : <Info className="h-5 w-5" />}
-            {report.status || 'Pending'}
+
+          {/* Confidence meter */}
+          <div className="shrink-0 flex flex-col items-center gap-2 px-6 py-4 bg-muted/30 rounded-2xl border border-border/40 min-w-[140px]">
+            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">AI Confidence</p>
+            <p className="text-4xl font-black text-primary tabular-nums">{confidence}%</p>
+            <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+              <motion.div initial={{ width: 0 }} animate={{ width: `${confidence}%` }}
+                transition={{ duration: 1, ease: 'easeOut' }}
+                className={cn('h-full rounded-full', confidence >= 80 ? 'bg-emerald-500' : confidence >= 50 ? 'bg-amber-500' : 'bg-red-500')} />
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          {/* Main Intelligence Section */}
-          <Card className="border-none shadow-2xl shadow-primary/5 bg-background/50 backdrop-blur-md border border-border/50 rounded-[2.5rem] overflow-hidden">
-            <CardHeader className="bg-muted/30 border-b border-border/50 p-8">
-              <CardTitle className="text-xl font-black uppercase tracking-tight flex items-center gap-3">
-                <FileText className="h-6 w-6 text-primary" />
-                Diagnostic Extraction
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-8 space-y-10">
-              <div className="grid md:grid-cols-2 gap-10">
-                <div className="space-y-4">
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest border-l-4 border-primary pl-3">Detected Pathology</p>
-                  <p className="text-3xl font-black tracking-tighter text-primary uppercase">
-                    {report.risk_analysis?.possible_disease || 'Unidentified'}
-                  </p>
-                  <div className="p-4 bg-muted/20 rounded-2xl border border-border/50">
-                    <p className="text-[9px] font-bold text-muted-foreground uppercase mb-1">Impact Assessment</p>
-                    <p className="text-lg font-black">{report.extracted_data.cases} Confirmed Cases</p>
-                  </div>
+      {/* ── MAIN GRID ───────────────────────────── */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+
+          {/* Diagnostic Extraction */}
+          <Section title="Diagnostic Extraction" icon={<FileText className="h-4 w-4" />}>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Detected Pathology</p>
+                  <p className="text-2xl font-black text-primary">{report.risk_analysis?.possible_disease || 'Unidentified'}</p>
                 </div>
-                <div className="space-y-4">
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest border-l-4 border-primary pl-3">Clinical Signs</p>
+                <div className="p-4 bg-muted/20 rounded-xl border border-border/40">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase mb-1">Reported Cases</p>
+                  <p className="text-3xl font-black tabular-nums">{report.extracted_data.cases}</p>
+                </div>
+                <div className="p-4 bg-muted/20 rounded-xl border border-border/40">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase mb-1">Classification</p>
+                  <p className="text-sm font-bold">{report.extracted_data.classification || 'Suspected'}</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-2">Clinical Signs</p>
                   <div className="flex flex-wrap gap-2">
                     {report.extracted_data.symptoms.map((s: string) => (
-                      <Badge key={s} variant="secondary" className="px-4 py-2 rounded-xl font-bold uppercase text-[10px] bg-background border border-border/50">
+                      <Badge key={s} variant="secondary"
+                        className="px-3 py-1.5 rounded-xl font-bold text-[10px] bg-background border border-border/50">
                         {s}
                       </Badge>
                     ))}
                   </div>
                 </div>
-              </div>
-
-              <div className="space-y-4">
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest border-l-4 border-primary pl-3">Multi-Agent Consensus Reasoning</p>
-                <div className="p-6 bg-primary/5 rounded-[2rem] border border-primary/10 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <Shield className="h-20 w-20 text-primary" />
+                <div className="p-4 bg-muted/20 rounded-xl border border-border/40">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase mb-1">Validation Engine</p>
+                  <div className="flex items-center gap-2">
+                    {report.validation?.valid
+                      ? <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                      : <Info className="h-5 w-5 text-red-500" />}
+                    <span className={cn('text-sm font-black',
+                      report.validation?.valid ? 'text-emerald-600' : 'text-red-500')}>
+                      {report.validation?.valid ? 'PASSED' : 'FAILED'}
+                    </span>
+                    <span className="text-xs text-muted-foreground ml-auto">
+                      {Math.round((report.validation?.confidence || 0) * 100)}%
+                    </span>
                   </div>
-                  <p className="text-sm font-medium leading-relaxed italic text-foreground/90 relative z-10">
-                    "{report.consensus?.final_reasoning || report.risk_analysis?.reason}"
-                  </p>
-                  {report.consensus?.average_confidence && (
-                    <div className="mt-4 flex items-center gap-2 relative z-10">
-                      <div className="h-1.5 flex-1 bg-muted rounded-full overflow-hidden">
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: `${report.consensus.average_confidence}%` }}
-                          className="h-full bg-primary"
-                        />
-                      </div>
-                      <span className="text-[10px] font-black text-primary">{Math.round(report.consensus.average_confidence)}% CONFIDENCE</span>
-                    </div>
+                  {report.validation?.issues?.length > 0 && (
+                    <ul className="mt-2 space-y-1">
+                      {report.validation.issues.map((issue: string, i: number) => (
+                        <li key={i} className="text-[10px] text-muted-foreground flex items-start gap-1.5">
+                          <span className="h-1.5 w-1.5 rounded-full bg-amber-500 mt-1 shrink-0" />{issue}
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </Section>
 
-          {/* Raw Data Section (The CSV-like display) */}
-          <Card className="border-none shadow-2xl shadow-primary/5 bg-background/50 backdrop-blur-md border border-border/50 rounded-[2.5rem] overflow-hidden">
-            <CardHeader className="bg-black text-white p-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl font-black uppercase tracking-tight flex items-center gap-3">
-                    <Database className="h-6 w-6 text-green-500" />
-                    Full Signal Record
-                  </CardTitle>
-                  <CardDescription className="text-white/50 font-bold uppercase text-[9px] tracking-widest mt-1">Raw Spectral Archive Table</CardDescription>
+          {/* Analysis & Consensus */}
+          <Section title="Multi-Agent Analysis & Consensus" icon={<Activity className="h-4 w-4" />}>
+            <div className="space-y-3">
+              {reasoningPoints.length > 0 ? reasoningPoints.map((point: any, i: number) => {
+                const style = levelStyle(point.level);
+                return (
+                  <div key={i} className={cn('border-l-4 pl-4 py-3 pr-4 bg-muted/10 rounded-r-xl', style.border)}>
+                    <div className="flex items-start gap-3">
+                      {point.level && (
+                        <span className={cn('text-[9px] font-black uppercase px-2 py-0.5 rounded-full border shrink-0 mt-0.5', style.badge)}>
+                          {point.level}
+                        </span>
+                      )}
+                      <ExpandableText text={point.text} />
+                    </div>
+                  </div>
+                );
+              }) : (
+                <p className="text-sm text-muted-foreground italic">No consensus reasoning available.</p>
+              )}
+            </div>
+            {report.consensus?.average_confidence && (
+              <div className="mt-4 pt-4 border-t border-border/40 flex items-center gap-3">
+                <div className="h-1.5 flex-1 bg-muted rounded-full overflow-hidden">
+                  <motion.div initial={{ width: 0 }} animate={{ width: `${report.consensus.average_confidence}%` }}
+                    className="h-full bg-primary" />
                 </div>
+                <span className="text-xs font-black text-primary whitespace-nowrap">{Math.round(report.consensus.average_confidence)}% Overall Confidence</span>
               </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs font-mono">
-                  <tbody className="divide-y divide-border/20">
-                    {[
-                      { key: "INTELLIGENCE_ID", value: report.session_id },
-                      { key: "PRIMARY_LOCATION", value: report.extracted_data.location },
-                      { key: "CASE_COUNT", value: report.extracted_data.cases },
-                      { key: "SIGNAL_DATE", value: report.extracted_data.date || "NULL" },
-                      { key: "PATHOLOGY_MATCH", value: report.risk_analysis?.possible_disease || "UNKNOWN" },
-                      { key: "THREAT_LEVEL", value: report.risk_analysis?.risk_level || "UNKNOWN" },
-                      { key: "VALIDATION_ENGINE", value: report.validation?.valid ? "PASS" : "FAIL" },
-                      { key: "CONFIDENCE_SCORE", value: `${Math.round((report.validation?.confidence || 0) * 100)}%` },
-                      { key: "RESEARCH_NODE_STATUS", value: report.context_research ? "ACTIVE" : "INACTIVE" },
-                      { key: "CONFLICT_ZONE_MARKER", value: report.context_research?.conflict_zone ? "TRUE" : "FALSE" },
-                      { key: "WATER_QUALITY_LOG", value: report.context_research?.water_quality || "NO_DATA" },
-                    ].map((row, i) => (
-                      <tr key={row.key} className={cn(i % 2 === 0 ? "bg-muted/10" : "bg-transparent", "hover:bg-primary/5 transition-colors")}>
-                        <td className="px-8 py-4 font-black text-muted-foreground w-1/3 border-r border-border/10 uppercase tracking-tighter">{row.key}</td>
-                        <td className="px-8 py-4 text-foreground font-bold">{row.value}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
+            )}
+          </Section>
 
-          {/* Raw Signal Text */}
-          <Card className="border-none shadow-2xl shadow-primary/5 bg-black/95 rounded-[2.5rem] overflow-hidden">
-            <CardHeader className="p-8 border-b border-white/10">
-              <CardTitle className="text-lg font-black text-green-500 uppercase tracking-widest flex items-center gap-3">
-                <Zap className="h-5 w-5" />
-                Raw Transmission Stream
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-8">
-              <div className="bg-black p-6 rounded-2xl border border-white/5 font-mono text-[11px] leading-relaxed text-green-400 overflow-auto max-h-[400px] scrollbar-thin">
-                {report.raw_report || "No raw transmission data found in this buffer."}
+          {/* Data Record Table */}
+          <Section title="Full Signal Record" icon={<Database className="h-4 w-4" />}>
+            <div className="overflow-x-auto rounded-xl border border-border/40">
+              <table className="w-full text-xs">
+                <tbody className="divide-y divide-border/30">
+                  {[
+                    { key: 'Intelligence ID', value: report.session_id },
+                    { key: 'Location', value: report.extracted_data.location },
+                    { key: 'Case Count', value: report.extracted_data.cases },
+                    { key: 'Event Date', value: report.extracted_data.date || '—' },
+                    { key: 'Pathology Match', value: report.risk_analysis?.possible_disease || 'Unknown' },
+                    { key: 'Threat Level', value: report.risk_analysis?.risk_level || 'Unknown' },
+                    { key: 'Validation Result', value: report.validation?.valid ? '✅ PASS' : '❌ FAIL' },
+                    { key: 'Confidence Score', value: `${Math.round((report.validation?.confidence || 0) * 100)}%` },
+                    { key: 'Research Node', value: report.context_research ? 'Active' : 'Inactive' },
+                    { key: 'Conflict Zone', value: report.context_research?.conflict_zone ? 'Yes ⚠️' : 'No' },
+                    { key: 'Water Quality', value: report.context_research?.water_quality || '—' },
+                    { key: 'Temperature', value: report.context_research?.temperature || '—' },
+                  ].map((row, i) => (
+                    <tr key={row.key} className={cn('hover:bg-primary/5 transition-colors', i % 2 === 0 ? 'bg-muted/5' : '')}>
+                      <td className="px-4 py-3 font-black text-muted-foreground w-2/5 border-r border-border/30 text-[10px] uppercase tracking-wider">{row.key}</td>
+                      <td className="px-4 py-3 font-medium text-foreground">{String(row.value)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Section>
+
+          {/* Raw Transmission */}
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-xl">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-green-500" />
+                <span className="text-xs font-black uppercase tracking-widest text-green-500">Raw Transmission Stream</span>
               </div>
-            </CardContent>
-          </Card>
+              <button onClick={copyRaw}
+                className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all border',
+                  copied ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:bg-zinc-700')}>
+                {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                {copied ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
+            <div className="p-5 font-mono text-[11px] leading-relaxed text-green-400 overflow-auto max-h-80">
+              {report.raw_report
+                ? report.raw_report.split('\n').map((l: string) => l.trim().replace(/\s{2,}/g, ' ')).filter(Boolean).join('\n\n')
+                : 'No raw transmission data in this buffer.'}
+            </div>
+          </div>
         </div>
 
-        {/* Sidebar Info */}
-        <div className="space-y-8">
+        {/* ── SIDEBAR ─────────────────────────── */}
+        <div className="space-y-6">
+
+          {/* Environmental Intel */}
           {report.context_research && (
-            <Card className="border-none shadow-2xl shadow-primary/5 bg-gradient-to-br from-background to-primary/5 rounded-[2.5rem] border border-primary/10 overflow-hidden">
-              <CardHeader className="p-8">
-                <CardTitle className="text-lg font-black uppercase tracking-tight flex items-center gap-2 text-primary">
-                  <Shield className="h-5 w-5" />
-                  Environmental Intel
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-8 pt-0 space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-background rounded-2xl border border-border/50">
-                    <p className="text-[8px] font-black text-muted-foreground uppercase mb-1 flex items-center gap-1">
-                      <Droplets className="h-3 w-3 text-primary" /> Water
+            <Section title="Environmental Intel" icon={<Shield className="h-4 w-4" />}>
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { label: 'Water Quality', value: report.context_research.water_quality, icon: <Droplets className="h-3.5 w-3.5 text-blue-500" />, color: 'text-blue-600' },
+                    { label: 'Temperature', value: report.context_research.temperature, icon: <Thermometer className="h-3.5 w-3.5 text-orange-500" />, color: 'text-orange-600' },
+                  ].map(d => (
+                    <div key={d.label} className="p-3 bg-muted/20 rounded-xl border border-border/40">
+                      <div className="flex items-center gap-1 mb-1">{d.icon}<span className="text-[9px] font-black uppercase text-muted-foreground">{d.label}</span></div>
+                      <p className="text-xs font-bold">{d.value || '—'}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className={cn('flex items-center gap-3 p-3 rounded-xl border',
+                  report.context_research.conflict_zone ? 'bg-red-500/5 border-red-500/20' : 'bg-emerald-500/5 border-emerald-500/20')}>
+                  <Shield className={cn('h-4 w-4 shrink-0', report.context_research.conflict_zone ? 'text-red-500' : 'text-emerald-500')} />
+                  <div>
+                    <p className="text-[9px] font-black uppercase text-muted-foreground">Security Status</p>
+                    <p className={cn('text-xs font-bold', report.context_research.conflict_zone ? 'text-red-600' : 'text-emerald-600')}>
+                      {report.context_research.conflict_zone ? 'Active Conflict Zone' : 'Stable Region'}
                     </p>
-                    <p className="text-[10px] font-black uppercase">{report.context_research.water_quality}</p>
-                  </div>
-                  <div className="p-4 bg-background rounded-2xl border border-border/50">
-                    <p className="text-[8px] font-black text-muted-foreground uppercase mb-1 flex items-center gap-1">
-                      <Thermometer className="h-3 w-3 text-orange-500" /> Temperature
-                    </p>
-                    <p className="text-[10px] font-black uppercase">{report.context_research.temperature}</p>
                   </div>
                 </div>
-                
-                <div className="p-4 bg-background rounded-2xl border border-border/50">
-                  <p className="text-[8px] font-black text-muted-foreground uppercase mb-2 flex items-center gap-1">
-                    <Info className="h-3 w-3 text-primary" /> Web Narrative Context
-                  </p>
+
+                <div className="p-3 bg-muted/20 rounded-xl border border-border/40">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase mb-1.5">Security Narrative</p>
                   <p className="text-xs font-medium text-foreground/80 leading-relaxed italic">
                     "{report.context_research.security_status}"
                   </p>
                 </div>
 
                 {report.context_research.recent_news?.length > 0 && (
-                  <div className="space-y-3">
-                    <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Recent Headlines</p>
+                  <div>
+                    <p className="text-[9px] font-black text-muted-foreground uppercase mb-2">Recent Headlines</p>
                     <div className="space-y-2">
                       {report.context_research.recent_news.map((news: string, i: number) => (
-                        <div key={i} className="flex gap-2 text-[10px] font-medium leading-tight">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary mt-1 shrink-0" />
+                        <div key={i} className="flex gap-2 text-[10px] font-medium leading-snug text-foreground/80">
+                          <span className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
                           {news}
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </Section>
           )}
 
-          <Card className="border-none shadow-2xl shadow-primary/5 bg-risk-high/5 rounded-[2.5rem] border border-risk-high/10 overflow-hidden">
-            <CardHeader className="p-8">
-              <CardTitle className="text-lg font-black uppercase tracking-tight flex items-center gap-2 text-risk-high">
-                <AlertTriangle className="h-5 w-5" />
-                Response Protocols
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-8 pt-0 space-y-4">
-              {report.alert?.recommendations.map((rec: string, i: number) => (
-                <div key={i} className="flex gap-3 p-4 bg-background rounded-2xl border border-risk-high/10 shadow-sm transition-all hover:translate-x-1">
-                  <div className="h-6 w-6 rounded-lg bg-risk-high/10 text-risk-high flex items-center justify-center shrink-0 font-black text-[10px]">
-                    {i+1}
+          {/* Response Protocols */}
+          {report.alert?.recommendations?.length > 0 && (
+            <Section title="Response Protocols" icon={<AlertTriangle className="h-4 w-4" />}>
+              <div className="space-y-2">
+                {report.alert.recommendations.map((rec: string, i: number) => (
+                  <div key={i} className="flex items-start gap-3 p-3 bg-muted/20 rounded-xl border border-border/40 hover:bg-muted/40 transition-colors">
+                    <div className="h-5 w-5 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center shrink-0 font-black text-[9px]">
+                      {i + 1}
+                    </div>
+                    <p className="text-xs font-medium leading-snug">{rec}</p>
                   </div>
-                  <p className="text-[11px] font-bold leading-tight">{rec}</p>
+                ))}
+              </div>
+            </Section>
+          )}
+
+          {/* Alert Summary */}
+          {report.alert && (
+            <Section title="Alert Summary" icon={<Info className="h-4 w-4" />}>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[9px] font-black text-muted-foreground uppercase mb-1">Alert Title</p>
+                  <p className="text-sm font-bold">{report.alert.title}</p>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
+                {report.alert.message && (
+                  <div>
+                    <p className="text-[9px] font-black text-muted-foreground uppercase mb-1">Message</p>
+                    <p className="text-xs font-medium text-foreground/80 leading-relaxed">{report.alert.message}</p>
+                  </div>
+                )}
+                {report.alert.why_urgent && (
+                  <div className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+                    <p className="text-[9px] font-black text-amber-600 uppercase mb-1">Why Urgent</p>
+                    <p className="text-xs font-medium text-foreground/80 leading-relaxed">{report.alert.why_urgent}</p>
+                  </div>
+                )}
+                {report.alert.prevention_strategy && (
+                  <div className="p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl">
+                    <p className="text-[9px] font-black text-emerald-600 uppercase mb-1">Prevention Strategy</p>
+                    <p className="text-xs font-medium text-foreground/80 leading-relaxed">{report.alert.prevention_strategy}</p>
+                  </div>
+                )}
+              </div>
+            </Section>
+          )}
         </div>
       </div>
     </div>
-  );
-}
-
-// Minimal icons for internal use
-function Zap({ className }: { className?: string }) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width="24" height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <path d="M4 14.899 17.656 3.101a.5.5 0 0 1 .83.518l-3.328 10.28a.5.5 0 0 0 .474.654H20a.5.5 0 0 1 .344.863l-13.656 11.798a.5.5 0 0 1-.83-.518l3.328-10.28a.5.5 0 0 0-.474-.654H4a.5.5 0 0 1-.344-.863Z" />
-    </svg>
   );
 }

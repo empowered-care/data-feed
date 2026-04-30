@@ -385,7 +385,7 @@ class SuperAgent:
         avg_conf = total_confidence / len(opinions)
         
         final_reasoning = "Consensus reached from multiple perspectives: " + \
-                        " | ".join([f"{op.risk_level}: {op.reason[:50]}..." for op in opinions])
+                        " | ".join([f"{op.risk_level}: {op.reason}" for op in opinions])
         
         return ConsensusResult(
             final_risk_level=final_risk,
