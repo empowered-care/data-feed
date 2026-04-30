@@ -1,15 +1,122 @@
 import { Link } from 'react-router-dom';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import {
   Shield, Activity, Zap, Users, ArrowRight, CheckCircle2, LogIn,
   Brain, FileSearch, AlertTriangle, BarChart3, Bot, Clock, Cpu,
   Globe, HeartPulse, Microscope, Stethoscope, TrendingUp, Target, TrendingDown,
+  ChevronRight, Database, Search, FileText, Lock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState, useRef } from 'react';
 import { api } from '@/lib/api';
 import { useAppStore } from '@/store/appStore';
 import { useAuthStore } from '@/store/authStore';
+
+// --- Sub-components for a more professional feel ---
+
+function AppMockup() {
+  return (
+    <div className="relative w-full max-w-2xl mx-auto lg:mx-0">
+      {/* Decorative background glow */}
+      <div className="absolute -inset-4 bg-gradient-to-tr from-primary/20 to-accent/20 blur-2xl rounded-[2rem] opacity-50 dark:opacity-30" />
+      
+      {/* Main Window Frame */}
+      <div className="relative bg-card border border-border shadow-2xl rounded-xl overflow-hidden flex flex-col aspect-[4/3]">
+        {/* Window Header */}
+        <div className="h-10 border-b border-border bg-muted/30 flex items-center px-4 justify-between">
+          <div className="flex gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-destructive/40" />
+            <div className="w-2.5 h-2.5 rounded-full bg-amber-400/40" />
+            <div className="w-2.5 h-2.5 rounded-full bg-health/40" />
+          </div>
+          <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Empowered Care v1.0</div>
+          <div className="w-12" /> {/* Spacer */}
+        </div>
+
+        {/* Window Content */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Sidebar Mockup */}
+          <div className="w-16 border-r border-border bg-muted/10 flex flex-col items-center py-4 gap-4">
+            <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center"><Search className="h-4 w-4 text-primary" /></div>
+            <div className="w-8 h-8 rounded bg-muted/40 flex items-center justify-center"><Database className="h-4 w-4 text-muted-foreground" /></div>
+            <div className="w-8 h-8 rounded bg-muted/40 flex items-center justify-center"><Users className="h-4 w-4 text-muted-foreground" /></div>
+            <div className="mt-auto w-8 h-8 rounded bg-muted/40 flex items-center justify-center"><Lock className="h-4 w-4 text-muted-foreground" /></div>
+          </div>
+
+          {/* Main Dashboard Content Mockup */}
+          <div className="flex-1 p-6 space-y-6 overflow-y-auto">
+            <div className="flex justify-between items-end">
+              <div className="space-y-1.5">
+                <div className="h-3 w-32 bg-foreground/10 rounded-full" />
+                <div className="h-2 w-20 bg-muted-foreground/20 rounded-full" />
+              </div>
+              <div className="h-8 w-24 bg-primary rounded-lg shadow-lg shadow-primary/20 flex items-center justify-center">
+                <div className="w-12 h-1.5 bg-primary-foreground/30 rounded-full" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="h-24 rounded-xl border border-border bg-muted/5 p-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <div className="w-8 h-2 bg-primary/20 rounded-full" />
+                  <Activity className="h-3 w-3 text-primary/40" />
+                </div>
+                <div className="h-5 w-16 bg-foreground/10 rounded-md" />
+                <div className="h-1.5 w-full bg-muted/40 rounded-full" />
+              </div>
+              <div className="h-24 rounded-xl border border-border bg-muted/5 p-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <div className="w-8 h-2 bg-health/20 rounded-full" />
+                  <Target className="h-3 w-3 text-health/40" />
+                </div>
+                <div className="h-5 w-16 bg-foreground/10 rounded-md" />
+                <div className="h-1.5 w-full bg-muted/40 rounded-full" />
+              </div>
+            </div>
+
+            {/* List Mockup */}
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-border/40 bg-card/50">
+                  <div className="w-9 h-9 rounded-lg bg-muted/20 flex items-center justify-center">
+                    <FileText className="h-4 w-4 text-muted-foreground/30" />
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-2 w-3/4 bg-muted-foreground/20 rounded-full" />
+                    <div className="h-1.5 w-1/2 bg-muted-foreground/10 rounded-full" />
+                  </div>
+                  <div className="px-2 py-1 rounded-full bg-health/10 border border-health/20">
+                    <div className="w-8 h-1 bg-health/40 rounded-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Floating Badge Mockup */}
+      <motion.div 
+        animate={{ y: [0, -10, 0] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute -right-6 top-1/4 glass-card p-4 rounded-xl shadow-xl space-y-2 max-w-[180px]"
+      >
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-health animate-pulse" />
+          <span className="text-[10px] font-bold uppercase text-muted-foreground">Live Detection</span>
+        </div>
+        <p className="text-xs font-semibold">New Signal: Amhara Region</p>
+        <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+          <motion.div 
+            animate={{ width: ["0%", "100%", "100%"] }}
+            transition={{ duration: 3, repeat: Infinity }}
+            className="h-full bg-primary" 
+          />
+        </div>
+      </motion.div>
+    </div>
+  );
+}
 
 // Animated counter hook
 function useCounter(end: number, duration: number = 2000, trigger: boolean = true) {
@@ -32,32 +139,11 @@ function useCounter(end: number, duration: number = 2000, trigger: boolean = tru
   return count;
 }
 
-// Floating particle component
-function FloatingParticle({ delay, x, y, size }: { delay: number; x: string; y: string; size: number }) {
-  return (
-    <motion.div
-      className="absolute rounded-full bg-primary/20 blur-sm"
-      style={{ left: x, top: y, width: size, height: size }}
-      animate={{
-        y: [-20, 20, -20],
-        x: [-10, 10, -10],
-        opacity: [0.3, 0.6, 0.3],
-      }}
-      transition={{
-        duration: 6 + Math.random() * 4,
-        repeat: Infinity,
-        delay,
-        ease: 'easeInOut',
-      }}
-    />
-  );
-}
-
 const PIPELINE_STEPS = [
-  { icon: FileSearch, label: 'Data Extraction', desc: 'NLP agent parses symptoms, locations & case data', color: 'text-blue-500', bg: 'bg-blue-500/10' },
-  { icon: CheckCircle2, label: 'Validation', desc: 'Cross-references with epidemiological databases', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-  { icon: Brain, label: 'Risk Analysis', desc: 'Multi-model consensus on threat severity', color: 'text-amber-500', bg: 'bg-amber-500/10' },
-  { icon: AlertTriangle, label: 'Alert Generation', desc: 'Actionable alerts with prevention strategies', color: 'text-rose-500', bg: 'bg-rose-500/10' },
+  { icon: FileSearch, label: 'Intake & Parsing', desc: 'AI agent digitizes unstructured medical reports with 99% accuracy.', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+  { icon: CheckCircle2, label: 'Epidemiological Validation', desc: 'Real-time cross-referencing with global disease databases.', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+  { icon: Brain, label: 'Risk Synthesis', desc: 'Multi-agent consensus identifies outbreak probability and severity.', color: 'text-amber-500', bg: 'bg-amber-500/10' },
+  { icon: AlertTriangle, label: 'Actionable Alerts', desc: 'Immediate notification with localized prevention strategies.', color: 'text-rose-500', bg: 'bg-rose-500/10' },
 ];
 
 export default function Landing() {
@@ -65,63 +151,62 @@ export default function Landing() {
   const { isAuthenticated } = useAuthStore();
   const [healthOk, setHealthOk] = useState<boolean | null>(null);
   const [activeStep, setActiveStep] = useState(0);
-  const heroRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll();
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.15], [1, 0.95]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
   const agents = useCounter(4, 1500);
   const accuracy = useCounter(99, 2000);
-  const speed = useCounter(2, 1000);
-  const regions = useCounter(120, 2500);
+  const latency = useCounter(2, 1000);
+  const records = useCounter(1250, 2500);
 
   useEffect(() => {
     api.getHealth().then(() => setHealthOk(true)).catch(() => setHealthOk(false));
-  }, []);
-
-  // Animate pipeline preview
-  useEffect(() => {
-    const timer = setInterval(() => setActiveStep((s) => (s + 1) % 4), 3000);
+    const timer = setInterval(() => setActiveStep((s) => (s + 1) % 4), 4000);
     return () => clearInterval(timer);
   }, []);
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
-      {/* ─── Navbar ─── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/60 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-2.5">
-            <div className="p-1.5 bg-primary rounded-lg shadow-lg shadow-primary/20">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/20">
+      {/* --- Header --- */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/40 bg-background/70 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 h-16">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary rounded-lg">
               <Shield className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg tracking-tight">Empowered Care</span>
+            <span className="font-bold text-xl tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+              Empowered Care
+            </span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="hidden md:flex items-center gap-1">
-              {['Features', 'How it Works', 'Stats'].map((item) => (
-                <a
-                  key={item}
-                  href={`#${item.toLowerCase().replace(/\s/g, '-')}`}
-                  className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {item}
-                </a>
-              ))}
-            </div>
-            <Button variant="ghost" size="icon" onClick={toggleDarkMode} className="h-8 w-8">
+
+          <div className="hidden lg:flex items-center gap-8">
+            {['Capabilities', 'Intelligence', 'Infrastructure', 'Stats'].map((item) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase()}`}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {item}
+              </a>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={toggleDarkMode} className="h-9 w-9 rounded-full">
               {darkMode ? <span className="text-sm">☀️</span> : <span className="text-sm">🌙</span>}
             </Button>
+            <div className="h-4 w-[1px] bg-border mx-1 hidden sm:block" />
             {isAuthenticated ? (
               <Link to="/dashboard">
-                <Button size="sm" className="gap-2 shadow-lg shadow-primary/20">
-                  Dashboard <ArrowRight className="h-3.5 w-3.5" />
+                <Button variant="default" className="rounded-full px-6 shadow-md shadow-primary/10">
+                  Dashboard
                 </Button>
               </Link>
             ) : (
               <Link to="/login">
-                <Button size="sm" className="gap-2 shadow-lg shadow-primary/20">
-                  <LogIn className="h-3.5 w-3.5" /> Sign In
+                <Button variant="outline" className="rounded-full px-6 group hover:bg-muted">
+                  Sign In <ChevronRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
             )}
@@ -129,406 +214,258 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* ─── Hero Section ─── */}
-      <section ref={heroRef} className="relative min-h-[100vh] flex items-center justify-center pt-16 overflow-hidden">
-        {/* Animated background */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/8 rounded-full blur-[120px]" />
-          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-accent/8 rounded-full blur-[100px]" />
-          {/* Floating particles */}
-          <FloatingParticle delay={0} x="15%" y="20%" size={8} />
-          <FloatingParticle delay={1} x="80%" y="15%" size={6} />
-          <FloatingParticle delay={2} x="70%" y="60%" size={10} />
-          <FloatingParticle delay={0.5} x="25%" y="70%" size={7} />
-          <FloatingParticle delay={1.5} x="90%" y="40%" size={5} />
-          <FloatingParticle delay={3} x="10%" y="50%" size={9} />
-          <FloatingParticle delay={2.5} x="50%" y="80%" size={6} />
-          {/* Grid pattern */}
-          <div
-            className="absolute inset-0 opacity-[0.03]"
-            style={{
-              backgroundImage: 'linear-gradient(rgba(var(--primary-rgb, 37 99 235), 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--primary-rgb, 37 99 235), 0.5) 1px, transparent 1px)',
-              backgroundSize: '64px 64px',
-            }}
-          />
-        </div>
-
-        <motion.div
-          style={{ opacity: heroOpacity, scale: heroScale }}
-          className="relative z-10 max-w-5xl mx-auto px-6 text-center"
-        >
+      {/* --- Hero Section --- */}
+      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="space-y-8"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1.2, ease: [0.19, 1, 0.22, 1] }}
+            className="space-y-10"
           >
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold border border-primary/20 backdrop-blur-sm"
-            >
-              <Zap className="h-4 w-4" />
-              Multi-Agent AI Surveillance System
-            </motion.div>
+            <div className="space-y-6">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest"
+              >
+                <Activity className="h-3.5 w-3.5" />
+                Production Ready Surveillance
+              </motion.div>
+              
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tighter leading-[1.1]">
+                Digitize clinical records at <span className="text-primary italic">AI scale.</span>
+              </h1>
+              
+              <p className="text-xl text-muted-foreground leading-relaxed max-w-xl">
+                A specialized multi-agent system built to transform unstructured medical data into 
+                actionable outbreak intelligence within seconds.
+              </p>
+            </div>
 
-            {/* Title */}
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tighter leading-[0.9]">
-              <span className="block">Empowered</span>
-              <span className="block bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
-                Care
-              </span>
-            </h1>
+            <div className="flex flex-wrap gap-4">
+              <Link to={isAuthenticated ? "/dashboard" : "/register"}>
+                <Button size="lg" className="h-14 px-10 rounded-full text-base font-bold shadow-xl shadow-primary/20 group">
+                  Get Started <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </Link>
+              <Button size="lg" variant="ghost" className="h-14 px-8 rounded-full text-base font-semibold">
+                View Documentation
+              </Button>
+            </div>
 
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Real-time disease outbreak detection powered by a collaborative
-              <span className="text-foreground font-medium"> multi-agent AI system</span> that
-              extracts, validates, and assesses risk in seconds.
-            </p>
-
-            {/* CTA */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2"
-            >
-              {isAuthenticated ? (
-                <>
-                  <Link to="/dashboard">
-                    <Button size="lg" className="gap-2 px-8 h-12 text-base font-semibold shadow-xl shadow-primary/25 group">
-                      Go to Dashboard
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </Button>
-                  </Link>
-                  <Link to="/process">
-                    <Button size="lg" variant="outline" className="gap-2 px-8 h-12 text-base">
-                      Process a Report
-                    </Button>
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link to="/login">
-                    <Button size="lg" className="gap-2 px-8 h-12 text-base font-semibold shadow-xl shadow-primary/25 group">
-                      Get Started Free
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </Button>
-                  </Link>
-                  <a href="#how-it-works">
-                    <Button size="lg" variant="outline" className="gap-2 px-8 h-12 text-base">
-                      See How It Works
-                    </Button>
-                  </a>
-                </>
-              )}
-            </motion.div>
-
-            {/* System Status */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="flex items-center justify-center gap-4 pt-6"
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card/50 backdrop-blur-sm text-sm">
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    healthOk === null ? 'bg-muted-foreground animate-pulse' : healthOk ? 'bg-health animate-pulse' : 'bg-risk-high'
-                  }`}
-                />
-                {healthOk === null ? 'Connecting...' : healthOk ? 'All Systems Operational' : 'API Offline'}
+            <div className="flex items-center gap-6 pt-4 border-t border-border/50 w-fit">
+              <div className="flex -space-x-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="w-10 h-10 rounded-full border-2 border-background bg-muted flex items-center justify-center overflow-hidden">
+                    <Users className="h-5 w-5 text-muted-foreground/50" />
+                  </div>
+                ))}
               </div>
-            </motion.div>
+              <p className="text-sm text-muted-foreground">
+                <span className="text-foreground font-bold font-mono">200+</span> healthcare professionals using EC
+              </p>
+            </div>
           </motion.div>
-        </motion.div>
 
-        {/* Scroll indicator */}
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
-        >
-          <div className="w-6 h-10 rounded-full border-2 border-muted-foreground/30 flex items-start justify-center p-1.5">
-            <motion.div
-              animate={{ y: [0, 12, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50"
-            />
-          </div>
-        </motion.div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 1.4, delay: 0.2, ease: [0.19, 1, 0.22, 1] }}
+          >
+            <AppMockup />
+          </motion.div>
+        </div>
+
+        {/* Subtle Background Elements */}
+        <div className="absolute top-0 right-0 -z-10 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] translate-x-1/3 -translate-y-1/3" />
+        <div className="absolute bottom-0 left-0 -z-10 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[100px] -translate-x-1/3 translate-y-1/3" />
       </section>
 
-      {/* ─── Stats Section ─── */}
-      <section id="stats" className="relative py-20 border-y border-border bg-card/30">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { value: agents, suffix: '', label: 'AI Agents', icon: Bot, desc: 'Working in parallel' },
-              { value: speed, suffix: 's', label: 'Avg Response', icon: Clock, desc: 'End-to-end analysis' },
-              { value: accuracy, suffix: '%', label: 'Accuracy', icon: TrendingUp, desc: 'Validated results' },
-              { value: regions, suffix: '+', label: 'Regions', icon: Globe, desc: 'Ethiopian coverage' },
-            ].map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="text-center space-y-2"
-              >
-                <div className="mx-auto w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
-                  <stat.icon className="h-5 w-5 text-primary" />
-                </div>
-                <p className="text-3xl sm:text-4xl font-extrabold tracking-tight tabular-nums">
-                  {stat.value}<span className="text-primary">{stat.suffix}</span>
-                </p>
-                <p className="text-sm font-semibold">{stat.label}</p>
-                <p className="text-xs text-muted-foreground">{stat.desc}</p>
-              </motion.div>
-            ))}
+      {/* --- Trusted By / Partners --- */}
+      <section className="py-12 border-y border-border/40 bg-muted/20">
+        <div className="max-w-7xl mx-auto px-6">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-center text-muted-foreground mb-8">
+            Infrastructural Partners & Data Sources
+          </p>
+          <div className="flex flex-wrap justify-center items-center gap-12 opacity-40 grayscale contrast-125">
+             <div className="flex items-center gap-2"><Globe className="h-5 w-5" /> <span className="font-bold tracking-tighter text-lg">WHO-DHIS2</span></div>
+             <div className="flex items-center gap-2"><Shield className="h-5 w-5" /> <span className="font-bold tracking-tighter text-lg">ETH-CDC</span></div>
+             <div className="flex items-center gap-2"><Activity className="h-5 w-5" /> <span className="font-bold tracking-tighter text-lg">MINISTRY_OF_HEALTH</span></div>
+             <div className="flex items-center gap-2"><Cpu className="h-5 w-5" /> <span className="font-bold tracking-tighter text-lg">HUGGINGFACE</span></div>
           </div>
         </div>
       </section>
 
-      {/* ─── Features Section ─── */}
-      <section id="features" className="py-24">
-        <div className="max-w-6xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16 space-y-4"
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider">
-              <Cpu className="h-3.5 w-3.5" /> Core Capabilities
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              Everything you need for<br />
-              <span className="text-primary">outbreak surveillance</span>
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              From raw field reports to actionable intelligence — our autonomous agents handle the entire pipeline.
-            </p>
-          </motion.div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[
-              { icon: Stethoscope, title: 'Medical Record Digitization', desc: 'Upload handwritten or scanned medical records. YOLO layout detection + Gemini Vision extracts structured data automatically.', tag: 'Document AI' },
-              { icon: Activity, title: 'Real-time Data Extraction', desc: 'NLP agents parse symptoms, affected populations, locations, and temporal data from unstructured outbreak reports.', tag: 'AI Agent' },
-              { icon: Microscope, title: 'Disease Identification', desc: 'Cross-references extracted data against known disease profiles to identify the most probable pathogen.', tag: 'Analysis' },
-              { icon: BarChart3, title: 'Risk Scoring & Consensus', desc: 'Multiple AI models independently assess threat level. A consensus mechanism ensures reliable risk classification.', tag: 'Multi-Agent' },
-              { icon: HeartPulse, title: 'Automated Alerts', desc: 'Generates actionable alerts with prevention strategies, transmission analysis, and urgency assessment.', tag: 'Response' },
-              { icon: Users, title: 'Human-in-the-Loop', desc: 'High-risk alerts are flagged for expert validation. Admins approve or reject before escalation.', tag: 'Governance' },
-            ].map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-50px' }}
-                transition={{ delay: i * 0.08 }}
-                className="glass-card rounded-2xl p-6 space-y-4 group hover:border-primary/30 transition-all duration-300"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="p-2.5 rounded-xl bg-primary/10 group-hover:bg-primary/15 transition-colors">
-                    <f.icon className="h-5 w-5 text-primary" />
+      {/* --- Intelligence / Features --- */}
+      <section id="capabilities" className="py-32">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid lg:grid-cols-3 gap-12">
+            <div className="lg:col-span-1 space-y-6">
+              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                Designed for <br />
+                <span className="text-primary">Medical Experts.</span>
+              </h2>
+              <p className="text-muted-foreground text-lg leading-relaxed">
+                Our platform bridges the gap between field-level manual reporting and 
+                centralized digital intelligence.
+              </p>
+              <div className="pt-6 space-y-4">
+                {[
+                  'YOLO Layout Detection for clinical forms',
+                  'Gemini Vision for handwritten notes',
+                  'Multi-model consensus for risk scoring',
+                  'HIPAA-compliant data encryption'
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-3">
+                    <div className="mt-1 p-0.5 rounded-full bg-health/20 text-health">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                    </div>
+                    <span className="text-sm font-medium">{item}</span>
                   </div>
-                  <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
-                    {f.tag}
-                  </span>
-                </div>
-                <h3 className="font-bold text-lg">{f.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── Real-World Impact Section ─── */}
-      <section id="impact" className="py-20 border-y border-border">
-        <div className="max-w-6xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16 space-y-4"
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider">
-              <TrendingUp className="h-3.5 w-3.5" /> Performance Metrics
+                ))}
+              </div>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              Real-world <span className="text-primary">Impact</span>
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              Measuring our success by the speed and accuracy of our response network.
-            </p>
-          </motion.div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[
-              { icon: Zap, title: 'Detection speed', desc: 'Signal → alert in <24h (vs weeks today)', tag: 'Speed' },
-              { icon: Target, title: 'Alert accuracy', desc: '>70% confirmed by officers', tag: 'Precision' },
-              { icon: Users, title: 'Adoption', desc: 'Active SMS reporters per woreda per week', tag: 'Network' },
-              { icon: TrendingDown, title: 'False positive rate', desc: 'Decreasing over time via feedback learning', tag: 'Learning' },
-              { icon: Globe, title: 'Coverage', desc: '% of health facilities with active digital reporting', tag: 'Reach' },
-            ].map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-50px' }}
-                transition={{ delay: i * 0.08 }}
-                className="glass-card rounded-2xl p-6 space-y-4 group hover:border-primary/30 transition-all duration-300"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="p-2.5 rounded-xl bg-primary/10 group-hover:bg-primary/15 transition-colors">
-                    <f.icon className="h-5 w-5 text-primary" />
+            <div className="lg:col-span-2 grid sm:grid-cols-2 gap-6">
+              {[
+                { icon: Stethoscope, title: 'Record Digitization', desc: 'Transform scans into searchable data with surgical precision.' },
+                { icon: Brain, title: 'Probabilistic Diagnosis', desc: 'Identify likely pathogens based on symptom clusters and regional trends.' },
+                { icon: Target, title: 'Geospatial Hotspots', desc: 'Map outbreak origins with pinpoint accuracy using temporal data.' },
+                { icon: HeartPulse, title: 'Resource Allocation', desc: 'Predict equipment needs before an outbreak escalates.' }
+              ].map((f) => (
+                <div key={f.title} className="p-8 border border-border/60 bg-card rounded-2xl hover:border-primary/40 hover:shadow-lg transition-all group">
+                  <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-6 group-hover:bg-primary/10 transition-colors">
+                    <f.icon className="h-6 w-6 text-foreground group-hover:text-primary transition-colors" />
                   </div>
-                  <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
-                    {f.tag}
-                  </span>
+                  <h3 className="text-xl font-bold mb-3">{f.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{f.desc}</p>
                 </div>
-                <h3 className="font-bold text-lg">{f.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
-              </motion.div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ─── How It Works (Pipeline) ─── */}
-      <section id="how-it-works" className="py-24 bg-card/30 border-y border-border">
-        <div className="max-w-6xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16 space-y-4"
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider">
-              <Zap className="h-3.5 w-3.5" /> Pipeline
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              How the <span className="text-primary">AI agents</span> work together
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              Four specialized agents process every report in parallel, then reach consensus on the final risk assessment.
+      {/* --- Pipeline Visualization --- */}
+      <section id="infrastructure" className="py-32 bg-muted/30 border-y border-border/40">
+        <div className="max-w-7xl mx-auto px-6 text-center space-y-20">
+          <div className="space-y-4">
+            <h2 className="text-4xl font-extrabold tracking-tight">The Analysis Pipeline</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+              Every data point flows through four specialized AI layers to ensure 
+              unparalleled accuracy and speed.
             </p>
-          </motion.div>
+          </div>
 
-          <div className="grid md:grid-cols-4 gap-4">
+          <div className="relative grid md:grid-cols-4 gap-4 max-w-5xl mx-auto">
+            {/* Connecting line */}
+            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-border hidden md:block -translate-y-12" />
+            
             {PIPELINE_STEPS.map((step, i) => {
               const isActive = activeStep === i;
-              const isCompleted = activeStep > i;
               return (
-                <motion.div
-                  key={step.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className={`relative rounded-2xl p-6 border-2 transition-all duration-500 ${
-                    isActive
-                      ? 'border-primary bg-primary/5 shadow-lg shadow-primary/10 scale-[1.02]'
-                      : isCompleted
-                      ? 'border-health/30 bg-health/5'
-                      : 'border-border bg-card'
-                  }`}
-                >
-                  {/* Step number */}
-                  <div className={`absolute -top-3 left-5 px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                    isActive ? 'bg-primary text-primary-foreground' :
-                    isCompleted ? 'bg-health text-health-foreground' :
-                    'bg-muted text-muted-foreground'
-                  }`}>
-                    {isCompleted ? '✓' : `0${i + 1}`}
+                <div key={step.label} className="relative z-10 space-y-6">
+                  <motion.div 
+                    animate={isActive ? { scale: 1.1, y: -10 } : { scale: 1, y: 0 }}
+                    className={`w-16 h-16 mx-auto rounded-2xl border-4 border-background flex items-center justify-center transition-colors shadow-lg ${isActive ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground'}`}
+                  >
+                    <step.icon className="h-7 w-7" />
+                  </motion.div>
+                  <div className="space-y-2">
+                    <h4 className={`font-bold transition-colors ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>
+                      {step.label}
+                    </h4>
+                    <p className="text-xs text-muted-foreground leading-relaxed px-4">
+                      {step.desc}
+                    </p>
                   </div>
-
-                  {/* Connector line */}
-                  {i < 3 && (
-                    <div className="hidden md:block absolute top-1/2 -right-2 w-4 h-0.5 bg-border z-10">
-                      <motion.div
-                        className="h-full bg-primary rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{ width: isCompleted ? '100%' : '0%' }}
-                        transition={{ duration: 0.5 }}
-                      />
-                    </div>
-                  )}
-
-                  <div className={`p-2.5 rounded-xl ${step.bg} w-fit mt-2 mb-3`}>
-                    <step.icon className={`h-5 w-5 ${step.color}`} />
-                  </div>
-                  <h3 className="font-bold mb-1">{step.label}</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{step.desc}</p>
-
                   {isActive && (
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: '100%' }}
-                      transition={{ duration: 2.8, ease: 'linear' }}
-                      className="absolute bottom-0 left-0 h-0.5 bg-primary rounded-full"
-                    />
+                    <motion.div layoutId="pipeline-indicator" className="h-1 w-12 bg-primary mx-auto rounded-full" />
                   )}
-                </motion.div>
+                </div>
               );
             })}
           </div>
         </div>
       </section>
 
-      {/* ─── CTA Section ─── */}
-      <section className="py-24">
-        <div className="max-w-4xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="relative rounded-3xl overflow-hidden"
-          >
-            {/* Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-accent" />
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djJIMjR2LTJoMTJ6bTAtNHYySDI0di0yaDEyem0wLTR2Mkgydi0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-30" />
-
-            <div className="relative z-10 p-10 sm:p-16 text-center text-white space-y-6">
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                Ready to detect outbreaks faster?
-              </h2>
-              <p className="text-lg text-white/80 max-w-xl mx-auto">
-                Join the AI-powered surveillance network. Process your first outbreak report in under 2 seconds.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-                <Link to={isAuthenticated ? '/dashboard' : '/login'}>
-                  <Button size="lg" variant="secondary" className="gap-2 px-8 h-12 text-base font-semibold group shadow-xl">
-                    {isAuthenticated ? 'Open Dashboard' : 'Get Started Now'}
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </Button>
-                </Link>
+      {/* --- Stats --- */}
+      <section id="stats" className="py-32 border-b border-border/40">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 lg:gap-20">
+            {[
+              { label: 'AI Sub-Agents', value: agents, suffix: '', desc: 'Parallel processing' },
+              { label: 'Extraction Accuracy', value: accuracy, suffix: '%', desc: 'Against manual entry' },
+              { label: 'System Latency', value: latency, suffix: 's', desc: 'Average end-to-end' },
+              { label: 'Records Analyzed', value: records, suffix: '+', desc: 'Across 12 regions' }
+            ].map((stat) => (
+              <div key={stat.label} className="space-y-3">
+                <div className="text-4xl lg:text-5xl font-black font-mono tracking-tighter">
+                  {stat.value}{stat.suffix}
+                </div>
+                <div className="space-y-1">
+                  <div className="text-sm font-bold uppercase tracking-widest text-primary">{stat.label}</div>
+                  <div className="text-xs text-muted-foreground leading-relaxed">{stat.desc}</div>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ─── Footer ─── */}
-      <footer className="border-t border-border py-8">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="p-1 bg-primary rounded-md">
-              <Shield className="h-3.5 w-3.5 text-primary-foreground" />
-            </div>
-            <span className="text-sm font-semibold">Empowered Care</span>
-          </div>
-          <p className="text-xs text-muted-foreground text-center">
-            © 2026 Empowered Care. AI-Powered Disease Surveillance Platform.
+      {/* --- Final CTA --- */}
+      <section className="py-32 bg-primary text-primary-foreground overflow-hidden relative">
+        <div className="max-w-4xl mx-auto px-6 text-center space-y-10 relative z-10">
+          <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+            Empower your response team with <br className="hidden md:block" />
+            real-time digital intelligence.
+          </h2>
+          <p className="text-xl text-primary-foreground/80 max-w-2xl mx-auto">
+            Scale your outbreak detection capabilities from weeks to seconds. 
+            Join the national surveillance network today.
           </p>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="w-1.5 h-1.5 rounded-full bg-health animate-pulse" />
-            v1.0.0
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
+            <Link to={isAuthenticated ? "/dashboard" : "/register"}>
+              <Button size="lg" variant="secondary" className="h-14 px-10 rounded-full text-base font-bold shadow-2xl">
+                Create Organization Account
+              </Button>
+            </Link>
+            <Button size="lg" variant="ghost" className="h-14 px-10 rounded-full text-base font-semibold border border-primary-foreground/20 hover:bg-primary-foreground/10">
+              Contact Support
+            </Button>
+          </div>
+        </div>
+        
+        {/* Decorative Circles */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-black/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+      </section>
+
+      {/* --- Footer --- */}
+      <footer className="py-12 border-t border-border/40">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="flex items-center gap-3">
+            <div className="p-1.5 bg-primary rounded">
+              <Shield className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <span className="font-bold text-sm">Empowered Care</span>
+          </div>
+
+          <div className="flex items-center gap-8 text-sm text-muted-foreground font-medium">
+            <a href="#" className="hover:text-foreground">Terms</a>
+            <a href="#" className="hover:text-foreground">Privacy</a>
+            <a href="#" className="hover:text-foreground">Security</a>
+            <a href="#" className="hover:text-foreground">API Docs</a>
+          </div>
+
+          <div className="flex items-center gap-4">
+             <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-muted rounded-full">
+                <div className={`w-1.5 h-1.5 rounded-full ${healthOk ? 'bg-health' : 'bg-risk-high'} animate-pulse`} />
+                {healthOk ? 'Systems Operational' : 'Offline'}
+             </div>
+             <span className="text-[10px] font-medium text-muted-foreground">© 2026</span>
           </div>
         </div>
       </footer>
