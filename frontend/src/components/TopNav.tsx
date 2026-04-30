@@ -39,10 +39,6 @@ export function TopNav({ onMenuClick }: Props) {
         <button onClick={onMenuClick} className="lg:hidden p-2 hover:bg-muted rounded-xl transition-colors">
           <Menu className="h-6 w-6" />
         </button>
-        <div className="hidden sm:flex items-center gap-2.5 px-4 py-2 rounded-xl bg-muted/50 border border-border/50 text-[10px] font-black uppercase tracking-widest text-primary">
-          <span className="w-2 h-2 rounded-full bg-health animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-          Neural Link Active
-        </div>
       </div>
 
       <div className="flex items-center gap-4">

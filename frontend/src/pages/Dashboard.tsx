@@ -200,59 +200,35 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8 pb-10">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 animate-pulse">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary mr-1.5" />
-              Live Surveillance
-            </Badge>
-          </div>
-          <h2 className="text-3xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-            Epidemic Intelligence
+          <h2 className="text-3xl font-bold tracking-tight text-foreground">
+            Geospatial Surveillance Overview
           </h2>
-          <p className="text-sm text-muted-foreground font-medium">
-            Real-time disease outbreak detection & risk analysis
+          <p className="text-sm text-muted-foreground mt-1">
+            Real-time monitoring and analytics for regional health data
           </p>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row flex-wrap items-center gap-3 bg-background/80 backdrop-blur-xl border border-border/40 p-2 rounded-2xl shadow-sm">
           {/* Search bar */}
-          <div className="relative">
+          <div className="relative flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 text-muted-foreground"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             <input 
               type="text"
               placeholder="Search reports..."
-              className="h-9 w-[200px] rounded-md border border-border/50 bg-background px-3 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+              className="h-10 w-[200px] rounded-xl border-none bg-muted/30 pl-9 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-muted-foreground"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
-          {/* Time Filter Toggle */}
-          <div className="bg-muted px-1 py-1 rounded-lg flex items-center gap-1 border border-border/50">
-            <Button 
-               variant={timeFilter === 'last24h' ? 'secondary' : 'ghost'} 
-               size="sm" 
-               onClick={() => setTimeFilter('last24h')}
-               className="h-7 px-3 text-[10px] font-black uppercase tracking-widest"
-            >
-               <Clock className="h-3 w-3 mr-1.5" />
-               Last 24h
-            </Button>
-            <Button 
-               variant={timeFilter === 'all' ? 'secondary' : 'ghost'} 
-               size="sm" 
-               onClick={() => setTimeFilter('all')}
-               className="h-7 px-3 text-[10px] font-black uppercase tracking-widest"
-            >
-               All Time
-            </Button>
-          </div>
+          <div className="w-px h-6 bg-border/50 hidden sm:block mx-1" />
 
-          {/* Risk Filter Indicator/Action */}
+          {/* Filters Container */}
           <div className="flex items-center gap-2">
             <Select value={locationFilter} onValueChange={setLocationFilter}>
-              <SelectTrigger className="h-9 w-[130px] text-[10px] font-black uppercase bg-background border-border/50">
+              <SelectTrigger className="h-10 w-[140px] text-xs font-medium bg-muted/30 border-none rounded-xl focus:ring-1 focus:ring-primary/50">
                 <SelectValue placeholder="Location" />
               </SelectTrigger>
               <SelectContent>
@@ -262,18 +238,18 @@ export default function Dashboard() {
             </Select>
 
             <Select value={diseaseFilter} onValueChange={setDiseaseFilter}>
-              <SelectTrigger className="h-9 w-[150px] text-[10px] font-black uppercase bg-background border-border/50">
-                <SelectValue placeholder="Disease" />
+              <SelectTrigger className="h-10 w-[150px] text-xs font-medium bg-muted/30 border-none rounded-xl focus:ring-1 focus:ring-primary/50">
+                <SelectValue placeholder="Condition" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Diseases</SelectItem>
+                <SelectItem value="all">All Conditions</SelectItem>
                 {diseases.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
               </SelectContent>
             </Select>
 
             <Select value={classFilter} onValueChange={(v: any) => setClassFilter(v)}>
-              <SelectTrigger className="h-9 w-[130px] text-[10px] font-black uppercase bg-background border-border/50">
-                <SelectValue placeholder="Classification" />
+              <SelectTrigger className="h-10 w-[140px] text-xs font-medium bg-muted/30 border-none rounded-xl focus:ring-1 focus:ring-primary/50">
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
@@ -288,37 +264,40 @@ export default function Dashboard() {
               size="sm" 
               onClick={() => setRiskFilter(riskFilter === 'all' ? 'HIGH' : riskFilter === 'HIGH' ? 'MEDIUM' : 'all')}
               className={cn(
-                "h-9 gap-2 font-black text-[10px] uppercase tracking-widest transition-all",
-                riskFilter !== 'all' && "border-primary/50 bg-primary/5"
+                "h-10 px-4 gap-2 font-medium text-xs rounded-xl transition-all border-none",
+                riskFilter !== 'all' ? "bg-primary/10 text-primary" : "bg-muted/30 hover:bg-muted/50"
               )}
             >
-              <Filter className={cn("h-4 w-4", riskFilter !== 'all' && "text-primary")} />
-              {riskFilter === 'all' ? 'Risk' : `Risk: ${riskFilter}`}
+              <Filter className={cn("h-3.5 w-3.5", riskFilter !== 'all' ? "text-primary" : "text-muted-foreground")} />
+              {riskFilter === 'all' ? 'Risk Level' : `Risk: ${riskFilter}`}
             </Button>
           </div>
+
+          <div className="w-px h-6 bg-border/50 hidden sm:block mx-1" />
 
           <Button 
             size="sm" 
             onClick={exportToCSV}
-            className="h-9 gap-2 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90"
+            variant="default"
+            className="h-10 rounded-xl px-4 text-xs shadow-sm transition-all"
           >
-            Export Data
+            Export CSV
           </Button>
         </div>
       </div>
 
       <div className="grid lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3 space-y-6">
-          <Card className="border-none shadow-2xl shadow-primary/5 overflow-hidden bg-background/50 backdrop-blur-sm border border-border/50">
+          <Card className="border-none shadow-xl shadow-border/10 overflow-hidden bg-background/60 backdrop-blur-md border border-border/40 rounded-2xl">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
               <div>
-                <CardTitle className="text-lg font-bold">Geospatial Distribution</CardTitle>
-                <CardDescription>Visualizing reported cases across regions</CardDescription>
+                <CardTitle className="text-lg font-semibold text-foreground">Interactive Regional Map</CardTitle>
+                <CardDescription className="text-sm">Geospatial visualization of active cases</CardDescription>
               </div>
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 bg-muted/50 px-2 py-1 rounded-md border border-border/50">
-                  <div className="w-2 h-2 rounded-full bg-risk-high" />
-                  <span className="text-[10px] font-bold uppercase">Active Hotspots</span>
+                <div className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-full border border-border/40 shadow-sm">
+                  <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Active Hubs</span>
                 </div>
               </div>
             </CardHeader>
@@ -432,62 +411,61 @@ export default function Dashboard() {
 
         <div className="space-y-6">
           <MetricCard 
-            title="Total Historical Cases" 
+            title="Total Recorded Cases" 
             value={total_cases} 
             icon={<FileText className="h-5 w-5" />} 
-            subtitle="All-time cumulative ingestion" 
-            className="shadow-primary/5"
+            subtitle="Cumulative data points processed" 
+            className="shadow-border/5 rounded-2xl bg-background/60 border-border/40"
           />
           <MetricCard 
-            title="Active Filtered Cases" 
+            title="Current Active Cases" 
             value={active_cases} 
             icon={<Users className="h-5 w-5" />} 
-            subtitle="Cases matching current view/filters" 
+            subtitle="Cases in current filtered view" 
             trend="up" 
-            className="shadow-primary/5"
+            className="shadow-border/5 rounded-2xl bg-background/60 border-border/40"
           />
           <MetricCard 
-            title="Critical Hubs" 
+            title="High-Risk Zones" 
             value={high_risk_locations} 
             icon={<AlertTriangle className="h-5 w-5" />} 
-            subtitle="Immediate response zones" 
+            subtitle="Regions requiring immediate review" 
             trend="up" 
-            className="shadow-primary/5"
+            className="shadow-border/5 rounded-2xl bg-background/60 border-border/40"
           />
           <MetricCard 
-            title="System Health" 
+            title="Network Connectivity" 
             value="98.2%" 
-            icon={<TrendingUp className="h-5 w-5" />} 
-            subtitle="Agent nodes active" 
-            className="shadow-primary/5"
+            icon={<Activity className="h-5 w-5 text-emerald-500" />} 
+            subtitle="Data pipelines operational" 
+            className="shadow-border/5 rounded-2xl bg-background/60 border-border/40"
           />
 
-          <Card className="border-none shadow-xl shadow-primary/5 bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 overflow-hidden relative group">
-            <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.5))]" />
-            <CardHeader className="relative z-10">
-              <CardTitle className="text-sm font-bold flex items-center gap-2 text-primary">
-                <MapIcon className="h-4 w-4" />
-                Regional Alert
+          <Card className="border-none shadow-lg shadow-primary/5 bg-gradient-to-br from-background to-muted/20 border border-primary/20 overflow-hidden relative group rounded-2xl">
+            <CardHeader className="relative z-10 pb-2">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2 text-primary">
+                <Activity className="h-4 w-4" />
+                Automated Insights
               </CardTitle>
             </CardHeader>
             <CardContent className="relative z-10">
               {activeAlert ? (
                 <>
-                  <p className="text-xs font-medium text-foreground/80 leading-relaxed">
-                    <span className="font-bold text-primary">{activeAlert.location}</span> region is showing a <span className="font-bold text-risk-high underline decoration-2 underline-offset-2">Significant Increase</span> in reported cases over the last 6 hours.
+                  <p className="text-sm text-foreground/80 leading-relaxed">
+                    Detected an anomaly in the <span className="font-semibold text-primary">{activeAlert.location}</span> region with a sharp increase in reported cases over the last 6 hours.
                   </p>
                   <Button 
                     size="sm" 
                     variant="link" 
-                    className="px-0 mt-2 h-auto text-primary text-xs font-bold group-hover:gap-2 transition-all"
+                    className="px-0 mt-3 h-auto text-primary text-xs font-semibold group-hover:gap-2 transition-all"
                     onClick={() => setLocationFilter(activeAlert.location)}
                   >
-                    Investigate Cluster <ArrowUpRight className="h-3 w-3" />
+                    View location details <ArrowUpRight className="h-3 w-3 ml-1" />
                   </Button>
                 </>
               ) : (
-                <p className="text-xs font-medium text-foreground/80 leading-relaxed italic">
-                  No significant regional alerts detected in the last 6 hours. System monitoring active.
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Data patterns are stable. No significant regional anomalies detected in the last 6 hours.
                 </p>
               )}
             </CardContent>
@@ -495,27 +473,27 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <Card className="border-none shadow-2xl shadow-primary/5 overflow-hidden bg-background/50 backdrop-blur-sm border border-border/50">
-        <CardHeader className="flex flex-row items-center justify-between bg-muted/30 border-b border-border/50">
+      <Card className="border-none shadow-xl shadow-border/5 overflow-hidden bg-background/60 backdrop-blur-md border border-border/40 rounded-2xl">
+        <CardHeader className="flex flex-row items-center justify-between bg-muted/20 border-b border-border/40 px-6 py-5">
           <div>
-            <CardTitle className="text-lg font-bold">Surveillance Feed</CardTitle>
-            <CardDescription>Latest validated outbreak reports from agents</CardDescription>
+            <CardTitle className="text-lg font-semibold">Recent Validated Reports</CardTitle>
+            <CardDescription className="text-sm mt-1">Detailed log of recent case submissions and categorizations</CardDescription>
           </div>
-          <Button variant="ghost" size="sm" className="text-xs font-bold uppercase tracking-wider">
-            View All Reports
+          <Button variant="outline" size="sm" className="text-xs font-medium bg-background rounded-xl">
+            View Complete Log
           </Button>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border/50 text-left text-muted-foreground bg-muted/20">
-                  <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Location Hub</th>
-                  <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Pathology</th>
-                  <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Status</th>
-                  <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Cases</th>
-                  <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px]">Risk Profile</th>
-                  <th className="px-6 py-4 font-bold uppercase tracking-wider text-[10px] text-right">Action</th>
+                <tr className="border-b border-border/40 text-left text-muted-foreground bg-muted/10">
+                  <th className="px-6 py-4 font-semibold text-xs tracking-wide">Location</th>
+                  <th className="px-6 py-4 font-semibold text-xs tracking-wide">Suspected Condition</th>
+                  <th className="px-6 py-4 font-semibold text-xs tracking-wide">Data Status</th>
+                  <th className="px-6 py-4 font-semibold text-xs tracking-wide">Reported Cases</th>
+                  <th className="px-6 py-4 font-semibold text-xs tracking-wide">Risk Level</th>
+                  <th className="px-6 py-4 font-semibold text-xs tracking-wide text-right">Details</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/30">

@@ -119,8 +119,8 @@ export function FloatingAssistant() {
                    <Bot className="h-6 w-6" />
                  </div>
                  <div>
-                   <h3 className="font-black text-sm tracking-tight leading-none">Neural Link Active</h3>
-                   <span className="text-[10px] opacity-70 font-bold uppercase tracking-widest">Multi-Agent Intelligence</span>
+                   <h3 className="font-bold text-sm tracking-tight leading-none">AI Assistant</h3>
+                   <span className="text-[10px] opacity-70 font-medium uppercase tracking-widest">Data Analyst</span>
                  </div>
                </div>
                <div className="flex items-center gap-1 relative z-10">
