@@ -41,8 +41,8 @@ const CITY_TO_REGION: Record<string, string> = {
 
 const LOCATION_COORDS: Record<string, { cx: number; cy: number }> = {
   'Addis Ababa': { cx: 250, cy: 323 },
-  'Bole': { cx: 252, cy: 325 },
-  'Mercato': { cx: 248, cy: 320 },
+  'Bole': { cx: 258, cy: 328 }, // Spread slightly SE
+  'Mercato': { cx: 242, cy: 318 }, // Spread slightly NW
   'Bahir Dar': { cx: 200, cy: 150 },
   'Gondar': { cx: 220, cy: 120 },
   'Azezo': { cx: 218, cy: 125 },
@@ -58,7 +58,7 @@ const LOCATION_COORDS: Record<string, { cx: number; cy: number }> = {
   'Adama': { cx: 280, cy: 340 },
   'Zway': { cx: 260, cy: 360 },
   'Bale': { cx: 340, cy: 420 },
-  'Nekemte': { cx: 160, cy: 260 },
+  'Nekemte': { cx: 140, cy: 260 }, // Shifted West to de-cluster
   'Jijiga': { cx: 460, cy: 250 },
   'Gode': { cx: 550, cy: 380 },
   'Dire Dawa': { cx: 422, cy: 245 },
@@ -183,33 +183,55 @@ export default function EthiopiaMap() {
                     viewBox="0 0 800 600"
                     className="w-[110%] h-[110%] overflow-visible filter drop-shadow-[0_15px_25px_rgba(var(--primary),0.15)]"
                   >
+                    <defs>
+                      <linearGradient id="risk-high" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#ef4444" stopOpacity="0.85" />
+                        <stop offset="100%" stopColor="#991b1b" stopOpacity="0.95" />
+                      </linearGradient>
+                      <linearGradient id="risk-medium" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.85" />
+                        <stop offset="100%" stopColor="#b45309" stopOpacity="0.95" />
+                      </linearGradient>
+                      <linearGradient id="risk-low" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.85" />
+                        <stop offset="100%" stopColor="#047857" stopOpacity="0.95" />
+                      </linearGradient>
+                      <linearGradient id="base-region" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.08" />
+                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.02" />
+                      </linearGradient>
+                      <linearGradient id="base-region-hover" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.4" />
+                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.2" />
+                      </linearGradient>
+                    </defs>
                     <g transform="translate(100, 30)">
                       {Object.entries(regionPaths).map(([regionName, pathD]) => {
                         const data = regionData[regionName];
                         const isHovered = hoveredRegion === regionName;
                         
-                        let baseColor = 'rgba(30, 41, 59, 0.4)'; // Slate background
+                        let baseColor = 'url(#base-region)';
                         let strokeColor = 'rgba(var(--primary), 0.2)';
                         
                         if (data) {
                           if (data.maxRisk === 'HIGH') {
-                            baseColor = 'rgba(220, 38, 38, 0.6)';
-                            strokeColor = 'rgba(239, 68, 68, 1)';
+                            baseColor = 'url(#risk-high)';
+                            strokeColor = '#fca5a5';
                           } else if (data.maxRisk === 'MEDIUM') {
-                            baseColor = 'rgba(217, 119, 6, 0.6)';
-                            strokeColor = 'rgba(250, 204, 21, 1)';
+                            baseColor = 'url(#risk-medium)';
+                            strokeColor = '#fcd34d';
                           } else {
-                            baseColor = 'rgba(5, 150, 105, 0.6)';
-                            strokeColor = 'rgba(52, 211, 153, 1)';
+                            baseColor = 'url(#risk-low)';
+                            strokeColor = '#6ee7b7';
                           }
                         }
 
                         if (isHovered) {
-                           baseColor = data?.maxRisk === 'HIGH' ? 'rgba(239, 68, 68, 0.8)' : 
-                                       data?.maxRisk === 'MEDIUM' ? 'rgba(250, 204, 21, 0.8)' :
-                                       data ? 'rgba(52, 211, 153, 0.8)' : 
-                                       'rgba(var(--primary), 0.5)';
-                           strokeColor = 'rgba(var(--primary), 1)';
+                           baseColor = data?.maxRisk === 'HIGH' ? '#ef4444' : 
+                                       data?.maxRisk === 'MEDIUM' ? '#f59e0b' :
+                                       data ? '#10b981' : 
+                                       'url(#base-region-hover)';
+                           strokeColor = 'hsl(var(--primary))';
                         }
 
                         return (
@@ -311,27 +333,73 @@ export default function EthiopiaMap() {
                     </g>
                   </svg>
                   
-                  {/* Floating Tooltip positioned near the top of the container */}
+                  {/* Floating Tooltip HUD positioned near the top of the container */}
                   <AnimatePresence>
-                    {(hoveredRegion || hoveredPin) && (
-                       <motion.div
-                         initial={{ opacity: 0, y: -10 }}
-                         animate={{ opacity: 1, y: 0 }}
-                         exit={{ opacity: 0, y: -10 }}
-                         className="absolute top-24 pointer-events-none z-50"
-                       >
-                         <div className="px-4 py-2 bg-black/80 backdrop-blur-md rounded-xl border border-border/50 text-center shadow-2xl">
-                           <p className="text-sm font-black uppercase tracking-widest text-white">{hoveredPin || hoveredRegion}</p>
-                           {hoveredPin ? (
-                             <p className="text-xs font-bold text-muted-foreground">{cityPins.find((p:any)=>p.location === hoveredPin)?.totalCases} Cases Detected</p>
-                           ) : regionData[hoveredRegion as string] ? (
-                             <p className="text-xs font-bold text-muted-foreground">{regionData[hoveredRegion as string].totalCases} Cases Detected</p>
-                           ) : (
-                             <p className="text-xs font-bold text-muted-foreground">No active signals</p>
-                           )}
-                         </div>
-                       </motion.div>
-                    )}
+                    {(() => {
+                       if (!hoveredRegion && !hoveredPin) return null;
+
+                       const activeData = hoveredPin 
+                         ? cityPins.find((p:any) => p.location === hoveredPin)
+                         : regionData[hoveredRegion as string];
+                       
+                       const isHighRisk = activeData?.maxRisk === 'HIGH';
+                       const isMediumRisk = activeData?.maxRisk === 'MEDIUM';
+                       
+                       const glowColor = isHighRisk ? 'rgba(239,68,68,0.4)' : 
+                                         isMediumRisk ? 'rgba(250,204,21,0.4)' : 
+                                         activeData ? 'rgba(16,185,129,0.3)' : 'rgba(var(--primary),0.15)';
+                       
+                       const borderColor = isHighRisk ? 'border-red-500/50' : 
+                                           isMediumRisk ? 'border-amber-500/50' : 
+                                           activeData ? 'border-emerald-500/50' : 'border-border/50';
+
+                       return (
+                         <motion.div
+                           initial={{ opacity: 0, y: -15, scale: 0.95 }}
+                           animate={{ opacity: 1, y: 0, scale: 1 }}
+                           exit={{ opacity: 0, y: -15, scale: 0.95 }}
+                           transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                           className="absolute top-8 pointer-events-none z-50 flex justify-center w-full"
+                         >
+                           <div className={cn(
+                             "flex items-center gap-5 px-6 py-3.5 rounded-2xl bg-background/85 backdrop-blur-xl border shadow-2xl transition-colors duration-300",
+                             borderColor
+                           )} style={{ boxShadow: `0 10px 40px -10px ${glowColor}` }}>
+                             
+                             <div className="flex flex-col gap-1 text-left">
+                               <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+                                 <span className={cn(
+                                   "w-2 h-2 rounded-full shadow-sm",
+                                   isHighRisk ? "bg-red-500 animate-pulse shadow-red-500/50" : 
+                                   isMediumRisk ? "bg-amber-500 animate-pulse shadow-amber-500/50" : 
+                                   activeData ? "bg-emerald-500 shadow-emerald-500/50" : "bg-muted"
+                                 )} />
+                                 {hoveredPin ? 'Target Location' : 'Regional Sector'}
+                               </p>
+                               <h4 className="text-lg font-black text-foreground tracking-tight leading-none">{hoveredPin || hoveredRegion}</h4>
+                             </div>
+
+                             <div className="w-px h-10 bg-border/50 mx-1" />
+                             
+                             {activeData ? (
+                               <div className="flex flex-col items-end justify-center">
+                                 <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">Active Cases</p>
+                                 <p className={cn(
+                                   "text-xl font-black leading-none tabular-nums tracking-tighter",
+                                   isHighRisk ? "text-red-500" : isMediumRisk ? "text-amber-500" : "text-emerald-500"
+                                 )}>
+                                   {activeData.totalCases}
+                                 </p>
+                               </div>
+                             ) : (
+                               <div className="flex items-center justify-center h-10 px-2">
+                                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">No active signals</p>
+                               </div>
+                             )}
+                           </div>
+                         </motion.div>
+                       );
+                    })()}
                   </AnimatePresence>
 
                 </div>
